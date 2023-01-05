@@ -1,190 +1,79 @@
 package main
 
 import (
-	"fmt"
-	"github.com/go-chi/chi/v5"
-	"io"
+	"github.com/go-resty/resty/v2"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
 	"log"
-	"net/http"
+	"math/rand"
 	"runtime"
-	"strconv"
-	"strings"
+	"sync"
 	"time"
 )
 
-var metricsGauge = make(map[string]float64)
-var metricsCounter = make(map[string]int64)
-
-func metricsPolling() {
-	for {
-		time.Sleep(2 * time.Second)
-		fmt.Println("Update Metrics")
-		go getMetrics()
-	}
-}
-
-func reportPolling() {
-
-	for {
-		<-time.After(10 * time.Second)
-		fmt.Println("Set Metrics")
-		go sentMetrics()
-	}
-}
-
-func handler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hi there, I love %s!", r.URL.Path[1:])
-}
-
 func main() {
-
-	//go metricsPolling()
-	go reportPolling()
-
-	initMap()
-
-	r := chi.NewRouter()
-
-	r.Get("/", func(rw http.ResponseWriter, r *http.Request) {
-		rw.Write([]byte("chi"))
-	})
-
-	// http://<АДРЕС_СЕРВЕРА>/update/<ТИП_МЕТРИКИ>/<ИМЯ_МЕТРИКИ>/<ЗНАЧЕНИЕ_МЕТРИКИ>;
-
-	r.Route("/update", func(r chi.Router) {
-		for name, _ := range metricsGauge {
-			r.Post("/gauge/"+name, MetricsGaugeHandler)
-		}
-		for name, _ := range metricsCounter {
-			r.Post("/counter/"+name, MetricsCounterHandler)
-		}
-	})
-
-	http.ListenAndServe(":8080", r)
+	var wg sync.WaitGroup
+	wg.Add(2) // в группе две горутины
+	go PutMetrics()
+	go SentMetrics()
+	wg.Wait() // ожидаем завершения обоих горутин
 }
 
-func sentMetrics() {
+func SentMetrics() {
 
-	log.Print(metricsGauge)
-	log.Print(metricsCounter)
+	for range time.Tick(10 * time.Second) {
 
-}
+		log.Print("SentMetrics")
 
-func MetricsGaugeHandler(w http.ResponseWriter, r *http.Request) {
+		// Create a Resty Client
+		client := resty.New()
 
-	resp, err := io.ReadAll(r.Body)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		client.R().
+			SetHeader("Content-Type", "text/plain").
+			SetBody(storage.MetricsGauge["alloc"]).
+			Post("/update/gauge/alloc")
 	}
-
-	s := r.URL.String()
-	key := s[strings.LastIndex(s, "/")+1:]
-
-	f, err := strconv.ParseFloat(string(resp), 64)
-	if err != nil {
-		panic(err)
-	}
-
-	metricsGauge[key] = f
-
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("<h1>MetricsGaugeHandler</h1>"))
 }
 
-func MetricsCounterHandler(w http.ResponseWriter, r *http.Request) {
+func PutMetrics() {
 
-	resp, err := io.ReadAll(r.Body)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	s := r.URL.String()
-	key := s[strings.LastIndex(s, "/")+1:]
-
-	f, err := strconv.ParseInt(string(resp), 10, 64)
-	if err != nil {
-		panic(err)
-	}
-
-	metricsCounter[key] = f
-
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("<h1>MetricsCounterHandler</h1>"))
-}
-
-//http://<АДРЕС_СЕРВЕРА>/update/<ТИП_МЕТРИКИ>/<ИМЯ_МЕТРИКИ>/<ЗНАЧЕНИЕ_МЕТРИКИ>;
-
-func initMap() {
-
-	metricsCounter["poll_count"] = 0
-	metricsCounter["random_value"] = 0
-	metricsGauge["alloc"] = 0
-	metricsGauge["buck_hash_sys"] = 0
-
-	metricsGauge["Frees"] = 0
-	metricsGauge["GCCPUFraction"] = 0
-	metricsGauge["GCSys"] = 0
-	metricsGauge["HeapAlloc"] = 0
-	metricsGauge["HeapIdle"] = 0
-	metricsGauge["HeapInuse"] = 0
-	metricsGauge["HeapObjects"] = 0
-	metricsGauge["HeapReleased"] = 0
-	metricsGauge["HeapSys"] = 0
-	metricsGauge["LastGC"] = 0
-	metricsGauge["Lookups"] = 0
-	metricsGauge["MCacheInuse"] = 0
-	metricsGauge["MCacheSys"] = 0
-	metricsGauge["MSpanInuse"] = 0
-	metricsGauge["MSpanSys"] = 0
-	metricsGauge["Mallocs"] = 0
-	metricsGauge["NextGC"] = 0
-	metricsGauge["NumForcedGC"] = 0
-	metricsGauge["NumGC"] = 0
-	metricsGauge["OtherSys"] = 0
-	metricsGauge["PauseTotalNs"] = 0
-	metricsGauge["StackInuse"] = 0
-	metricsGauge["StackSys"] = 0
-	metricsGauge["Sys"] = 0
-	metricsGauge["TotalAlloc"] = 0
-}
-
-// https://golang.org/pkg/runtime/#MemStats
-func getMetrics() (memStats runtime.MemStats) {
-
-	metricsCounter["poll_count"] = metricsCounter["poll_count"] + 1
-	metricsCounter["random_value"] = 123
-
+	var memStats runtime.MemStats
 	runtime.ReadMemStats(&memStats)
-	metricsGauge["alloc"] = float64(memStats.Alloc)
-	metricsGauge["buck_hash_sys"] = float64(memStats.BuckHashSys)
 
-	metricsGauge["Frees"] = float64(memStats.Frees)
-	metricsGauge["GCCPUFraction"] = float64(memStats.GCCPUFraction)
-	metricsGauge["GCSys"] = float64(memStats.GCSys)
-	metricsGauge["HeapAlloc"] = float64(memStats.HeapAlloc)
-	metricsGauge["HeapIdle"] = float64(memStats.HeapIdle)
-	metricsGauge["HeapInuse"] = float64(memStats.HeapInuse)
-	metricsGauge["HeapObjects"] = float64(memStats.HeapObjects)
-	metricsGauge["HeapReleased"] = float64(memStats.HeapReleased)
-	metricsGauge["HeapSys"] = float64(memStats.HeapSys)
-	metricsGauge["LastGC"] = float64(memStats.LastGC)
-	metricsGauge["Lookups"] = float64(memStats.Lookups)
-	metricsGauge["MCacheInuse"] = float64(memStats.MCacheInuse)
-	metricsGauge["MCacheSys"] = float64(memStats.MCacheSys)
-	metricsGauge["MSpanInuse"] = float64(memStats.MSpanInuse)
-	metricsGauge["MSpanSys"] = float64(memStats.MSpanSys)
-	metricsGauge["Mallocs"] = float64(memStats.Mallocs)
-	metricsGauge["NextGC"] = float64(memStats.NextGC)
-	metricsGauge["NumForcedGC"] = float64(memStats.NumForcedGC)
-	metricsGauge["NumGC"] = float64(memStats.NumGC)
-	metricsGauge["OtherSys"] = float64(memStats.OtherSys)
-	metricsGauge["PauseTotalNs"] = float64(memStats.PauseTotalNs)
-	metricsGauge["StackInuse"] = float64(memStats.StackInuse)
-	metricsGauge["StackSys"] = float64(memStats.StackSys)
-	metricsGauge["Sys"] = float64(memStats.Sys)
-	metricsGauge["TotalAlloc"] = float64(memStats.TotalAlloc)
+	for range time.Tick(2 * time.Second) {
 
-	return
+		storage.MetricsGauge["alloc"] = float64(memStats.Alloc)
+		storage.MetricsGauge["buck_hash_sys"] = float64(memStats.BuckHashSys)
+		storage.MetricsGauge["frees"] = float64(memStats.Frees)
+		storage.MetricsGauge["GCCPUFraction"] = float64(memStats.GCCPUFraction)
+		storage.MetricsGauge["gc_sys"] = float64(memStats.GCSys)
+		storage.MetricsGauge["heap_alloc"] = float64(memStats.HeapAlloc)
+		storage.MetricsGauge["heap_idle"] = float64(memStats.HeapIdle)
+		storage.MetricsGauge["heap_inuse"] = float64(memStats.HeapInuse)
+		storage.MetricsGauge["heap_objects"] = float64(memStats.HeapObjects)
+		storage.MetricsGauge["heap_released"] = float64(memStats.HeapReleased)
+		storage.MetricsGauge["heap_sys"] = float64(memStats.HeapSys)
+		storage.MetricsGauge["last_gc"] = float64(memStats.LastGC)
+		storage.MetricsGauge["lookups"] = float64(memStats.Lookups)
+		storage.MetricsGauge["mcache_inuse"] = float64(memStats.MCacheInuse)
+		storage.MetricsGauge["mcache_sys"] = float64(memStats.MCacheSys)
+		storage.MetricsGauge["mspan_inuse"] = float64(memStats.MSpanInuse)
+		storage.MetricsGauge["mspan_sys"] = float64(memStats.MSpanSys)
+		storage.MetricsGauge["mallocs"] = float64(memStats.Mallocs)
+		storage.MetricsGauge["next_gc"] = float64(memStats.NextGC)
+		storage.MetricsGauge["num_forced_gc"] = float64(memStats.NumForcedGC)
+		storage.MetricsGauge["num_gc"] = float64(memStats.NumGC)
+		storage.MetricsGauge["other_sys"] = float64(memStats.OtherSys)
+		storage.MetricsGauge["pause_total_ns"] = float64(memStats.PauseTotalNs)
+		storage.MetricsGauge["stack_inuse"] = float64(memStats.StackInuse)
+		storage.MetricsGauge["stack_sys"] = float64(memStats.StackSys)
+		storage.MetricsGauge["sys"] = float64(memStats.Sys)
+		storage.MetricsGauge["total_alloc"] = float64(memStats.TotalAlloc)
+
+		storage.MetricsCounter["poll_count"] = storage.MetricsCounter["poll_count"] + 1
+		storage.MetricsCounter["random_value"] = rand.Int63()
+
+		//log.Print(storage.MetricsGauge)
+		//log.Print(storage.MetricsCounter)
+		log.Print("PutMetrics")
+	}
 }
