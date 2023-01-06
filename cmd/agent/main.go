@@ -21,7 +21,7 @@ func main() {
 
 func SentMetrics() {
 
-	for range time.Tick(2 * time.Second) {
+	for range time.Tick(10 * time.Second) {
 
 		log.Print("SentMetrics")
 
@@ -30,18 +30,28 @@ func SentMetrics() {
 
 		for name, val := range storage.MetricsGauge {
 			str := strconv.FormatFloat(val, 'f', 5, 64)
-			client.R().
+			resp, err := client.R().
 				SetHeader("Content-Type", "text/plain").
 				//SetBody(storage.MetricsGauge["alloc"]).
-				Post("/update/gauge/" + name + "/" + str)
+				Post("http://127.0.0.1:8080/update/gauge/" + name + "/" + str)
+
+			if err != nil {
+				log.Fatal(err)
+			}
+			log.Print(resp)
 		}
 
 		for name, val := range storage.MetricsCounter {
 			str := strconv.FormatInt(val, 10)
-			client.R().
+			resp, err := client.R().
 				SetHeader("Content-Type", "text/plain").
 				//SetBody(storage.MetricsCounter["alloc"]).
-				Post("/update/counter/" + name + "/" + str)
+				Post("http://127.0.0.1:8080/update/counter/" + name + "/" + str)
+
+			if err != nil {
+				log.Fatal(err)
+			}
+			log.Print(resp)
 		}
 
 	}
@@ -57,7 +67,7 @@ func PutMetrics() {
 		storage.MetricsGauge["alloc"] = float64(memStats.Alloc)
 		storage.MetricsGauge["buck_hash_sys"] = float64(memStats.BuckHashSys)
 		storage.MetricsGauge["frees"] = float64(memStats.Frees)
-		storage.MetricsGauge["GCCPUFraction"] = float64(memStats.GCCPUFraction)
+		storage.MetricsGauge["gc_cpu_fraction"] = float64(memStats.GCCPUFraction)
 		storage.MetricsGauge["gc_sys"] = float64(memStats.GCSys)
 		storage.MetricsGauge["heap_alloc"] = float64(memStats.HeapAlloc)
 		storage.MetricsGauge["heap_idle"] = float64(memStats.HeapIdle)
