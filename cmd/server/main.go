@@ -12,17 +12,8 @@ func main() {
 	storage.InitMap()
 
 	r := chi.NewRouter()
-
 	r.Get("/", app.IndexHandler)
-
-	// http://<АДРЕС_СЕРВЕРА>/update/<ТИП_МЕТРИКИ>/<ИМЯ_МЕТРИКИ>/<ЗНАЧЕНИЕ_МЕТРИКИ>;
 	r.Route("/update", func(r chi.Router) {
-		//for name, _ := range storage.MetricsGauge {
-		//	r.Post("/gauge/"+name+"/{value}", app.MetricsGaugeHandler)
-		//}
-		//for name, _ := range storage.MetricsCounter {
-		//	r.Post("/counter/"+name+"/{value}", app.MetricsCounterHandler)
-		//}
 		r.Post("/{type}/{name}/{value}", app.MetricsHandler)
 	})
 

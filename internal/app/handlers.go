@@ -5,80 +5,52 @@ import (
 	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
 	"log"
 	"net/http"
+	"strconv"
 )
 
 func IndexHandler(w http.ResponseWriter, r *http.Request) {
 	log.Print(storage.MetricsGauge)
 	log.Print(storage.MetricsCounter)
-	//fmt.Fprintf(w, "Hi there, I love %s!", r.URL.Path[1:])
 }
 
+// http://<АДРЕС_СЕРВЕРА>/update/<ТИП_МЕТРИКИ>/<ИМЯ_МЕТРИКИ>/<ЗНАЧЕНИЕ_МЕТРИКИ>;
 func MetricsHandler(w http.ResponseWriter, r *http.Request) {
 
 	typeMetrics := chi.URLParam(r, "type")
+	if typeMetrics == "" {
+		http.Error(w, "The query parameter type is missing", http.StatusBadRequest)
+		return
+	}
 	nameMetrics := chi.URLParam(r, "name")
+	if nameMetrics == "" {
+		http.Error(w, "The query parameter name is missing", http.StatusBadRequest)
+		return
+	}
 	valueMetrics := chi.URLParam(r, "value")
+	if valueMetrics == "" {
+		http.Error(w, "The query parameter value is missing", http.StatusBadRequest)
+		return
+	}
 
-	log.Print(typeMetrics)
-	log.Print(nameMetrics)
-	log.Print(valueMetrics)
+	//log.Print(typeMetrics)
+	//log.Print(nameMetrics)
+	//log.Print(valueMetrics)
 
-	//str := r.URL.String()
-	//res := strings.Split(str, "/")
-	//typeMetrics := res[1]
-	//nameMetrics := res[2]
-	//valueMetrics := res[3]
-
-	//if typeMetrics == "gauge" {
-	//	val, err := strconv.ParseFloat(string(valueMetrics), 64)
-	//	if err != nil {
-	//		panic(err)
-	//	}
-	//	storage.MetricsGauge[nameMetrics] = val
-	//}
-	//if typeMetrics == "counter" {
-	//	val, err := strconv.ParseInt(string(valueMetrics), 10, 64)
-	//	if err != nil {
-	//		panic(err)
-	//	}
-	//	storage.MetricsCounter[nameMetrics] = val
-	//}
-
-	log.Fatal()
-
-	//short := mux.Vars(r)
-
-	//valueID := chi.URLParam(r, "value")
-	//
-	//log.Print(valueID)
-
-	//if short["id"] == "" {
-	//	http.Error(w, "The query parameter is missing", http.StatusBadRequest)
-	//	return
-	//}
+	if typeMetrics == "gauge" {
+		val, err := strconv.ParseFloat(string(valueMetrics), 64)
+		if err != nil {
+			panic(err)
+		}
+		storage.MetricsGauge[nameMetrics] = val
+	}
+	if typeMetrics == "counter" {
+		val, err := strconv.ParseInt(string(valueMetrics), 10, 64)
+		if err != nil {
+			panic(err)
+		}
+		storage.MetricsCounter[nameMetrics] = val
+	}
 
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("<h1>MetricsGaugeHandler</h1>"))
-}
-
-func MetricsCounterHandler(w http.ResponseWriter, r *http.Request) {
-
-	//resp, err := io.ReadAll(r.Body)
-	//if err != nil {
-	//	http.Error(w, err.Error(), http.StatusInternalServerError)
-	//	return
-	//}
-	//
-	//s := r.URL.String()
-	//key := s[strings.LastIndex(s, "/")+1:]
-	//
-	//f, err := strconv.ParseInt(string(resp), 10, 64)
-	//if err != nil {
-	//	panic(err)
-	//}
-	//
-	//storage.MetricsCounter[key] = f
-
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("<h1>MetricsCounterHandler</h1>"))
+	w.Write([]byte("<h1>MetricsHandler</h1>"))
 }
