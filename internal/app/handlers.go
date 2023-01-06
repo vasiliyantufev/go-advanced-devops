@@ -1,12 +1,10 @@
 package app
 
 import (
+	"github.com/go-chi/chi/v5"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
-	"io"
 	"log"
 	"net/http"
-	"strconv"
-	"strings"
 )
 
 func IndexHandler(w http.ResponseWriter, r *http.Request) {
@@ -15,23 +13,49 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 	//fmt.Fprintf(w, "Hi there, I love %s!", r.URL.Path[1:])
 }
 
-func MetricsGaugeHandler(w http.ResponseWriter, r *http.Request) {
+func MetricsHandler(w http.ResponseWriter, r *http.Request) {
 
-	resp, err := io.ReadAll(r.Body)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	typeMetrics := chi.URLParam(r, "type")
+	nameMetrics := chi.URLParam(r, "name")
+	valueMetrics := chi.URLParam(r, "value")
 
-	s := r.URL.String()
-	key := s[strings.LastIndex(s, "/")+1:]
+	log.Print(typeMetrics)
+	log.Print(nameMetrics)
+	log.Print(valueMetrics)
 
-	f, err := strconv.ParseFloat(string(resp), 64)
-	if err != nil {
-		panic(err)
-	}
+	//str := r.URL.String()
+	//res := strings.Split(str, "/")
+	//typeMetrics := res[1]
+	//nameMetrics := res[2]
+	//valueMetrics := res[3]
 
-	storage.MetricsGauge[key] = f
+	//if typeMetrics == "gauge" {
+	//	val, err := strconv.ParseFloat(string(valueMetrics), 64)
+	//	if err != nil {
+	//		panic(err)
+	//	}
+	//	storage.MetricsGauge[nameMetrics] = val
+	//}
+	//if typeMetrics == "counter" {
+	//	val, err := strconv.ParseInt(string(valueMetrics), 10, 64)
+	//	if err != nil {
+	//		panic(err)
+	//	}
+	//	storage.MetricsCounter[nameMetrics] = val
+	//}
+
+	log.Fatal()
+
+	//short := mux.Vars(r)
+
+	//valueID := chi.URLParam(r, "value")
+	//
+	//log.Print(valueID)
+
+	//if short["id"] == "" {
+	//	http.Error(w, "The query parameter is missing", http.StatusBadRequest)
+	//	return
+	//}
 
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("<h1>MetricsGaugeHandler</h1>"))
@@ -39,21 +63,21 @@ func MetricsGaugeHandler(w http.ResponseWriter, r *http.Request) {
 
 func MetricsCounterHandler(w http.ResponseWriter, r *http.Request) {
 
-	resp, err := io.ReadAll(r.Body)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	s := r.URL.String()
-	key := s[strings.LastIndex(s, "/")+1:]
-
-	f, err := strconv.ParseInt(string(resp), 10, 64)
-	if err != nil {
-		panic(err)
-	}
-
-	storage.MetricsCounter[key] = f
+	//resp, err := io.ReadAll(r.Body)
+	//if err != nil {
+	//	http.Error(w, err.Error(), http.StatusInternalServerError)
+	//	return
+	//}
+	//
+	//s := r.URL.String()
+	//key := s[strings.LastIndex(s, "/")+1:]
+	//
+	//f, err := strconv.ParseInt(string(resp), 10, 64)
+	//if err != nil {
+	//	panic(err)
+	//}
+	//
+	//storage.MetricsCounter[key] = f
 
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("<h1>MetricsCounterHandler</h1>"))

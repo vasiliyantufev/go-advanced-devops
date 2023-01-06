@@ -6,6 +6,7 @@ import (
 	"log"
 	"math/rand"
 	"runtime"
+	"strconv"
 	"sync"
 	"time"
 )
@@ -20,17 +21,29 @@ func main() {
 
 func SentMetrics() {
 
-	for range time.Tick(10 * time.Second) {
+	for range time.Tick(2 * time.Second) {
 
 		log.Print("SentMetrics")
 
 		// Create a Resty Client
 		client := resty.New()
 
-		client.R().
-			SetHeader("Content-Type", "text/plain").
-			SetBody(storage.MetricsGauge["alloc"]).
-			Post("/update/gauge/alloc")
+		for name, val := range storage.MetricsGauge {
+			str := strconv.FormatFloat(val, 'f', 5, 64)
+			client.R().
+				SetHeader("Content-Type", "text/plain").
+				//SetBody(storage.MetricsGauge["alloc"]).
+				Post("/update/gauge/" + name + "/" + str)
+		}
+
+		for name, val := range storage.MetricsCounter {
+			str := strconv.FormatInt(val, 10)
+			client.R().
+				SetHeader("Content-Type", "text/plain").
+				//SetBody(storage.MetricsCounter["alloc"]).
+				Post("/update/counter/" + name + "/" + str)
+		}
+
 	}
 }
 

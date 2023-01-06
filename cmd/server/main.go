@@ -17,12 +17,13 @@ func main() {
 
 	// http://<АДРЕС_СЕРВЕРА>/update/<ТИП_МЕТРИКИ>/<ИМЯ_МЕТРИКИ>/<ЗНАЧЕНИЕ_МЕТРИКИ>;
 	r.Route("/update", func(r chi.Router) {
-		for name, _ := range storage.MetricsGauge {
-			r.Post("/gauge/"+name, app.MetricsGaugeHandler)
-		}
-		for name, _ := range storage.MetricsCounter {
-			r.Post("/counter/"+name, app.MetricsCounterHandler)
-		}
+		//for name, _ := range storage.MetricsGauge {
+		//	r.Post("/gauge/"+name+"/{value}", app.MetricsGaugeHandler)
+		//}
+		//for name, _ := range storage.MetricsCounter {
+		//	r.Post("/counter/"+name+"/{value}", app.MetricsCounterHandler)
+		//}
+		r.Post("/{type}/{name}/{value}", app.MetricsHandler)
 	})
 
 	http.ListenAndServe(":8080", r)
