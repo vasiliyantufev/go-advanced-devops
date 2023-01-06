@@ -42,7 +42,10 @@ func MetricsHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "The query parameter value is missing", http.StatusBadRequest)
 		return
 	}
-
+	//if _, err := strconv.Atoi(valueMetrics); err != nil {
+	//	http.Error(w, "The query parameter value "+valueMetrics+" is incorrect", http.StatusBadRequest)
+	//	return
+	//}
 	//log.Print(typeMetrics)
 	//log.Print(nameMetrics)
 	//log.Print(valueMetrics)
@@ -50,14 +53,16 @@ func MetricsHandler(w http.ResponseWriter, r *http.Request) {
 	if typeMetrics == "gauge" {
 		val, err := strconv.ParseFloat(string(valueMetrics), 64)
 		if err != nil {
-			panic(err)
+			http.Error(w, "The query parameter value "+valueMetrics+" is incorrect", http.StatusBadRequest)
+			return
 		}
 		storage.MetricsGauge[nameMetrics] = val
 	}
 	if typeMetrics == "counter" {
 		val, err := strconv.ParseInt(string(valueMetrics), 10, 64)
 		if err != nil {
-			panic(err)
+			http.Error(w, "The query parameter value "+valueMetrics+" is incorrect", http.StatusBadRequest)
+			return
 		}
 		storage.MetricsCounter[nameMetrics] = val
 	}
