@@ -21,6 +21,11 @@ func MetricsHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "The query parameter type is missing", http.StatusBadRequest)
 		return
 	}
+	if typeMetrics != "gauge" && typeMetrics != "counter" {
+		http.Error(w, "The type incorrect", http.StatusNotImplemented)
+		return
+	}
+
 	nameMetrics := chi.URLParam(r, "name")
 	if nameMetrics == "" {
 		http.Error(w, "The query parameter name is missing", http.StatusBadRequest)
