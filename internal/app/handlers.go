@@ -36,10 +36,6 @@ func MetricsHandler(w http.ResponseWriter, r *http.Request) {
 	//	http.Error(w, "The name "+nameMetrics+" incorrect", http.StatusBadRequest)
 	//	return
 	//}
-	if nameMetrics == "testCounter" || nameMetrics == "testGauge" {
-		http.Error(w, "The name "+nameMetrics+" incorrect", http.StatusBadRequest)
-		return
-	}
 
 	valueMetrics := chi.URLParam(r, "value")
 	if valueMetrics == "" {
