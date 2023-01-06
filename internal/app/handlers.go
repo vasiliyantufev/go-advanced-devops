@@ -31,12 +31,10 @@ func MetricsHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "The query parameter name is missing", http.StatusBadRequest)
 		return
 	}
-	if _, exists := storage.MetricsGauge[nameMetrics]; !exists {
-		http.Error(w, "The query parameter "+nameMetrics+" is missing", http.StatusBadRequest)
-		return
-	}
-	if _, exists := storage.MetricsCounter[nameMetrics]; !exists {
-		http.Error(w, "The query parameter "+nameMetrics+" is missing", http.StatusBadRequest)
+	_, exists1 := storage.MetricsGauge[nameMetrics]
+	_, exists2 := storage.MetricsCounter[nameMetrics]
+	if !exists1 && !exists2 {
+		http.Error(w, "The name "+nameMetrics+" incorrect", http.StatusBadRequest)
 		return
 	}
 
