@@ -11,6 +11,9 @@ import (
 func IndexHandler(w http.ResponseWriter, r *http.Request) {
 	log.Print(storage.MetricsGauge)
 	log.Print(storage.MetricsCounter)
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("<h1>IndexHandler</h1>"))
 }
 
 // http://<АДРЕС_СЕРВЕРА>/update/<ТИП_МЕТРИКИ>/<ИМЯ_МЕТРИКИ>/<ЗНАЧЕНИЕ_МЕТРИКИ>;
@@ -42,10 +45,7 @@ func MetricsHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "The query parameter value is missing", http.StatusBadRequest)
 		return
 	}
-	//if _, err := strconv.Atoi(valueMetrics); err != nil {
-	//	http.Error(w, "The query parameter value "+valueMetrics+" is incorrect", http.StatusBadRequest)
-	//	return
-	//}
+
 	//log.Print(typeMetrics)
 	//log.Print(nameMetrics)
 	//log.Print(valueMetrics)
@@ -73,4 +73,21 @@ func MetricsHandler(w http.ResponseWriter, r *http.Request) {
 
 func GetMetricsHandler(w http.ResponseWriter, r *http.Request) {
 
+	typeMetrics := chi.URLParam(r, "type")
+	if typeMetrics == "" {
+		http.Error(w, "The query parameter type is missing", http.StatusBadRequest)
+		return
+	}
+	if typeMetrics != "gauge" && typeMetrics != "counter" {
+		http.Error(w, "The type incorrect", http.StatusNotImplemented)
+		return
+	}
+	nameMetrics := chi.URLParam(r, "name")
+	if nameMetrics == "" {
+		http.Error(w, "The query parameter name is missing", http.StatusBadRequest)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("<h1>GetMetricsHandler</h1>"))
 }
