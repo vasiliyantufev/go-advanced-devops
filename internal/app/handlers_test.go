@@ -22,8 +22,7 @@ func TestCounterHandler(t *testing.T) {
 		r.Post("/{type}/{name}/{value}", MetricsHandler)
 	})
 
-	var val1 int64
-	val1 = 22
+	var val1 int64 = 22
 	rtr.ServeHTTP(wp, httptest.NewRequest("POST", "/update/counter/testSetGet22/"+fmt.Sprint(val1), nil))
 	rtr.ServeHTTP(wg, httptest.NewRequest("GET", "/value/counter/testSetGet22", nil))
 	bodyGet := wg.Body.String()
@@ -32,8 +31,7 @@ func TestCounterHandler(t *testing.T) {
 	assert.Equal(t, val1, k,
 		fmt.Sprintf("Incorrect body. Expect %s, got %s", fmt.Sprint(val1), bodyGet))
 
-	var val2 int64
-	val2 = 33
+	var val2 int64 = 33
 	rtr.ServeHTTP(wp2, httptest.NewRequest("POST", "/update/counter/testSetGet33/"+fmt.Sprint(val2), nil))
 	rtr.ServeHTTP(wg2, httptest.NewRequest("GET", "/value/counter/testSetGet33", nil))
 	bodyGet = wg2.Body.String()
@@ -54,8 +52,7 @@ func TestGaugeHandler(t *testing.T) {
 		r.Post("/{type}/{name}/{value}", MetricsHandler)
 	})
 
-	var val int64
-	val = 22
+	var val int64 = 22
 	rtr.ServeHTTP(wp, httptest.NewRequest("POST", "/update/gauge/testSetGet22/"+fmt.Sprint(val), nil))
 	rtr.ServeHTTP(wg, httptest.NewRequest("GET", "/value/gauge/testSetGet22", nil))
 	bodyGet := wg.Body.String()
