@@ -20,13 +20,13 @@ func main() {
 }
 
 func SentMetrics() {
+	
+	// Create a Resty Client
+	client := resty.New()
 
 	for range time.Tick(10 * time.Second) {
 
 		log.Print("SentMetrics")
-
-		// Create a Resty Client
-		client := resty.New()
 
 		for name, val := range storage.MetricsGauge {
 			str := strconv.FormatFloat(val, 'f', 5, 64)
