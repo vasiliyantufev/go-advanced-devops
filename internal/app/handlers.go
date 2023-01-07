@@ -49,12 +49,6 @@ func MetricsHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "The query parameter name is missing", http.StatusBadRequest)
 		return
 	}
-	//_, exists1 := storage.MetricsGauge[nameMetrics]
-	//_, exists2 := storage.MetricsCounter[nameMetrics]
-	//if !exists1 && !exists2 {
-	//	http.Error(w, "The name "+nameMetrics+" incorrect", http.StatusBadRequest)
-	//	return
-	//}
 
 	valueMetrics := chi.URLParam(r, "value")
 	if valueMetrics == "" {
@@ -101,6 +95,12 @@ func GetMetricsHandler(w http.ResponseWriter, r *http.Request) {
 	nameMetrics := chi.URLParam(r, "name")
 	if nameMetrics == "" {
 		http.Error(w, "The query parameter name is missing", http.StatusBadRequest)
+		return
+	}
+	_, exists1 := storage.MetricsGauge[nameMetrics]
+	_, exists2 := storage.MetricsCounter[nameMetrics]
+	if !exists1 && !exists2 {
+		http.Error(w, "The name "+nameMetrics+" incorrect", http.StatusNotFound)
 		return
 	}
 
