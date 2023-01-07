@@ -1,6 +1,7 @@
 package app
 
 import (
+	"fmt"
 	"github.com/go-chi/chi/v5"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
 	"log"
@@ -88,6 +89,13 @@ func GetMetricsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var resp string
+	if typeMetrics == "gauge" {
+		resp = fmt.Sprint(storage.MetricsGauge[nameMetrics])
+	}
+	if typeMetrics == "counter" {
+		resp = fmt.Sprint(storage.MetricsCounter[nameMetrics])
+	}
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("<h1>GetMetricsHandler</h1>"))
+	w.Write([]byte(resp))
 }
