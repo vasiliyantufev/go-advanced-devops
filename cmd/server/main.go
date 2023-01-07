@@ -12,7 +12,10 @@ func main() {
 	storage.InitMap()
 
 	r := chi.NewRouter()
+
 	r.Get("/", app.IndexHandler)
+	r.Get("/value/{type}/{name}", app.GetMetricsHandler)
+
 	r.Route("/update", func(r chi.Router) {
 		r.Post("/{type}/{name}/{value}", app.MetricsHandler)
 	})

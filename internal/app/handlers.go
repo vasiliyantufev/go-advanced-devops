@@ -70,3 +70,7 @@ func MetricsHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("<h1>MetricsHandler</h1>"))
 }
+
+func GetMetricsHandler(w http.ResponseWriter, r *http.Request) {
+
+}
