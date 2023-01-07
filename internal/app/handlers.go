@@ -4,17 +4,32 @@ import (
 	"fmt"
 	"github.com/go-chi/chi/v5"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
+	"html/template"
 	"log"
 	"net/http"
 	"strconv"
 )
 
-func IndexHandler(w http.ResponseWriter, r *http.Request) {
-	log.Print(storage.MetricsGauge)
-	log.Print(storage.MetricsCounter)
+type ViewData struct {
+	MapG map[string]float64
+	MapC map[string]int64
+}
 
+func IndexHandler(w http.ResponseWriter, r *http.Request) {
+
+	data := ViewData{
+		MapG: storage.MetricsGauge,
+		MapC: storage.MetricsCounter,
+	}
+
+	tmpl, _ := template.ParseFiles("./web/templates/index.html")
+	//err := tmpl.Execute(w, storage.MetricsGauge)
+	err := tmpl.Execute(w, data)
+	if err != nil {
+		log.Fatalf("execution failed: %s", err)
+	}
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("<h1>IndexHandler</h1>"))
+
 }
 
 // http://<АДРЕС_СЕРВЕРА>/update/<ТИП_МЕТРИКИ>/<ИМЯ_МЕТРИКИ>/<ЗНАЧЕНИЕ_МЕТРИКИ>;
