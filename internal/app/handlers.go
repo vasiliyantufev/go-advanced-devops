@@ -74,7 +74,13 @@ func MetricsHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "The query parameter value "+valueMetrics+" is incorrect", http.StatusBadRequest)
 			return
 		}
-		storage.MetricsCounter[nameMetrics] = val
+
+		var sum int64
+		sum = 0
+		for _, val := range storage.MetricsCounter {
+			sum = sum + val
+		}
+		storage.MetricsCounter[nameMetrics] = sum + val
 	}
 
 	w.WriteHeader(http.StatusOK)

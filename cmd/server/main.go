@@ -3,13 +3,12 @@ package main
 import (
 	"github.com/go-chi/chi/v5"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/app"
-	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
 	"net/http"
 )
 
 func main() {
 
-	storage.InitMap()
+	//storage.InitMap()
 
 	r := chi.NewRouter()
 
