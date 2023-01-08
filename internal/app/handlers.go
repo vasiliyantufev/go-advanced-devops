@@ -10,6 +10,13 @@ import (
 	"strconv"
 )
 
+var MemServer = storage.NewMemStorage()
+
+//type ViewData struct {
+//	MapG map[string]float64
+//	MapC map[string]int64
+//}
+
 type ViewData struct {
 	MapG map[string]float64
 	MapC map[string]int64
@@ -17,9 +24,14 @@ type ViewData struct {
 
 func IndexHandler(w http.ResponseWriter, r *http.Request) {
 
+	//data := ViewData{
+	//	MapG: storage.MetricsGauge,
+	//	MapC: storage.MetricsCounter,
+	//}
+
 	data := ViewData{
-		MapG: storage.MetricsGauge,
-		MapC: storage.MetricsCounter,
+		MapG: MemServer.DataMetricsGauge,
+		MapC: MemServer.DataMetricsCount,
 	}
 
 	tmpl, _ := template.ParseFiles("./web/templates/index.html")
@@ -66,7 +78,8 @@ func MetricsHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "The query parameter value "+valueMetrics+" is incorrect", http.StatusBadRequest)
 			return
 		}
-		storage.MetricsGauge[nameMetrics] = val
+		//storage.MetricsGauge[nameMetrics] = val
+		MemServer.PutMetricsGauge(nameMetrics, val)
 	}
 	if typeMetrics == "counter" {
 		val, err := strconv.ParseInt(string(valueMetrics), 10, 64)
@@ -77,10 +90,12 @@ func MetricsHandler(w http.ResponseWriter, r *http.Request) {
 
 		var sum int64
 		sum = 0
-		for _, val := range storage.MetricsCounter {
+		//for _, val := range storage.MetricsCounter {
+		for _, val := range MemServer.DataMetricsCount {
 			sum = sum + val
 		}
-		storage.MetricsCounter[nameMetrics] = sum + val
+		//storage.MetricsCounter[nameMetrics] = sum + val
+		MemServer.PutMetricsCount(nameMetrics, sum+val)
 	}
 
 	w.WriteHeader(http.StatusOK)
@@ -103,8 +118,10 @@ func GetMetricsHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "The query parameter name is missing", http.StatusBadRequest)
 		return
 	}
-	_, exists1 := storage.MetricsGauge[nameMetrics]
-	_, exists2 := storage.MetricsCounter[nameMetrics]
+	//_, exists1 := storage.MetricsGauge[nameMetrics]
+	//_, exists2 := storage.MetricsCounter[nameMetrics]
+	_, exists1 := MemServer.GetMetricsGauge(nameMetrics)
+	_, exists2 := MemServer.GetMetricsCount(nameMetrics)
 	if !exists1 && !exists2 {
 		http.Error(w, "The name "+nameMetrics+" incorrect", http.StatusNotFound)
 		return
@@ -112,10 +129,14 @@ func GetMetricsHandler(w http.ResponseWriter, r *http.Request) {
 
 	var resp string
 	if typeMetrics == "gauge" {
-		resp = fmt.Sprint(storage.MetricsGauge[nameMetrics])
+		//resp = fmt.Sprint(storage.MetricsGauge[nameMetrics])
+		val, _ := MemServer.GetMetricsGauge(nameMetrics)
+		resp = fmt.Sprint(val)
 	}
 	if typeMetrics == "counter" {
-		resp = fmt.Sprint(storage.MetricsCounter[nameMetrics])
+		//resp = fmt.Sprint(storage.MetricsCounter[nameMetrics])
+		val, _ := MemServer.GetMetricsCount(nameMetrics)
+		resp = fmt.Sprint(val)
 	}
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(resp))

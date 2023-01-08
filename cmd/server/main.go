@@ -11,10 +11,7 @@ const portNumber = ":8080"
 
 func main() {
 
-	//storage.InitMap()
-
 	r := chi.NewRouter()
-	//app.RunRouter()
 
 	r.Get("/", app.IndexHandler)
 	r.Get("/value/{type}/{name}", app.GetMetricsHandler)
