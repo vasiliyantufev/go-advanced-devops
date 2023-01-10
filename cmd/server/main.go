@@ -22,7 +22,7 @@ func main() {
 		r.Post("/{type}/{name}/{value}", app.MetricsHandler)
 	})
 
-	log.Printf("Starting application on port %v\n", portNumber)
+	log.Infof("Starting application on port %v\n", portNumber)
 	if con := http.ListenAndServe(portNumber, r); con != nil {
 		log.Fatal(con)
 	}

@@ -14,6 +14,8 @@ import (
 var MemAgent = storage.NewMemStorage()
 
 func main() {
+
+	log.SetLevel(log.DebugLevel)
 	var wg sync.WaitGroup
 	wg.Add(2) // в группе две горутины
 	go PutMetrics()
@@ -25,11 +27,10 @@ func SentMetrics() {
 
 	// Create a Resty Client
 	client := resty.New()
-	log.SetLevel(log.DebugLevel)
 
 	for range time.Tick(10 * time.Second) {
 
-		log.Print("SentMetrics")
+		log.Info("Sent metrics")
 
 		for name, val := range MemAgent.DataMetricsGauge {
 			str := strconv.FormatFloat(val, 'f', 5, 64)
@@ -41,7 +42,6 @@ func SentMetrics() {
 			if err != nil {
 				log.Error(err)
 			}
-			log.Print("Request completed successfully")
 			log.Debug(resp)
 		}
 
@@ -55,7 +55,6 @@ func SentMetrics() {
 			if err != nil {
 				log.Error(err)
 			}
-			log.Print("Request completed successfully")
 			log.Debug(resp)
 		}
 
@@ -66,6 +65,7 @@ func PutMetrics() {
 
 	var memStats runtime.MemStats
 	runtime.ReadMemStats(&memStats)
+	log.SetLevel(log.TraceLevel)
 
 	for range time.Tick(2 * time.Second) {
 
@@ -101,6 +101,6 @@ func PutMetrics() {
 		MemAgent.PutMetricsCount("poll_count", pollCount+1)
 		MemAgent.PutMetricsCount("random_value", rand.Int63())
 
-		log.Print("PutMetrics")
+		log.Info("Put metrics")
 	}
 }

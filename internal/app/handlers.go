@@ -71,6 +71,8 @@ func MetricsHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		MemServer.PutMetricsGauge(nameMetrics, val)
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("Request completed successfully " + nameMetrics + ":" + fmt.Sprint(val)))
 	}
 	if typeMetrics == "counter" {
 		val, err := strconv.ParseInt(string(valueMetrics), 10, 64)
@@ -80,15 +82,15 @@ func MetricsHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		var sum int64
-		sum = 0
 		for _, val := range MemServer.DataMetricsCount {
 			sum = sum + val
 		}
-		MemServer.PutMetricsCount(nameMetrics, sum+val)
+		sum = sum + val
+		MemServer.PutMetricsCount(nameMetrics, sum)
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("Request completed successfully " + nameMetrics + ":" + fmt.Sprint(sum)))
 	}
 
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("<h1>MetricsHandler</h1>"))
 }
 
 func GetMetricsHandler(w http.ResponseWriter, r *http.Request) {
