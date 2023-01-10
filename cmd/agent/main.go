@@ -65,7 +65,6 @@ func PutMetrics() {
 
 	var memStats runtime.MemStats
 	runtime.ReadMemStats(&memStats)
-	log.SetLevel(log.TraceLevel)
 
 	for range time.Tick(2 * time.Second) {
 
