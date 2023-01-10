@@ -26,11 +26,11 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 
 	tmpl, err := template.ParseFiles("./web/templates/index.html")
 	if err != nil {
-		log.Error("Parse failed: %s", err)
+		log.Errorf("Parse failed: %s", err)
 	}
 	err = tmpl.Execute(w, data)
 	if err != nil {
-		log.Error("Execution failed: %s", err)
+		log.Errorf("Execution failed: %s", err)
 	}
 	w.WriteHeader(http.StatusOK)
 
