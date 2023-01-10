@@ -12,6 +12,7 @@ const portNumber = ":8080"
 func main() {
 
 	r := chi.NewRouter()
+	log.SetLevel(log.DebugLevel)
 
 	r.Get("/", app.IndexHandler)
 

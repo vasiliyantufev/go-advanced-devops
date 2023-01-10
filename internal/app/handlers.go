@@ -63,6 +63,7 @@ func MetricsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var resp string
 	if typeMetrics == "gauge" {
 		val, err := strconv.ParseFloat(string(valueMetrics), 64)
 		if err != nil {
@@ -71,8 +72,7 @@ func MetricsHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		MemServer.PutMetricsGauge(nameMetrics, val)
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("Request completed successfully " + nameMetrics + ":" + fmt.Sprint(val)))
+		resp = "Request completed successfully " + nameMetrics + "=" + fmt.Sprint(val)
 	}
 	if typeMetrics == "counter" {
 		val, err := strconv.ParseInt(string(valueMetrics), 10, 64)
@@ -87,9 +87,12 @@ func MetricsHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		sum = sum + val
 		MemServer.PutMetricsCount(nameMetrics, sum)
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("Request completed successfully " + nameMetrics + ":" + fmt.Sprint(sum)))
+		resp = "Request completed successfully " + nameMetrics + "=" + fmt.Sprint(sum)
 	}
+
+	log.Debug(resp)
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(resp))
 
 }
 
@@ -113,7 +116,7 @@ func GetMetricsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var resp string
+	var param string
 	if typeMetrics == "gauge" {
 		val, exists := MemServer.GetMetricsGauge(nameMetrics)
 		if !exists {
@@ -121,7 +124,7 @@ func GetMetricsHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "The name "+nameMetrics+" incorrect", http.StatusNotFound)
 			return
 		}
-		resp = fmt.Sprint(val)
+		param = fmt.Sprint(val)
 	}
 	if typeMetrics == "counter" {
 		val, exists := MemServer.GetMetricsCount(nameMetrics)
@@ -130,8 +133,9 @@ func GetMetricsHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "The name "+nameMetrics+" incorrect", http.StatusNotFound)
 			return
 		}
-		resp = fmt.Sprint(val)
+		param = fmt.Sprint(val)
 	}
+	log.Debug("Request completed successfully " + nameMetrics + "=" + fmt.Sprint(param))
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(resp))
+	w.Write([]byte(param))
 }

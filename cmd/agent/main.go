@@ -15,7 +15,6 @@ var MemAgent = storage.NewMemStorage()
 
 func main() {
 
-	log.SetLevel(log.DebugLevel)
 	var wg sync.WaitGroup
 	wg.Add(2) // в группе две горутины
 	go PutMetrics()
@@ -34,7 +33,7 @@ func SentMetrics() {
 
 		for name, val := range MemAgent.DataMetricsGauge {
 			str := strconv.FormatFloat(val, 'f', 5, 64)
-			resp, err := client.R().
+			_, err := client.R().
 				SetHeader("Content-Type", "text/plain").
 				//SetBody(storage.MetricsGauge["alloc"]).
 				Post("http://127.0.0.1:8080/update/gauge/" + name + "/" + str)
@@ -42,12 +41,11 @@ func SentMetrics() {
 			if err != nil {
 				log.Error(err)
 			}
-			log.Debug(resp)
 		}
 
 		for name, val := range MemAgent.DataMetricsCount {
 			str := strconv.FormatInt(val, 10)
-			resp, err := client.R().
+			_, err := client.R().
 				SetHeader("Content-Type", "text/plain").
 				//SetBody(storage.MetricsCounter["alloc"]).
 				Post("http://127.0.0.1:8080/update/counter/" + name + "/" + str)
@@ -55,7 +53,6 @@ func SentMetrics() {
 			if err != nil {
 				log.Error(err)
 			}
-			log.Debug(resp)
 		}
 
 	}
