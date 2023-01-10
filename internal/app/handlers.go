@@ -110,21 +110,24 @@ func GetMetricsHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "The query parameter name is missing", http.StatusBadRequest)
 		return
 	}
-	_, exists1 := MemServer.GetMetricsGauge(nameMetrics)
-	_, exists2 := MemServer.GetMetricsCount(nameMetrics)
-	if !exists1 && !exists2 {
-		log.Error("The name " + nameMetrics + " incorrect")
-		http.Error(w, "The name "+nameMetrics+" incorrect", http.StatusNotFound)
-		return
-	}
 
 	var resp string
 	if typeMetrics == "gauge" {
-		val, _ := MemServer.GetMetricsGauge(nameMetrics)
+		val, exists := MemServer.GetMetricsGauge(nameMetrics)
+		if !exists {
+			log.Error("The name " + nameMetrics + " incorrect")
+			http.Error(w, "The name "+nameMetrics+" incorrect", http.StatusNotFound)
+			return
+		}
 		resp = fmt.Sprint(val)
 	}
 	if typeMetrics == "counter" {
-		val, _ := MemServer.GetMetricsCount(nameMetrics)
+		val, exists := MemServer.GetMetricsCount(nameMetrics)
+		if !exists {
+			log.Error("The name " + nameMetrics + " incorrect")
+			http.Error(w, "The name "+nameMetrics+" incorrect", http.StatusNotFound)
+			return
+		}
 		resp = fmt.Sprint(val)
 	}
 	w.WriteHeader(http.StatusOK)
