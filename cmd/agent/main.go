@@ -2,8 +2,8 @@ package main
 
 import (
 	"github.com/go-resty/resty/v2"
+	log "github.com/sirupsen/logrus"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
-	"log"
 	"math/rand"
 	"runtime"
 	"strconv"
@@ -19,19 +19,18 @@ func main() {
 	go PutMetrics()
 	go SentMetrics()
 	wg.Wait() // ожидаем завершения обоих горутин
-	//Mem
 }
 
 func SentMetrics() {
 
 	// Create a Resty Client
 	client := resty.New()
+	log.SetLevel(log.DebugLevel)
 
 	for range time.Tick(10 * time.Second) {
 
 		log.Print("SentMetrics")
 
-		//for name, val := range storage.MetricsGauge {
 		for name, val := range MemAgent.DataMetricsGauge {
 			str := strconv.FormatFloat(val, 'f', 5, 64)
 			resp, err := client.R().
@@ -40,12 +39,12 @@ func SentMetrics() {
 				Post("http://127.0.0.1:8080/update/gauge/" + name + "/" + str)
 
 			if err != nil {
-				log.Fatal(err)
+				log.Error(err)
 			}
-			log.Print(resp)
+			log.Print("Request completed successfully")
+			log.Debug(resp)
 		}
 
-		//for name, val := range storage.MetricsCounter {
 		for name, val := range MemAgent.DataMetricsCount {
 			str := strconv.FormatInt(val, 10)
 			resp, err := client.R().
@@ -54,9 +53,10 @@ func SentMetrics() {
 				Post("http://127.0.0.1:8080/update/counter/" + name + "/" + str)
 
 			if err != nil {
-				log.Fatal(err)
+				log.Error(err)
 			}
-			log.Print(resp)
+			log.Print("Request completed successfully")
+			log.Debug(resp)
 		}
 
 	}
@@ -97,46 +97,9 @@ func PutMetrics() {
 		MemAgent.PutMetricsGauge("sys", float64(memStats.Sys))
 		MemAgent.PutMetricsGauge("total_alloc", float64(memStats.TotalAlloc))
 
-		//storage.MetricsGauge["alloc"] = float64(memStats.Alloc)
-		//storage.MetricsCounter["poll_count"] = storage.MetricsCounter["poll_count"] + 1
-		//storage.MetricsCounter["random_value"] = rand.Int63()
-		//storage.MetricsGauge["alloc"] = float64(memStats.Alloc)
-		//storage.MetricsGauge["buck_hash_sys"] = float64(memStats.BuckHashSys)
-		//storage.MetricsGauge["frees"] = float64(memStats.Frees)
-		//storage.MetricsGauge["gc_cpu_fraction"] = float64(memStats.GCCPUFraction)
-		//storage.MetricsGauge["gc_sys"] = float64(memStats.GCSys)
-		//storage.MetricsGauge["heap_alloc"] = float64(memStats.HeapAlloc)
-		//storage.MetricsGauge["heap_idle"] = float64(memStats.HeapIdle)
-		//storage.MetricsGauge["heap_inuse"] = float64(memStats.HeapInuse)
-		//storage.MetricsGauge["heap_objects"] = float64(memStats.HeapObjects)
-		//storage.MetricsGauge["heap_released"] = float64(memStats.HeapReleased)
-		//storage.MetricsGauge["heap_sys"] = float64(memStats.HeapSys)
-		//storage.MetricsGauge["last_gc"] = float64(memStats.LastGC)
-		//storage.MetricsGauge["lookups"] = float64(memStats.Lookups)
-		//storage.MetricsGauge["mcache_inuse"] = float64(memStats.MCacheInuse)
-		//storage.MetricsGauge["mcache_sys"] = float64(memStats.MCacheSys)
-		//storage.MetricsGauge["mspan_inuse"] = float64(memStats.MSpanInuse)
-		//storage.MetricsGauge["mspan_sys"] = float64(memStats.MSpanSys)
-		//storage.MetricsGauge["mallocs"] = float64(memStats.Mallocs)
-		//storage.MetricsGauge["next_gc"] = float64(memStats.NextGC)
-		//storage.MetricsGauge["num_forced_gc"] = float64(memStats.NumForcedGC)
-		//storage.MetricsGauge["num_gc"] = float64(memStats.NumGC)
-		//storage.MetricsGauge["other_sys"] = float64(memStats.OtherSys)
-		//storage.MetricsGauge["pause_total_ns"] = float64(memStats.PauseTotalNs)
-		//storage.MetricsGauge["stack_inuse"] = float64(memStats.StackInuse)
-		//storage.MetricsGauge["stack_sys"] = float64(memStats.StackSys)
-		//storage.MetricsGauge["sys"] = float64(memStats.Sys)
-		//storage.MetricsGauge["total_alloc"] = float64(memStats.TotalAlloc)
-
 		pollCount, _ := MemAgent.GetMetricsCount("poll_count")
 		MemAgent.PutMetricsCount("poll_count", pollCount+1)
 		MemAgent.PutMetricsCount("random_value", rand.Int63())
-
-		//storage.MetricsCounter["poll_count"] = storage.MetricsCounter["poll_count"] + 1
-		//storage.MetricsCounter["random_value"] = rand.Int63()
-
-		//log.Print(storage.MetricsGauge)
-		//log.Print(storage.MetricsCounter)
 
 		log.Print("PutMetrics")
 	}

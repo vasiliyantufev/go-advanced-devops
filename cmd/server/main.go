@@ -2,8 +2,8 @@ package main
 
 import (
 	"github.com/go-chi/chi/v5"
+	log "github.com/sirupsen/logrus"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/app"
-	"log"
 	"net/http"
 )
 
@@ -14,14 +14,16 @@ func main() {
 	r := chi.NewRouter()
 
 	r.Get("/", app.IndexHandler)
-	r.Get("/value/{type}/{name}", app.GetMetricsHandler)
 
+	r.Route("/value", func(r chi.Router) {
+		r.Get("/{type}/{name}", app.GetMetricsHandler)
+	})
 	r.Route("/update", func(r chi.Router) {
 		r.Post("/{type}/{name}/{value}", app.MetricsHandler)
 	})
+
 	log.Printf("Starting application on port %v\n", portNumber)
-	con := http.ListenAndServe(portNumber, r)
-	if con != nil {
+	if con := http.ListenAndServe(portNumber, r); con != nil {
 		log.Fatal(con)
 	}
 

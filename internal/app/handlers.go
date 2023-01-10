@@ -3,19 +3,14 @@ package app
 import (
 	"fmt"
 	"github.com/go-chi/chi/v5"
+	log "github.com/sirupsen/logrus"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
 	"html/template"
-	"log"
 	"net/http"
 	"strconv"
 )
 
 var MemServer = storage.NewMemStorage()
-
-//type ViewData struct {
-//	MapG map[string]float64
-//	MapC map[string]int64
-//}
 
 type ViewData struct {
 	MapG map[string]float64
@@ -24,77 +19,71 @@ type ViewData struct {
 
 func IndexHandler(w http.ResponseWriter, r *http.Request) {
 
-	//data := ViewData{
-	//	MapG: storage.MetricsGauge,
-	//	MapC: storage.MetricsCounter,
-	//}
-
 	data := ViewData{
 		MapG: MemServer.DataMetricsGauge,
 		MapC: MemServer.DataMetricsCount,
 	}
 
-	tmpl, _ := template.ParseFiles("./web/templates/index.html")
-	//err := tmpl.Execute(w, storage.MetricsGauge)
-	err := tmpl.Execute(w, data)
+	tmpl, err := template.ParseFiles("./web/templates/index.html")
 	if err != nil {
-		log.Fatalf("execution failed: %s", err)
+		log.Error("Parse failed: %s", err)
+	}
+	err = tmpl.Execute(w, data)
+	if err != nil {
+		log.Error("Execution failed: %s", err)
 	}
 	w.WriteHeader(http.StatusOK)
 
 }
 
-// http://<АДРЕС_СЕРВЕРА>/update/<ТИП_МЕТРИКИ>/<ИМЯ_МЕТРИКИ>/<ЗНАЧЕНИЕ_МЕТРИКИ>;
 func MetricsHandler(w http.ResponseWriter, r *http.Request) {
 
 	typeMetrics := chi.URLParam(r, "type")
 	if typeMetrics == "" {
+		log.Error("The query parameter type is missing")
 		http.Error(w, "The query parameter type is missing", http.StatusBadRequest)
 		return
 	}
 	if typeMetrics != "gauge" && typeMetrics != "counter" {
+		log.Error("The type incorrect")
 		http.Error(w, "The type incorrect", http.StatusNotImplemented)
 		return
 	}
 	nameMetrics := chi.URLParam(r, "name")
 	if nameMetrics == "" {
+		log.Error("The query parameter name is missing")
 		http.Error(w, "The query parameter name is missing", http.StatusBadRequest)
 		return
 	}
 
 	valueMetrics := chi.URLParam(r, "value")
 	if valueMetrics == "" {
+		log.Error("The query parameter value is missing")
 		http.Error(w, "The query parameter value is missing", http.StatusBadRequest)
 		return
 	}
 
-	//log.Print(typeMetrics)
-	//log.Print(nameMetrics)
-	//log.Print(valueMetrics)
-
 	if typeMetrics == "gauge" {
 		val, err := strconv.ParseFloat(string(valueMetrics), 64)
 		if err != nil {
+			log.Error("The query parameter value " + valueMetrics + " is incorrect")
 			http.Error(w, "The query parameter value "+valueMetrics+" is incorrect", http.StatusBadRequest)
 			return
 		}
-		//storage.MetricsGauge[nameMetrics] = val
 		MemServer.PutMetricsGauge(nameMetrics, val)
 	}
 	if typeMetrics == "counter" {
 		val, err := strconv.ParseInt(string(valueMetrics), 10, 64)
 		if err != nil {
+			log.Error("The query parameter value " + valueMetrics + " is incorrect")
 			http.Error(w, "The query parameter value "+valueMetrics+" is incorrect", http.StatusBadRequest)
 			return
 		}
-
 		var sum int64
 		sum = 0
-		//for _, val := range storage.MetricsCounter {
 		for _, val := range MemServer.DataMetricsCount {
 			sum = sum + val
 		}
-		//storage.MetricsCounter[nameMetrics] = sum + val
 		MemServer.PutMetricsCount(nameMetrics, sum+val)
 	}
 
@@ -106,35 +95,35 @@ func GetMetricsHandler(w http.ResponseWriter, r *http.Request) {
 
 	typeMetrics := chi.URLParam(r, "type")
 	if typeMetrics == "" {
+		log.Error("The query parameter type is missing")
 		http.Error(w, "The query parameter type is missing", http.StatusBadRequest)
 		return
 	}
 	if typeMetrics != "gauge" && typeMetrics != "counter" {
+		log.Error("The type incorrect")
 		http.Error(w, "The type incorrect", http.StatusNotImplemented)
 		return
 	}
 	nameMetrics := chi.URLParam(r, "name")
 	if nameMetrics == "" {
+		log.Error("The query parameter name is missing")
 		http.Error(w, "The query parameter name is missing", http.StatusBadRequest)
 		return
 	}
-	//_, exists1 := storage.MetricsGauge[nameMetrics]
-	//_, exists2 := storage.MetricsCounter[nameMetrics]
 	_, exists1 := MemServer.GetMetricsGauge(nameMetrics)
 	_, exists2 := MemServer.GetMetricsCount(nameMetrics)
 	if !exists1 && !exists2 {
+		log.Error("The name " + nameMetrics + " incorrect")
 		http.Error(w, "The name "+nameMetrics+" incorrect", http.StatusNotFound)
 		return
 	}
 
 	var resp string
 	if typeMetrics == "gauge" {
-		//resp = fmt.Sprint(storage.MetricsGauge[nameMetrics])
 		val, _ := MemServer.GetMetricsGauge(nameMetrics)
 		resp = fmt.Sprint(val)
 	}
 	if typeMetrics == "counter" {
-		//resp = fmt.Sprint(storage.MetricsCounter[nameMetrics])
 		val, _ := MemServer.GetMetricsCount(nameMetrics)
 		resp = fmt.Sprint(val)
 	}
