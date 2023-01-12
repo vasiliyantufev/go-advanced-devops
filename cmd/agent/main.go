@@ -25,8 +25,8 @@ func main() {
 	var wg sync.WaitGroup
 
 	wg.Add(2) // в группе две горутины
-	go PutMetrics(cfg.Poll_interval)
-	go SentMetrics(cfg.Report_interval)
+	go PutMetrics(cfg.PollInterval)
+	go SentMetrics(cfg.ReportInterval)
 	wg.Wait() // ожидаем завершения обоих горутин
 }
 
