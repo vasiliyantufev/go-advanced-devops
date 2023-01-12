@@ -19,11 +19,13 @@ func main() {
 
 	log.SetLevel(log.DebugLevel)
 
+	log.Info(cfg)
+
 	r := chi.NewRouter()
 	//r.Use(middleware.Logger)
 
 	r.Get("/", app.IndexHandler)
-	r.Route("/value", func(r chi.Router) {
+	r.Route("/value/", func(r chi.Router) {
 		r.Get("/{type}/{name}", app.GetMetricsHandler)
 		r.Post("/", app.PostValueMetricsHandler)
 	})
