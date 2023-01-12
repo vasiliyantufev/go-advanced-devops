@@ -32,8 +32,6 @@ func main() {
 
 func SentMetrics(interval time.Duration) {
 
-	log.Info(interval)
-
 	// Create a Resty Client
 	client := resty.New()
 
