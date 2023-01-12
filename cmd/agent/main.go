@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/caarlos0/env/v6"
 	"github.com/go-resty/resty/v2"
 	log "github.com/sirupsen/logrus"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
@@ -15,19 +16,28 @@ var MemAgent = storage.NewMemStorage()
 
 func main() {
 
+	var cfg storage.Config
+	err := env.Parse(&cfg)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	var wg sync.WaitGroup
+
 	wg.Add(2) // в группе две горутины
-	go PutMetrics()
-	go SentMetrics()
+	go PutMetrics(cfg.Poll_interval)
+	go SentMetrics(cfg.Report_interval)
 	wg.Wait() // ожидаем завершения обоих горутин
 }
 
-func SentMetrics() {
+func SentMetrics(interval time.Duration) {
+
+	log.Info(interval)
 
 	// Create a Resty Client
 	client := resty.New()
 
-	for range time.Tick(10 * time.Second) {
+	for range time.Tick(interval) {
 
 		log.Info("Sent metrics")
 
@@ -35,7 +45,6 @@ func SentMetrics() {
 			str := strconv.FormatFloat(val, 'f', 5, 64)
 			_, err := client.R().
 				SetHeader("Content-Type", "text/plain").
-				//SetBody(storage.MetricsGauge["alloc"]).
 				Post("http://127.0.0.1:8080/update/gauge/" + name + "/" + str)
 
 			if err != nil {
@@ -47,7 +56,6 @@ func SentMetrics() {
 			str := strconv.FormatInt(val, 10)
 			_, err := client.R().
 				SetHeader("Content-Type", "text/plain").
-				//SetBody(storage.MetricsCounter["alloc"]).
 				Post("http://127.0.0.1:8080/update/counter/" + name + "/" + str)
 
 			if err != nil {
@@ -58,12 +66,12 @@ func SentMetrics() {
 	}
 }
 
-func PutMetrics() {
+func PutMetrics(interval time.Duration) {
 
 	var memStats runtime.MemStats
 	runtime.ReadMemStats(&memStats)
 
-	for range time.Tick(2 * time.Second) {
+	for range time.Tick(interval) {
 
 		MemAgent.PutMetricsGauge("alloc", float64(memStats.Alloc))
 		MemAgent.PutMetricsGauge("buck_hash_sys", float64(memStats.BuckHashSys))

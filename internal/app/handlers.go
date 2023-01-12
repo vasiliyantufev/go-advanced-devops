@@ -1,11 +1,13 @@
 package app
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/go-chi/chi/v5"
 	log "github.com/sirupsen/logrus"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
 	"html/template"
+	"io"
 	"net/http"
 	"strconv"
 )
@@ -138,4 +140,111 @@ func GetMetricsHandler(w http.ResponseWriter, r *http.Request) {
 	log.Debug("Request completed successfully " + nameMetrics + "=" + fmt.Sprint(param))
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(param))
+}
+
+func PostMetricsHandler(w http.ResponseWriter, r *http.Request) {
+
+	resp, err := io.ReadAll(r.Body)
+	if err != nil {
+		log.Error(err.Error())
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	value := storage.Metrics{}
+	if err := json.Unmarshal([]byte(string(resp)), &value); err != nil {
+		log.Error(err.Error())
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if value.Value != nil {
+		MemServer.PutMetricsGauge(value.ID, *value.Value)
+		rawValue := storage.Metrics{
+			ID:    value.ID,
+			MType: value.MType,
+			Value: value.Value,
+		}
+		resp, err = json.Marshal(rawValue)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+		}
+		w.WriteHeader(http.StatusOK)
+		w.Write(resp)
+	}
+	if value.Delta != nil {
+		MemServer.PutMetricsCount(value.ID, *value.Delta)
+		rawValue := storage.Metrics{
+			ID:    value.ID,
+			MType: value.MType,
+			Delta: value.Delta,
+		}
+		resp, err = json.Marshal(rawValue)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+		}
+		w.WriteHeader(http.StatusOK)
+		w.Write(resp)
+	}
+}
+
+func PostValueMetricsHandler(w http.ResponseWriter, r *http.Request) {
+
+	resp, err := io.ReadAll(r.Body)
+	if err != nil {
+		log.Error(err.Error())
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	value := storage.Metrics{}
+	if err := json.Unmarshal([]byte(string(resp)), &value); err != nil {
+		log.Error(err.Error())
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if value.MType == "gauge" {
+		val, exists := MemServer.GetMetricsGauge(value.ID)
+		if !exists {
+			log.Error("Element not exists")
+			http.Error(w, "Element not exists", http.StatusBadRequest)
+			return
+		}
+		rawValue := storage.Metrics{
+			ID:    value.ID,
+			MType: value.MType,
+			Value: &val,
+		}
+		resp, err = json.Marshal(rawValue)
+		if err != nil {
+			log.Error(err.Error())
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+		w.Write(resp)
+	}
+
+	if value.MType == "count" {
+		val, exists := MemServer.GetMetricsCount(value.ID)
+		if !exists {
+			log.Error("Element not exists")
+			http.Error(w, "Element not exists", http.StatusBadRequest)
+			return
+		}
+		rawValue := storage.Metrics{
+			ID:    value.ID,
+			MType: value.MType,
+			Delta: &val,
+		}
+		resp, err = json.Marshal(rawValue)
+		if err != nil {
+			log.Error(err.Error())
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+		w.Write(resp)
+	}
 }
