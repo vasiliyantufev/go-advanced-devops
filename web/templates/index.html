@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+<ul>
+    {{range $key, $value := .MapG }}
+    <li>{{ $key }}: {{ $value }}</li>
+    {{end}}
+    {{range $key, $value := .MapC }}
+    <li>{{ $key }}: {{ $value }}</li>
+    {{end}}
+</ul>
+
+</body>
+</html>
