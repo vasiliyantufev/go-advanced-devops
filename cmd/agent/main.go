@@ -44,21 +44,39 @@ func SentMetrics(interval time.Duration) {
 			_, err := client.R().
 				SetHeader("Content-Type", "text/plain").
 				Post("http://127.0.0.1:8080/update/gauge/" + name + "/" + str)
-
 			if err != nil {
 				log.Error(err)
 			}
+
+			_, err = client.R().
+				SetHeader("Content-Type", "application/json").
+				SetBody(storage.Metrics{ID: name, MType: "gauge", Value: &val}).
+				Post("http://127.0.0.1:8080/update/")
+			if err != nil {
+				log.Error(err)
+			} /**/
+
 		}
+
+		//=============================================================================
 
 		for name, val := range MemAgent.DataMetricsCount {
 			str := strconv.FormatInt(val, 10)
 			_, err := client.R().
 				SetHeader("Content-Type", "text/plain").
 				Post("http://127.0.0.1:8080/update/counter/" + name + "/" + str)
-
 			if err != nil {
 				log.Error(err)
 			}
+
+			_, err = client.R().
+				SetHeader("Content-Type", "application/json").
+				SetBody(storage.Metrics{ID: name, MType: "counter", Delta: &val}).
+				Post("http://127.0.0.1:8080/update/")
+			if err != nil {
+				log.Error(err)
+			}
+
 		}
 
 	}
@@ -98,10 +116,10 @@ func PutMetrics(interval time.Duration) {
 		MemAgent.PutMetricsGauge("StackSys", float64(memStats.StackSys))
 		MemAgent.PutMetricsGauge("Sys", float64(memStats.Sys))
 		MemAgent.PutMetricsGauge("TotalAlloc", float64(memStats.TotalAlloc))
+		MemAgent.PutMetricsGauge("RandomValue", rand.Float64())
 
 		pollCount, _ := MemAgent.GetMetricsCount("PollCount")
 		MemAgent.PutMetricsCount("PollCount", pollCount+1)
-		MemAgent.PutMetricsCount("RandomValue", rand.Int63())
 
 		log.Info("Put metrics")
 	}
