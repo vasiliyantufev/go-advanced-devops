@@ -205,8 +205,8 @@ func PostValueMetricsHandler(w http.ResponseWriter, r *http.Request) {
 	if value.MType == "gauge" {
 		val, exists := MemServer.GetMetricsGauge(value.ID)
 		if !exists {
-			log.Error("Element not exists")
-			http.Error(w, "Element not exists", http.StatusNotFound)
+			log.Error("Element  " + value.ID + " not exists")
+			http.Error(w, "Element  "+value.ID+" not exists", http.StatusNotFound)
 			return
 		}
 		rawValue = storage.Metrics{
@@ -218,8 +218,8 @@ func PostValueMetricsHandler(w http.ResponseWriter, r *http.Request) {
 	if value.MType == "counter" {
 		val, exists := MemServer.GetMetricsCount(value.ID)
 		if !exists {
-			log.Error("Element not exists")
-			http.Error(w, "Element not exists", http.StatusNotFound)
+			log.Error("Element " + value.ID + " not exists")
+			http.Error(w, "Element "+value.ID+" not exists", http.StatusNotFound)
 			return
 		}
 		rawValue = storage.Metrics{

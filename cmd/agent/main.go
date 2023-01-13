@@ -43,7 +43,7 @@ func SentMetrics(interval time.Duration) {
 			str := strconv.FormatFloat(val, 'f', 5, 64)
 			_, err := client.R().
 				SetHeader("Content-Type", "text/plain").
-				Post("http://127.0.0.1:8080/update/gauge/" + name + "/" + str)
+				Post("http://localhost:8080/update/gauge/" + name + "/" + str)
 			if err != nil {
 				log.Error(err)
 			}
@@ -51,7 +51,7 @@ func SentMetrics(interval time.Duration) {
 			_, err = client.R().
 				SetHeader("Content-Type", "application/json").
 				SetBody(storage.Metrics{ID: name, MType: "gauge", Value: &val}).
-				Post("http://127.0.0.1:8080/update/")
+				Post("http://localhost:8080/update/")
 			if err != nil {
 				log.Error(err)
 			} /**/
@@ -64,7 +64,7 @@ func SentMetrics(interval time.Duration) {
 			str := strconv.FormatInt(val, 10)
 			_, err := client.R().
 				SetHeader("Content-Type", "text/plain").
-				Post("http://127.0.0.1:8080/update/counter/" + name + "/" + str)
+				Post("http://localhost:8080/update/counter/" + name + "/" + str)
 			if err != nil {
 				log.Error(err)
 			}
@@ -72,7 +72,7 @@ func SentMetrics(interval time.Duration) {
 			_, err = client.R().
 				SetHeader("Content-Type", "application/json").
 				SetBody(storage.Metrics{ID: name, MType: "counter", Delta: &val}).
-				Post("http://127.0.0.1:8080/update/")
+				Post("http://localhost:8080/update/")
 			if err != nil {
 				log.Error(err)
 			}
