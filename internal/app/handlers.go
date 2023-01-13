@@ -158,35 +158,30 @@ func PostMetricsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	rawValue := storage.Metrics{}
 	if value.Value != nil {
 		MemServer.PutMetricsGauge(value.ID, *value.Value)
-		rawValue := storage.Metrics{
+		rawValue = storage.Metrics{
 			ID:    value.ID,
 			MType: value.MType,
 			Value: value.Value,
 		}
-		resp, err = json.Marshal(rawValue)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-		}
-		w.WriteHeader(http.StatusOK)
-		w.Write(resp)
 	}
 	if value.Delta != nil {
 		MemServer.PutMetricsCount(value.ID, *value.Delta)
-		rawValue := storage.Metrics{
+		rawValue = storage.Metrics{
 			ID:    value.ID,
 			MType: value.MType,
 			Delta: value.Delta,
 		}
-		resp, err = json.Marshal(rawValue)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-		}
-		w.WriteHeader(http.StatusOK)
-		w.Header().Set("Content-Type", "application/json")
-		w.Write(resp)
 	}
+	resp, err = json.Marshal(rawValue)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	}
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(resp)
 }
 
 func PostValueMetricsHandler(w http.ResponseWriter, r *http.Request) {
@@ -205,6 +200,7 @@ func PostValueMetricsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	rawValue := storage.Metrics{}
 	if value.MType == "gauge" {
 		val, exists := MemServer.GetMetricsGauge(value.ID)
 		if !exists {
@@ -212,22 +208,12 @@ func PostValueMetricsHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Element not exists", http.StatusBadRequest)
 			return
 		}
-		rawValue := storage.Metrics{
+		rawValue = storage.Metrics{
 			ID:    value.ID,
 			MType: value.MType,
 			Value: &val,
 		}
-		resp, err = json.Marshal(rawValue)
-		if err != nil {
-			log.Error(err.Error())
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		w.Write(resp)
 	}
-
 	if value.MType == "counter" {
 		val, exists := MemServer.GetMetricsCount(value.ID)
 		if !exists {
@@ -235,19 +221,19 @@ func PostValueMetricsHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Element not exists", http.StatusBadRequest)
 			return
 		}
-		rawValue := storage.Metrics{
+		rawValue = storage.Metrics{
 			ID:    value.ID,
 			MType: value.MType,
 			Delta: &val,
 		}
-		resp, err = json.Marshal(rawValue)
-		if err != nil {
-			log.Error(err.Error())
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		w.Write(resp)
 	}
+	resp, err = json.Marshal(rawValue)
+	if err != nil {
+		log.Error(err.Error())
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(resp)
 }
