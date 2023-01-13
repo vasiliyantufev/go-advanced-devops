@@ -84,11 +84,13 @@ func MetricsHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		var sum int64
-		for _, val := range MemServer.DataMetricsCount {
-			sum = sum + val
+		if oldVal, exists := MemServer.GetMetricsCount(nameMetrics); exists {
+			sum = oldVal + val
+		} else {
+			sum = val
 		}
-		sum = sum + val
 		MemServer.PutMetricsCount(nameMetrics, sum)
+
 		resp = "Request completed successfully " + nameMetrics + "=" + fmt.Sprint(sum)
 	}
 
