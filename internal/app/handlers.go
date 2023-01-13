@@ -223,12 +223,12 @@ func PostValueMetricsHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		w.WriteHeader(http.StatusOK)
 		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
 		w.Write(resp)
 	}
 
-	if value.MType == "count" {
+	if value.MType == "counter" {
 		val, exists := MemServer.GetMetricsCount(value.ID)
 		if !exists {
 			log.Error("Element not exists")
@@ -246,8 +246,8 @@ func PostValueMetricsHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		w.WriteHeader(http.StatusOK)
 		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
 		w.Write(resp)
 	}
 }
