@@ -47,7 +47,7 @@ func MetricsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if typeMetrics != "gauge" && typeMetrics != "counter" {
-		log.Error("The type incorrect")
+		log.Error("The type incorrect " + typeMetrics)
 		http.Error(w, "The type incorrect", http.StatusNotImplemented)
 		return
 	}
@@ -107,7 +107,7 @@ func GetMetricsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if typeMetrics != "gauge" && typeMetrics != "counter" {
-		log.Error("The type incorrect")
+		log.Error("The type incorrect " + typeMetrics)
 		http.Error(w, "The type incorrect", http.StatusNotImplemented)
 		return
 	}
@@ -157,7 +157,6 @@ func PostMetricsHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-
 	rawValue := storage.Metrics{}
 	if value.Value != nil {
 		MemServer.PutMetricsGauge(value.ID, *value.Value)
@@ -177,10 +176,11 @@ func PostMetricsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	resp, err = json.Marshal(rawValue)
 	if err != nil {
+		log.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
-	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 	w.Write(resp)
 }
 
@@ -199,13 +199,12 @@ func PostValueMetricsHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-
 	rawValue := storage.Metrics{}
 	if value.MType == "gauge" {
 		val, exists := MemServer.GetMetricsGauge(value.ID)
 		if !exists {
 			log.Error("Element not exists")
-			http.Error(w, "Element not exists", http.StatusBadRequest)
+			http.Error(w, "Element not exists", http.StatusNotFound)
 			return
 		}
 		rawValue = storage.Metrics{
@@ -218,7 +217,7 @@ func PostValueMetricsHandler(w http.ResponseWriter, r *http.Request) {
 		val, exists := MemServer.GetMetricsCount(value.ID)
 		if !exists {
 			log.Error("Element not exists")
-			http.Error(w, "Element not exists", http.StatusBadRequest)
+			http.Error(w, "Element not exists", http.StatusNotFound)
 			return
 		}
 		rawValue = storage.Metrics{
@@ -230,7 +229,7 @@ func PostValueMetricsHandler(w http.ResponseWriter, r *http.Request) {
 	resp, err = json.Marshal(rawValue)
 	if err != nil {
 		log.Error(err.Error())
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
