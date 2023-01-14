@@ -22,7 +22,7 @@ func main() {
 	}
 
 	wg := new(sync.WaitGroup)
-	
+
 	wg.Add(2) // в группе две горутины
 	go PutMetrics(cfg.PollInterval)
 	go SentMetrics(cfg.ReportInterval)
@@ -93,8 +93,8 @@ func PutMetrics(interval time.Duration) {
 		MemAgent.PutMetricsGauge("Alloc", float64(memStats.Alloc))
 		MemAgent.PutMetricsGauge("BuckHashSys", float64(memStats.BuckHashSys))
 		MemAgent.PutMetricsGauge("Frees", float64(memStats.Frees))
-		MemAgent.PutMetricsGauge("GGCPUFraction", float64(memStats.GCCPUFraction))
-		MemAgent.PutMetricsGauge("GGSys", float64(memStats.GCSys))
+		MemAgent.PutMetricsGauge("GCCPUFraction", float64(memStats.GCCPUFraction))
+		MemAgent.PutMetricsGauge("GCSys", float64(memStats.GCSys))
 		MemAgent.PutMetricsGauge("HeapAlloc", float64(memStats.HeapAlloc))
 		MemAgent.PutMetricsGauge("HeapIdle", float64(memStats.HeapIdle))
 		MemAgent.PutMetricsGauge("HeapInuse", float64(memStats.HeapInuse))
