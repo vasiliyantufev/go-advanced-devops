@@ -7,7 +7,6 @@ import (
 	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
 	"math/rand"
 	"runtime"
-	"strconv"
 	"sync"
 	"time"
 )
@@ -22,8 +21,8 @@ func main() {
 		log.Fatal(err)
 	}
 
-	var wg sync.WaitGroup
-
+	wg := new(sync.WaitGroup)
+	
 	wg.Add(2) // в группе две горутины
 	go PutMetrics(cfg.PollInterval)
 	go SentMetrics(cfg.ReportInterval)
@@ -40,15 +39,16 @@ func SentMetrics(interval time.Duration) {
 		log.Info("Sent metrics")
 
 		for name, val := range MemAgent.DataMetricsGauge {
-			str := strconv.FormatFloat(val, 'f', 5, 64)
-			_, err := client.R().
-				SetHeader("Content-Type", "text/plain").
-				Post("http://localhost:8080/update/gauge/" + name + "/" + str)
-			if err != nil {
-				log.Error(err)
-			}
 
-			_, err = client.R().
+			//str := strconv.FormatFloat(val, 'f', 5, 64)
+			//_, err := client.R().
+			//	SetHeader("Content-Type", "text/plain").
+			//	Post("http://localhost:8080/update/gauge/" + name + "/" + str)
+			//if err != nil {
+			//	log.Error(err)
+			//}
+
+			_, err := client.R().
 				SetHeader("Content-Type", "application/json").
 				SetBody(storage.Metrics{ID: name, MType: "gauge", Value: &val}).
 				Post("http://localhost:8080/update/")
@@ -61,15 +61,16 @@ func SentMetrics(interval time.Duration) {
 		//=============================================================================
 
 		for name, val := range MemAgent.DataMetricsCount {
-			str := strconv.FormatInt(val, 10)
-			_, err := client.R().
-				SetHeader("Content-Type", "text/plain").
-				Post("http://localhost:8080/update/counter/" + name + "/" + str)
-			if err != nil {
-				log.Error(err)
-			}
 
-			_, err = client.R().
+			//str := strconv.FormatInt(val, 10)
+			//_, err := client.R().
+			//	SetHeader("Content-Type", "text/plain").
+			//	Post("http://localhost:8080/update/counter/" + name + "/" + str)
+			//if err != nil {
+			//	log.Error(err)
+			//}
+
+			_, err := client.R().
 				SetHeader("Content-Type", "application/json").
 				SetBody(storage.Metrics{ID: name, MType: "counter", Delta: &val}).
 				Post("http://localhost:8080/update/")
@@ -85,10 +86,10 @@ func SentMetrics(interval time.Duration) {
 func PutMetrics(interval time.Duration) {
 
 	var memStats runtime.MemStats
-	runtime.ReadMemStats(&memStats)
 
 	for range time.Tick(interval) {
 
+		runtime.ReadMemStats(&memStats)
 		MemAgent.PutMetricsGauge("Alloc", float64(memStats.Alloc))
 		MemAgent.PutMetricsGauge("BuckHashSys", float64(memStats.BuckHashSys))
 		MemAgent.PutMetricsGauge("Frees", float64(memStats.Frees))

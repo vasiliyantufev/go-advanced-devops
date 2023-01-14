@@ -25,7 +25,7 @@ func main() {
 	//r.Use(middleware.Logger)
 
 	r.Get("/", app.IndexHandler)
-	r.Route("/value/", func(r chi.Router) {
+	r.Route("/value", func(r chi.Router) {
 		r.Get("/{type}/{name}", app.GetMetricsHandler)
 		r.Post("/", app.PostValueMetricsHandler)
 	})
@@ -34,7 +34,7 @@ func main() {
 		r.Post("/", app.PostMetricsHandler)
 	})
 
-	log.Infof("Starting application on port %v\n", cfg.Address)
+	log.Infof("Starting application %v\n", cfg.Address)
 	if con := http.ListenAndServe(cfg.Address, r); con != nil {
 		log.Fatal(con)
 	}

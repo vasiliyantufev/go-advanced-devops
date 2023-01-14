@@ -3,14 +3,15 @@ package storage
 import "sync"
 
 type MemStorage struct {
-	mx               sync.RWMutex
+	mx               *sync.RWMutex
 	DataMetricsGauge map[string]float64
 	DataMetricsCount map[string]int64
 }
 
-//Создаём map
+// Создаём map
 func NewMemStorage() *MemStorage {
 	return &MemStorage{
+		mx:               new(sync.RWMutex),
 		DataMetricsGauge: make(map[string]float64),
 		DataMetricsCount: make(map[string]int64),
 	}
