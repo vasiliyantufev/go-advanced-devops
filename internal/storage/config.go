@@ -9,8 +9,9 @@ import "time"
 //}
 
 type Config struct {
-	Address        string        `env:"ADDRESS" envDefault:"localhost:8080"`
-	ReportInterval time.Duration `env:"REPORT_INTERVAL" envDefault:"10s"`
+	Address        string        `env:"ADDRESS"     envDefault:"localhost:8080"`
+	Port           string        `env:"SERVER_PORT" envDefault:":8080"`
+	ReportInterval time.Duration `env:"REPORT_INTERVAL" envDefault:"12s"`
 	PollInterval   time.Duration `env:"POLL_INTERVAL" envDefault:"2s"`
 	PollT          time.Duration `env:"POLL_T" envDefault:"22s"`
 }

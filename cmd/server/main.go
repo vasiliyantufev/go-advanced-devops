@@ -18,7 +18,6 @@ func main() {
 	}
 
 	log.SetLevel(log.DebugLevel)
-
 	log.Info(cfg)
 
 	r := chi.NewRouter()
@@ -34,9 +33,8 @@ func main() {
 		r.Post("/", app.PostMetricsHandler)
 	})
 
-	log.Infof("Starting application %v\n", cfg.Address)
-	if con := http.ListenAndServe(cfg.Address, r); con != nil {
+	log.Infof("Starting application on port %v\n", cfg.Port)
+	if con := http.ListenAndServe(cfg.Port, r); con != nil {
 		log.Fatal(con)
 	}
-
 }
