@@ -24,17 +24,17 @@ func main() {
 	wg := new(sync.WaitGroup)
 
 	wg.Add(2) // в группе две горутины
-	go PutMetrics(cfg.PollInterval)
-	go SentMetrics(cfg.ReportInterval)
+	go PutMetrics(cfg)
+	go SentMetrics(cfg)
 	wg.Wait() // ожидаем завершения обоих горутин
 }
 
-func SentMetrics(interval time.Duration) {
+func SentMetrics(config storage.Config) {
 
 	// Create a Resty Client
 	client := resty.New()
 
-	for range time.Tick(interval) {
+	for range time.Tick(config.ReportInterval) {
 
 		log.Info("Sent metrics")
 
@@ -51,7 +51,7 @@ func SentMetrics(interval time.Duration) {
 			_, err := client.R().
 				SetHeader("Content-Type", "application/json").
 				SetBody(storage.Metrics{ID: name, MType: "gauge", Value: &val}).
-				Post("http://localhost:8080/update/")
+				Post("http://localhost" + config.Port + "/update/")
 			if err != nil {
 				log.Error(err)
 			} /**/
@@ -73,7 +73,7 @@ func SentMetrics(interval time.Duration) {
 			_, err := client.R().
 				SetHeader("Content-Type", "application/json").
 				SetBody(storage.Metrics{ID: name, MType: "counter", Delta: &val}).
-				Post("http://localhost:8080/update/")
+				Post("http://localhost" + config.Port + "/update/")
 			if err != nil {
 				log.Error(err)
 			}
@@ -83,11 +83,11 @@ func SentMetrics(interval time.Duration) {
 	}
 }
 
-func PutMetrics(interval time.Duration) {
+func PutMetrics(config storage.Config) {
 
 	var memStats runtime.MemStats
 
-	for range time.Tick(interval) {
+	for range time.Tick(config.PollInterval) {
 
 		runtime.ReadMemStats(&memStats)
 		MemAgent.PutMetricsGauge("Alloc", float64(memStats.Alloc))
