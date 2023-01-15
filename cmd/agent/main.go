@@ -51,10 +51,10 @@ func SentMetrics(config storage.Config) {
 			_, err := client.R().
 				SetHeader("Content-Type", "application/json").
 				SetBody(storage.Metrics{ID: name, MType: "gauge", Value: &val}).
-				Post("http://localhost" + config.Port + "/update/")
+				Post("http://" + config.Address + "/update/")
 			if err != nil {
 				log.Error(err)
-			} /**/
+			}
 
 		}
 
@@ -73,13 +73,11 @@ func SentMetrics(config storage.Config) {
 			_, err := client.R().
 				SetHeader("Content-Type", "application/json").
 				SetBody(storage.Metrics{ID: name, MType: "counter", Delta: &val}).
-				Post("http://localhost" + config.Port + "/update/")
+				Post("http://" + config.Address + "/update/")
 			if err != nil {
 				log.Error(err)
 			}
-
 		}
-
 	}
 }
 

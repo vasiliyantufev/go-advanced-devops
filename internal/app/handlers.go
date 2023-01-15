@@ -187,6 +187,7 @@ func PostMetricsHandler(w http.ResponseWriter, r *http.Request) {
 		log.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
+	log.Debug("Request completed successfully metric:" + value.ID)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(resp)
@@ -207,6 +208,7 @@ func PostValueMetricsHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+
 	rawValue := storage.Metrics{}
 	if value.MType == "gauge" {
 		val, exists := MemServer.GetMetricsGauge(value.ID)
@@ -240,6 +242,7 @@ func PostValueMetricsHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	log.Debug("Request completed successfully metric:" + value.ID)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(resp)
