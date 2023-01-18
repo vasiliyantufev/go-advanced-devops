@@ -6,7 +6,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/app"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
-	"github.com/vasiliyantufev/go-advanced-devops/internal/storage/jsonMetrics"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/storage/jsonmetrics"
 	"runtime"
 	"sync"
 	"time"
@@ -35,6 +35,7 @@ func main() {
 func RestoreMetrics(config storage.Config) {
 
 	if config.Restore {
+		log.Info("Restore metrics")
 		memStats := app.FileRestore(config)
 		app.DateFromFile(MemAgent, memStats)
 	}
@@ -54,6 +55,7 @@ func StoreMetrics(config storage.Config) {
 
 	if config.StoreFile != "" {
 		for range time.Tick(config.StoreInterval) {
+			log.Info("Store metrics")
 			app.FileStore(config, MemAgent)
 		}
 	}
@@ -68,7 +70,7 @@ func SentMetrics(config storage.Config) {
 		for name, val := range MemAgent.DataMetricsGauge {
 			_, err := client.R().
 				SetHeader("Content-Type", "application/json").
-				SetBody(jsonMetrics.JsonMetricsToServer{ID: name, MType: "gauge", Value: &val}).
+				SetBody(jsonmetrics.JSONMetricsToServer{ID: name, MType: "gauge", Value: &val}).
 				Post("http://" + config.Address + "/update/")
 			if err != nil {
 				log.Error(err)
@@ -78,7 +80,7 @@ func SentMetrics(config storage.Config) {
 		for name, val := range MemAgent.DataMetricsCount {
 			_, err := client.R().
 				SetHeader("Content-Type", "application/json").
-				SetBody(jsonMetrics.JsonMetricsToServer{ID: name, MType: "counter", Delta: &val}).
+				SetBody(jsonmetrics.JSONMetricsToServer{ID: name, MType: "counter", Delta: &val}).
 				Post("http://" + config.Address + "/update/")
 			if err != nil {
 				log.Error(err)

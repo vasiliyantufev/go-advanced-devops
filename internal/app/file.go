@@ -6,13 +6,12 @@ import (
 	"fmt"
 	log "github.com/sirupsen/logrus"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
-	"github.com/vasiliyantufev/go-advanced-devops/internal/storage/jsonMetrics"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/storage/jsonmetrics"
+	"io"
 	"os"
 )
 
 func FileStore(config storage.Config, agent *storage.MemStorage) {
-
-	log.Info("Store metrics")
 
 	file, err := os.OpenFile(config.StoreFile, os.O_WRONLY|os.O_CREATE, 0777)
 	if err != nil {
@@ -35,28 +34,25 @@ func FileStore(config storage.Config, agent *storage.MemStorage) {
 	file.Close()
 }
 
-func FileRestore(config storage.Config) jsonMetrics.JsonMetricsFromFile {
-
-	log.Info("Restore metrics")
+func FileRestore(config storage.Config) jsonmetrics.JSONMetricsFromFile {
 
 	file, err := os.OpenFile(config.StoreFile, os.O_RDONLY|os.O_CREATE, 0777)
 	if err != nil {
 		log.Error(err)
-		return jsonMetrics.JsonMetricsFromFile{}
+		return jsonmetrics.JSONMetricsFromFile{}
 	}
 
 	reader := bufio.NewReader(file)
 	data, err := reader.ReadBytes('\n')
-	if err != nil {
-		log.Error(err)
-		return jsonMetrics.JsonMetricsFromFile{}
+	if err == io.EOF {
+		log.Print("Read file")
 	}
 
-	metric := jsonMetrics.JsonMetricsFromFile{}
+	metric := jsonmetrics.JSONMetricsFromFile{}
 	err = json.Unmarshal(data, &metric)
 	if err != nil {
 		log.Error(err)
-		return jsonMetrics.JsonMetricsFromFile{}
+		return jsonmetrics.JSONMetricsFromFile{}
 	}
 	file.Close()
 

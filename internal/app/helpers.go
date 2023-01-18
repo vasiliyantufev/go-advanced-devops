@@ -3,12 +3,12 @@ package app
 import (
 	log "github.com/sirupsen/logrus"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
-	"github.com/vasiliyantufev/go-advanced-devops/internal/storage/jsonMetrics"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/storage/jsonmetrics"
 	"math/rand"
 	"runtime"
 )
 
-func DateFromFile(agent *storage.MemStorage, metric jsonMetrics.JsonMetricsFromFile) {
+func DateFromFile(agent *storage.MemStorage, metric jsonmetrics.JSONMetricsFromFile) {
 
 	agent.PutMetricsGauge("Alloc", float64(metric.DataMetricsGauge.Alloc))
 	agent.PutMetricsGauge("BuckHashSys", float64(metric.DataMetricsGauge.BuckHashSys))

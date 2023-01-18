@@ -1,6 +1,6 @@
-package jsonMetrics
+package jsonmetrics
 
-type JsonMetricsFromFile struct {
+type JSONMetricsFromFile struct {
 	DataMetricsGauge InnerGauge   `json:"DataMetricsGauge"`
 	DataMetricsCount InnerCounter `json:"DataMetricsCount"`
 }
