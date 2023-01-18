@@ -1,6 +1,8 @@
 package storage
 
-import "sync"
+import (
+	"sync"
+)
 
 type MemStorage struct {
 	mx               *sync.RWMutex

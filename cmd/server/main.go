@@ -11,7 +11,7 @@ import (
 
 func main() {
 
-	var cfg storage.ServerConfig
+	var cfg storage.Config
 	err := env.Parse(&cfg)
 	if err != nil {
 		log.Fatal(err)
