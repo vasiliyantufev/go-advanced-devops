@@ -44,8 +44,13 @@ func FileRestore(config storage.Config) jsonMetrics.JsonMetricsFromFile {
 		log.Error(err)
 		return jsonMetrics.JsonMetricsFromFile{}
 	}
+
 	reader := bufio.NewReader(file)
 	data, err := reader.ReadBytes('\n')
+	if err != nil {
+		log.Error(err)
+		return jsonMetrics.JsonMetricsFromFile{}
+	}
 
 	metric := jsonMetrics.JsonMetricsFromFile{}
 	err = json.Unmarshal(data, &metric)
