@@ -22,23 +22,11 @@ func main() {
 		log.Fatal(err)
 	}
 
-	RestoreMetrics(cfg)
-
 	wg := new(sync.WaitGroup)
-	wg.Add(3)
+	wg.Add(2)
 	go PutMetrics(cfg)
-	go StoreMetrics(cfg)
 	go SentMetrics(cfg)
 	wg.Wait()
-}
-
-func RestoreMetrics(config storage.Config) {
-
-	if config.Restore {
-		log.Info("Restore metrics")
-		memStats := app.FileRestore(config)
-		app.DateFromFile(MemAgent, memStats)
-	}
 }
 
 func PutMetrics(config storage.Config) {
@@ -47,17 +35,7 @@ func PutMetrics(config storage.Config) {
 	for range time.Tick(config.PollInterval) {
 		log.Info("Put metrics")
 		runtime.ReadMemStats(&memStats)
-		app.DateFromRuntime(MemAgent, memStats)
-	}
-}
-
-func StoreMetrics(config storage.Config) {
-
-	if config.StoreFile != "" {
-		for range time.Tick(config.StoreInterval) {
-			log.Info("Store metrics")
-			app.FileStore(config, MemAgent)
-		}
+		app.DataFromRuntime(MemAgent, memStats)
 	}
 }
 

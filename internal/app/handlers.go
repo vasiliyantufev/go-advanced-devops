@@ -11,9 +11,12 @@ import (
 	"io"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 var MemServer = storage.NewMemStorage()
+
+var cfg storage.Config
 
 type ViewData struct {
 	MapG map[string]float64
@@ -140,6 +143,7 @@ func GetMetricsHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		param = fmt.Sprint(val)
 	}
+
 	log.Debug("Request completed successfully " + nameMetrics + "=" + fmt.Sprint(param))
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(param))
@@ -188,6 +192,12 @@ func PostMetricsHandler(w http.ResponseWriter, r *http.Request) {
 		log.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
+
+	cfg = storage.GetConfig()
+	if cfg.StoreInterval == 0 {
+		FileStore(cfg, MemServer)
+	}
+
 	log.Debug("Request completed successfully metric:" + value.ID)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
@@ -247,4 +257,23 @@ func PostValueMetricsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(resp)
+}
+
+func RestoreMetricsFromFile(config storage.Config) {
+
+	if config.Restore {
+		log.Info("Restore metrics")
+		memStats := FileRestore(config)
+		DataFromFile(MemServer, memStats)
+	}
+}
+
+func StoreMetricsToFile(config storage.Config) {
+
+	if config.StoreFile != "" {
+		for range time.Tick(config.StoreInterval) {
+			log.Info("Store metrics")
+			FileStore(config, MemServer)
+		}
+	}
 }

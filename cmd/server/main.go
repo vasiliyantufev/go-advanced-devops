@@ -1,7 +1,6 @@
 package main
 
 import (
-	"github.com/caarlos0/env/v6"
 	"github.com/go-chi/chi/v5"
 	log "github.com/sirupsen/logrus"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/app"
@@ -12,13 +11,12 @@ import (
 func main() {
 
 	var cfg storage.Config
-	err := env.Parse(&cfg)
-	if err != nil {
-		log.Fatal(err)
-	}
+	cfg = storage.GetConfig()
 
 	log.SetLevel(log.DebugLevel)
 	log.Info(cfg)
+
+	app.RestoreMetricsFromFile(cfg)
 
 	r := chi.NewRouter()
 	//r.Use(middleware.Logger)
@@ -32,6 +30,8 @@ func main() {
 		r.Post("/{type}/{name}/{value}", app.MetricsHandler)
 		r.Post("/", app.PostMetricsHandler)
 	})
+
+	go app.StoreMetricsToFile(cfg)
 
 	log.Infof("Starting application %v\n", cfg.Address)
 	if con := http.ListenAndServe(cfg.Address, r); con != nil {
