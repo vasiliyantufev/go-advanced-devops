@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"strconv"
 	"time"
+	_ "time"
 )
 
 var MemServer = storage.NewMemStorage()
@@ -275,5 +276,13 @@ func StoreMetricsToFile(config storage.Config) {
 			log.Info("Store metrics")
 			FileStore(config, MemServer)
 		}
+	}
+}
+
+func StartServer(cfg storage.Config, r *chi.Mux) {
+
+	log.Infof("Starting application %v\n", cfg.Address)
+	if con := http.ListenAndServe(cfg.Address, r); con != nil {
+		log.Fatal(con)
 	}
 }

@@ -5,7 +5,8 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/app"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
-	"net/http"
+	"sync"
+	_ "time"
 )
 
 func main() {
@@ -31,10 +32,9 @@ func main() {
 		r.Post("/", app.PostMetricsHandler)
 	})
 
+	wg := new(sync.WaitGroup)
+	wg.Add(2)
+	go app.StartServer(cfg, r)
 	go app.StoreMetricsToFile(cfg)
-
-	log.Infof("Starting application %v\n", cfg.Address)
-	if con := http.ListenAndServe(cfg.Address, r); con != nil {
-		log.Fatal(con)
-	}
+	wg.Wait()
 }
