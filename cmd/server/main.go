@@ -11,8 +11,7 @@ import (
 
 func main() {
 
-	var cfg storage.Config
-	cfg = storage.GetConfig()
+	cfg := storage.GetConfig()
 
 	log.SetLevel(log.DebugLevel)
 	log.Info(cfg)
@@ -32,6 +31,7 @@ func main() {
 		r.Post("/", app.PostMetricsHandler)
 	})
 
+	app.FileCreate(cfg)
 	wg := new(sync.WaitGroup)
 	wg.Add(2)
 	go app.StartServer(cfg, r)

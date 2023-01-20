@@ -12,7 +12,6 @@ import (
 	"net/http"
 	"strconv"
 	"time"
-	_ "time"
 )
 
 var MemServer = storage.NewMemStorage()

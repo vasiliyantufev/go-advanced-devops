@@ -11,6 +11,18 @@ import (
 	"os"
 )
 
+func FileCreate(config storage.Config) {
+
+	file, err := os.Create(config.StoreFile) // создаем файл
+	if err != nil {                          // если возникла ошибка
+		fmt.Println("Unable to create file:", err)
+		os.Exit(1) // выходим из программы
+	}
+	file.Close()             // закрываем файл
+	fmt.Println(file.Name()) // hello.txt
+
+}
+
 func FileStore(config storage.Config, agent *storage.MemStorage) {
 
 	file, err := os.OpenFile(config.StoreFile, os.O_WRONLY|os.O_CREATE, 0777)
