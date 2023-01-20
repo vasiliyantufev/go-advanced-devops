@@ -1,7 +1,6 @@
 package app
 
 import (
-	"bufio"
 	"encoding/json"
 	"fmt"
 	log "github.com/sirupsen/logrus"
@@ -10,6 +9,33 @@ import (
 	"io"
 	"os"
 )
+
+var metricGauge []*jsonmetrics.JSONMetricsToServer
+var metricCounter []*jsonmetrics.JSONMetricsToServer
+
+type metric struct {
+	file    *os.File
+	encoder *json.Encoder
+}
+
+func NewMetric(fileName string) (*metric, error) {
+	file, err := os.OpenFile(fileName, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0777)
+	if err != nil {
+		return nil, err
+	}
+	return &metric{
+		file:    file,
+		encoder: json.NewEncoder(file),
+	}, nil
+}
+
+func (m *metric) WriteMetric(event *jsonmetrics.JSONMetricsToServer) error {
+	return m.encoder.Encode(&event)
+}
+
+func (m *metric) Close() error {
+	return m.file.Close()
+}
 
 func FileCreate(config storage.Config) {
 
@@ -25,48 +51,57 @@ func FileCreate(config storage.Config) {
 
 func FileStore(config storage.Config, agent *storage.MemStorage) {
 
-	file, err := os.OpenFile(config.StoreFile, os.O_WRONLY|os.O_CREATE, 0777)
+	mWrite, err := NewMetric(config.StoreFile)
 	if err != nil {
-		fmt.Print(err)
-		return
-	}
-	writer := bufio.NewWriter(file)
-
-	fileData, err := json.Marshal(agent)
-	if err != nil {
-		fmt.Print(err)
-		return
+		log.Error(err)
 	}
 
-	if _, err := writer.Write(fileData); err != nil {
-		fmt.Print(err)
-		return
+	for name, val := range agent.DataMetricsGauge {
+		m := new(jsonmetrics.JSONMetricsToServer)
+		m.ID = name
+		m.MType = "gauge"
+		m.Value = &val
+
+		if err := mWrite.WriteMetric(m); err != nil {
+			log.Error(err)
+		}
 	}
-	writer.Flush()
-	file.Close()
+
+	for name, val := range agent.DataMetricsCount {
+		m := new(jsonmetrics.JSONMetricsToServer)
+		m.ID = name
+		m.MType = "counter"
+		m.Delta = &val
+
+		if err := mWrite.WriteMetric(m); err != nil {
+			log.Error(err)
+		}
+	}
+	mWrite.Close()
 }
 
-func FileRestore(config storage.Config) jsonmetrics.JSONMetricsFromFile {
+func FileRestore(config storage.Config, agent *storage.MemStorage) {
 
-	file, err := os.OpenFile(config.StoreFile, os.O_RDONLY|os.O_CREATE, 0777)
+	mRead, err := NewMetric(config.StoreFile)
 	if err != nil {
 		log.Error(err)
-		return jsonmetrics.JSONMetricsFromFile{}
 	}
 
-	reader := bufio.NewReader(file)
-	data, err := reader.ReadBytes('\n')
-	if err == io.EOF {
-		log.Print("Read file")
+	dec := json.NewDecoder(mRead.file)
+	for {
+		mr := new(jsonmetrics.JSONMetricsToServer)
+		if err := dec.Decode(mr); err == io.EOF {
+			break
+		} else if err != nil {
+			log.Error(err)
+		}
+
+		if (mr.MType == "counter") {
+			agent.PutMetricsCount(mr.ID, *mr.Delta)
+		} else if mr.MType == "gauge" {
+			agent.PutMetricsGauge(mr.ID, *mr.Value)
+		}
 	}
 
-	metric := jsonmetrics.JSONMetricsFromFile{}
-	err = json.Unmarshal(data, &metric)
-	if err != nil {
-		log.Error(err)
-		return jsonmetrics.JSONMetricsFromFile{}
-	}
-	file.Close()
-
-	return metric
+	mRead.Close()
 }

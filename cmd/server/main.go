@@ -32,6 +32,7 @@ func main() {
 	})
 
 	app.FileCreate(cfg)
+
 	wg := new(sync.WaitGroup)
 	wg.Add(2)
 	go app.StartServer(cfg, r)

@@ -263,8 +263,7 @@ func RestoreMetricsFromFile(config storage.Config) {
 
 	if config.Restore {
 		log.Info("Restore metrics")
-		memStats := FileRestore(config)
-		DataFromFile(MemServer, memStats)
+		FileRestore(config, MemServer)
 	}
 }
 
