@@ -6,7 +6,6 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/app"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
-	"github.com/vasiliyantufev/go-advanced-devops/internal/storage/jsonmetrics"
 	"runtime"
 	"sync"
 	"time"
@@ -48,7 +47,7 @@ func SentMetrics(config storage.Config) {
 		for name, val := range MemAgent.DataMetricsGauge {
 			_, err := client.R().
 				SetHeader("Content-Type", "application/json").
-				SetBody(jsonmetrics.JSONMetricsToServer{ID: name, MType: "gauge", Value: &val}).
+				SetBody(storage.JSONMetrics{ID: name, MType: "gauge", Value: &val}).
 				Post("http://" + config.Address + "/update/")
 			if err != nil {
 				log.Error(err)
@@ -58,7 +57,7 @@ func SentMetrics(config storage.Config) {
 		for name, val := range MemAgent.DataMetricsCount {
 			_, err := client.R().
 				SetHeader("Content-Type", "application/json").
-				SetBody(jsonmetrics.JSONMetricsToServer{ID: name, MType: "counter", Delta: &val}).
+				SetBody(storage.JSONMetrics{ID: name, MType: "counter", Delta: &val}).
 				Post("http://" + config.Address + "/update/")
 			if err != nil {
 				log.Error(err)

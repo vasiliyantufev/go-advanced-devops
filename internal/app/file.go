@@ -5,20 +5,20 @@ import (
 	"fmt"
 	log "github.com/sirupsen/logrus"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
-	"github.com/vasiliyantufev/go-advanced-devops/internal/storage/jsonmetrics"
 	"io"
 	"os"
 )
 
-var metricGauge []*jsonmetrics.JSONMetricsToServer
-var metricCounter []*jsonmetrics.JSONMetricsToServer
+var metricGauge []*storage.JSONMetrics
+var metricCounter []*storage.JSONMetrics
 
 type metric struct {
 	file    *os.File
 	encoder *json.Encoder
+	decoder *json.Decoder
 }
 
-func NewMetric(fileName string) (*metric, error) {
+func NewMetricW(fileName string) (*metric, error) {
 	file, err := os.OpenFile(fileName, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0777)
 	if err != nil {
 		return nil, err
@@ -29,8 +29,30 @@ func NewMetric(fileName string) (*metric, error) {
 	}, nil
 }
 
-func (m *metric) WriteMetric(event *jsonmetrics.JSONMetricsToServer) error {
+func NewMetricR(fileName string) (*metric, error) {
+	file, err := os.OpenFile(fileName, os.O_RDONLY, 0644)
+	if err != nil {
+		return nil, err
+	}
+	return &metric{
+		file:    file,
+		decoder: json.NewDecoder(file),
+	}, nil
+}
+
+func (m *metric) WriteMetric(event *storage.JSONMetrics) error {
 	return m.encoder.Encode(&event)
+}
+
+func (m *metric) ReadMetric() (*storage.JSONMetrics, error) {
+
+	mr := new(storage.JSONMetrics)
+	if err := m.decoder.Decode(mr); err == io.EOF {
+		return nil, err
+	} else if err != nil {
+		log.Error(err)
+	}
+	return mr, nil
 }
 
 func (m *metric) Close() error {
@@ -51,13 +73,13 @@ func FileCreate(config storage.Config) {
 
 func FileStore(config storage.Config, agent *storage.MemStorage) {
 
-	mWrite, err := NewMetric(config.StoreFile)
+	mWrite, err := NewMetricW(config.StoreFile)
 	if err != nil {
 		log.Error(err)
 	}
 
 	for name, val := range agent.DataMetricsGauge {
-		m := new(jsonmetrics.JSONMetricsToServer)
+		m := new(storage.JSONMetrics)
 		m.ID = name
 		m.MType = "gauge"
 		m.Value = &val
@@ -68,7 +90,7 @@ func FileStore(config storage.Config, agent *storage.MemStorage) {
 	}
 
 	for name, val := range agent.DataMetricsCount {
-		m := new(jsonmetrics.JSONMetricsToServer)
+		m := new(storage.JSONMetrics)
 		m.ID = name
 		m.MType = "counter"
 		m.Delta = &val
@@ -82,26 +104,27 @@ func FileStore(config storage.Config, agent *storage.MemStorage) {
 
 func FileRestore(config storage.Config, agent *storage.MemStorage) {
 
-	mRead, err := NewMetric(config.StoreFile)
+	mRead, err := NewMetricR(config.StoreFile)
 	if err != nil {
 		log.Error(err)
 	}
 
-	dec := json.NewDecoder(mRead.file)
 	for {
-		mr := new(jsonmetrics.JSONMetricsToServer)
-		if err := dec.Decode(mr); err == io.EOF {
+		mr, err := mRead.ReadMetric()
+
+		if err == io.EOF {
+			log.Info("File end")
 			break
 		} else if err != nil {
 			log.Error(err)
+			break
 		}
 
-		if (mr.MType == "counter") {
+		if mr.MType == "counter" {
 			agent.PutMetricsCount(mr.ID, *mr.Delta)
 		} else if mr.MType == "gauge" {
 			agent.PutMetricsGauge(mr.ID, *mr.Value)
 		}
 	}
-
 	mRead.Close()
 }

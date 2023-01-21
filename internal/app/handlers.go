@@ -6,7 +6,6 @@ import (
 	"github.com/go-chi/chi/v5"
 	log "github.com/sirupsen/logrus"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
-	"github.com/vasiliyantufev/go-advanced-devops/internal/storage/jsonmetrics"
 	"html/template"
 	"io"
 	"net/http"
@@ -158,16 +157,16 @@ func PostMetricsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	value := jsonmetrics.JSONMetricsToServer{}
+	value := storage.JSONMetrics{}
 	if err := json.Unmarshal([]byte(string(resp)), &value); err != nil {
 		log.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	rawValue := jsonmetrics.JSONMetricsToServer{}
+	rawValue := storage.JSONMetrics{}
 	if value.Value != nil {
 		MemServer.PutMetricsGauge(value.ID, *value.Value)
-		rawValue = jsonmetrics.JSONMetricsToServer{
+		rawValue = storage.JSONMetrics{
 			ID:    value.ID,
 			MType: value.MType,
 			Value: value.Value,
@@ -181,7 +180,7 @@ func PostMetricsHandler(w http.ResponseWriter, r *http.Request) {
 			sum = *value.Delta
 		}
 		MemServer.PutMetricsCount(value.ID, sum)
-		rawValue = jsonmetrics.JSONMetricsToServer{
+		rawValue = storage.JSONMetrics{
 			ID:    value.ID,
 			MType: value.MType,
 			Delta: value.Delta,
@@ -213,14 +212,14 @@ func PostValueMetricsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	value := jsonmetrics.JSONMetricsToServer{}
+	value := storage.JSONMetrics{}
 	if err := json.Unmarshal([]byte(string(resp)), &value); err != nil {
 		log.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	rawValue := jsonmetrics.JSONMetricsToServer{}
+	rawValue := storage.JSONMetrics{}
 	if value.MType == "gauge" {
 		val, exists := MemServer.GetMetricsGauge(value.ID)
 		if !exists {
@@ -228,7 +227,7 @@ func PostValueMetricsHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Element "+value.ID+" not exists", http.StatusNotFound)
 			return
 		}
-		rawValue = jsonmetrics.JSONMetricsToServer{
+		rawValue = storage.JSONMetrics{
 			ID:    value.ID,
 			MType: value.MType,
 			Value: &val,
@@ -241,7 +240,7 @@ func PostValueMetricsHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Element "+value.ID+" not exists", http.StatusNotFound)
 			return
 		}
-		rawValue = jsonmetrics.JSONMetricsToServer{
+		rawValue = storage.JSONMetrics{
 			ID:    value.ID,
 			MType: value.MType,
 			Delta: &val,
