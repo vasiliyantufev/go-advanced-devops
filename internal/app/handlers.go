@@ -3,14 +3,15 @@ package app
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/go-chi/chi/v5"
-	log "github.com/sirupsen/logrus"
-	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
 	"html/template"
 	"io"
 	"net/http"
 	"strconv"
 	"time"
+
+	"github.com/go-chi/chi/v5"
+	log "github.com/sirupsen/logrus"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
 )
 
 var MemServer = storage.NewMemStorage()
@@ -24,18 +25,33 @@ type ViewData struct {
 
 func IndexHandler(w http.ResponseWriter, r *http.Request) {
 
-	data := ViewData{
-		MapG: MemServer.DataMetricsGauge,
-		MapC: MemServer.DataMetricsCount,
-	}
-
 	tmpl, err := template.ParseFiles("./web/templates/index.html")
 	if err != nil {
 		log.Errorf("Parse failed: %s", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
+
+	gauges := make(map[string]float64)
+	counters := make(map[string]int64)
+
+	metrics := MemServer.GetAllMetrics()
+
+	for _, metric := range metrics {
+		if metric.MType == "gauge" {
+			gauges[metric.ID] = *metric.Value
+		}
+		if metric.MType == "counter" {
+			counters[metric.ID] = *metric.Delta
+		}
+	}
+
+	data := ViewData{MapG: gauges, MapC: counters}
 	err = tmpl.Execute(w, data)
 	if err != nil {
 		log.Errorf("Execution failed: %s", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 	w.WriteHeader(http.StatusOK)
 

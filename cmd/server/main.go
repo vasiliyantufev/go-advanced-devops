@@ -1,11 +1,13 @@
 package main
 
 import (
+	"context"
 	"github.com/go-chi/chi/v5"
 	log "github.com/sirupsen/logrus"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/app"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
-	"sync"
+	"os/signal"
+	"syscall"
 	_ "time"
 )
 
@@ -31,11 +33,14 @@ func main() {
 		r.Post("/", app.PostMetricsHandler)
 	})
 
-	app.FileCreate(cfg)
+	ctx, cnl := signal.NotifyContext(context.Background(), syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
+	defer cnl()
 
-	wg := new(sync.WaitGroup)
-	wg.Add(2)
 	go app.StartServer(cfg, r)
-	go app.StoreMetricsToFile(cfg)
-	wg.Wait()
+	if cfg.StoreInterval > 0 {
+		go app.StoreMetricsToFile(cfg)
+	}
+	<-ctx.Done()
+	app.FileStore(cfg, app.MemServer)
+	log.Println("server shutdown on signal with:", ctx.Err())
 }

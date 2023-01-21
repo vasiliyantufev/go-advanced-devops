@@ -1,13 +1,14 @@
 package main
 
 import (
-	"github.com/caarlos0/env/v6"
+	"context"
 	"github.com/go-resty/resty/v2"
 	log "github.com/sirupsen/logrus"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/app"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
+	"os/signal"
 	"runtime"
-	"sync"
+	"syscall"
 	"time"
 )
 
@@ -15,58 +16,57 @@ var MemAgent = storage.NewMemStorage()
 
 func main() {
 
-	var cfg storage.Config
-	err := env.Parse(&cfg)
-	if err != nil {
-		log.Fatal(err)
-	}
+	cfg := storage.GetConfig()
 
-	wg := new(sync.WaitGroup)
-	wg.Add(2)
-	go PutMetrics(cfg)
-	go SentMetrics(cfg)
-	wg.Wait()
+	ctx, cnl := signal.NotifyContext(context.Background(), syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
+	defer cnl()
+	go PutMetrics(ctx, cfg)
+	go SentMetrics(ctx, cfg)
+	<-ctx.Done()
+	log.Println("agent shutdown on signal with:", ctx.Err())
 }
 
-func PutMetrics(config storage.Config) {
-
-	var memStats runtime.MemStats
-	for range time.Tick(config.PollInterval) {
-		log.Info("Put metrics")
-		runtime.ReadMemStats(&memStats)
-		app.DataFromRuntime(MemAgent, memStats)
+func PutMetrics(ctx context.Context, config storage.Config) {
+	ticker := time.NewTicker(config.PollInterval)
+	defer ticker.Stop()
+	for {
+		select {
+		case <-ctx.Done():
+			log.Println("poll ticker stopped by ctx")
+			return
+		case <-ticker.C:
+			log.Info("Put metrics")
+			stats := new(runtime.MemStats)
+			runtime.ReadMemStats(stats)
+			app.DataFromRuntime(MemAgent, stats)
+		}
 	}
 }
 
-func SentMetrics(config storage.Config) {
+func SentMetrics(ctx context.Context, config storage.Config) {
 
 	// Create a Resty Client
 	client := resty.New()
-	for range time.Tick(config.ReportInterval) {
-		log.Info("Sent metrics")
-
-		//MemAgent.Mx.Lock()
-		//defer MemAgent.Mx.Unlock()
-		for name, val := range MemAgent.DataMetricsGauge {
-			_, err := client.R().
-				SetHeader("Content-Type", "application/json").
-				SetBody(storage.JSONMetrics{ID: name, MType: "gauge", Value: &val}).
-				Post("http://" + config.Address + "/update/")
-			if err != nil {
-				log.Error(err)
-			}
-		}
-		//=============================================================================
-		for name, val := range MemAgent.DataMetricsCount {
-			_, err := client.R().
-				SetHeader("Content-Type", "application/json").
-				SetBody(storage.JSONMetrics{ID: name, MType: "counter", Delta: &val}).
-				Post("http://" + config.Address + "/update/")
-			if err != nil {
-				log.Error(err)
+	urlPath := "http://" + config.Address + "/update/"
+	ticker := time.NewTicker(config.ReportInterval)
+	defer ticker.Stop()
+	for {
+		select {
+		case <-ctx.Done():
+			log.Println("report ticker stopped by ctx")
+			return
+		case <-ticker.C:
+			log.Info("Sent metrics")
+			metrics := MemAgent.GetAllMetrics()
+			for _, metric := range metrics {
+				_, err := client.R().
+					SetHeader("Content-Type", "application/json").
+					SetBody(metric).
+					Post(urlPath)
+				if err != nil {
+					log.Error(err)
+				}
 			}
 		}
 	}
 }
-
-///
