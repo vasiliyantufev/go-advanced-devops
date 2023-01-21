@@ -30,7 +30,7 @@ func NewMetricW(fileName string) (*metric, error) {
 }
 
 func NewMetricR(fileName string) (*metric, error) {
-	file, err := os.OpenFile(fileName, os.O_RDONLY, 0644)
+	file, err := os.OpenFile(fileName, os.O_RDONLY|os.O_CREATE, 0644)
 	if err != nil {
 		return nil, err
 	}

@@ -44,6 +44,9 @@ func SentMetrics(config storage.Config) {
 	client := resty.New()
 	for range time.Tick(config.ReportInterval) {
 		log.Info("Sent metrics")
+
+		//MemAgent.Mx.Lock()
+		//defer MemAgent.Mx.Unlock()
 		for name, val := range MemAgent.DataMetricsGauge {
 			_, err := client.R().
 				SetHeader("Content-Type", "application/json").

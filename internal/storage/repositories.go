@@ -5,7 +5,7 @@ import (
 )
 
 type MemStorage struct {
-	mx               *sync.RWMutex
+	Mx               *sync.RWMutex
 	DataMetricsGauge map[string]float64
 	DataMetricsCount map[string]int64
 }
@@ -13,34 +13,34 @@ type MemStorage struct {
 // Создаём map
 func NewMemStorage() *MemStorage {
 	return &MemStorage{
-		mx:               new(sync.RWMutex),
+		Mx:               new(sync.RWMutex),
 		DataMetricsGauge: make(map[string]float64),
 		DataMetricsCount: make(map[string]int64),
 	}
 }
 
 func (data *MemStorage) PutMetricsGauge(id string, o float64) {
-	data.mx.Lock()
-	defer data.mx.Unlock()
+	data.Mx.Lock()
+	defer data.Mx.Unlock()
 	data.DataMetricsGauge[id] = o
 }
 
 func (data *MemStorage) GetMetricsGauge(id string) (o float64, b bool) {
-	data.mx.RLock()
-	defer data.mx.RUnlock()
+	data.Mx.RLock()
+	defer data.Mx.RUnlock()
 	o, b = data.DataMetricsGauge[id]
 	return
 }
 
 func (data *MemStorage) PutMetricsCount(id string, o int64) {
-	data.mx.Lock()
-	defer data.mx.Unlock()
+	data.Mx.Lock()
+	defer data.Mx.Unlock()
 	data.DataMetricsCount[id] = o
 }
 
 func (data *MemStorage) GetMetricsCount(id string) (o int64, b bool) {
-	data.mx.RLock()
-	defer data.mx.RUnlock()
+	data.Mx.RLock()
+	defer data.Mx.RUnlock()
 	o, b = data.DataMetricsCount[id]
 	return
 }
