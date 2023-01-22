@@ -13,12 +13,12 @@ import (
 
 func main() {
 
-	//flags := storage.GetFlagsServer()
-	//cfg := storage.GetConfigServer(flags)
-	cfg := storage.GetConfigEnv()
+	storage.SetFlagsServer()
+	cfg := storage.GetConfigServer()
+	//cfg := storage.GetConfigEnv()
 
 	log.SetLevel(log.DebugLevel)
-	log.Info(cfg)
+	//log.Fatal(cfg)
 
 	app.RestoreMetricsFromFile(cfg)
 

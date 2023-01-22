@@ -4,6 +4,8 @@ import (
 	"flag"
 )
 
+var FgAgt FlagsAgent
+
 // Cтруктура хранения флагов
 type FlagsAgent struct {
 	a string //ADDRESS
@@ -20,14 +22,27 @@ func InitFlagsAgent(a, r, p *string) FlagsAgent {
 	}
 }
 
-func GetFlagsAgent() FlagsAgent {
+func GetFlagsAgent() {
 	// Установка флагов
 	address := flag.String("a", "localhost:8080", "Адрес сервера")
 	report_interval := flag.String("r", "10s", "Интервал времени в секундах, по истечении которого текущие показания отправляются на сервера.")
 	poll_interval := flag.String("p", "2s", "Интервал времени в секундах, по истечении которого текущие показания мертрик обновляются на клиенте")
-
 	flag.Parse()
 	flags := InitFlagsAgent(address, report_interval, poll_interval)
 
-	return flags
+	FgAgt.a = flags.a
+	FgAgt.r = flags.r
+	FgAgt.p = flags.p
+}
+
+func GetFlagAddressAgent() string {
+	return FgAgt.a
+}
+
+func GetFlagReportIntervalAgent() string {
+	return FgAgt.r
+}
+
+func GetFlagPollIntervalAgent() string {
+	return FgAgt.p
 }
