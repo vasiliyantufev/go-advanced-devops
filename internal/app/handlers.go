@@ -3,6 +3,7 @@ package app
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/storage/config"
 	"html/template"
 	"io"
 	"net/http"
@@ -15,8 +16,6 @@ import (
 )
 
 var MemServer = storage.NewMemStorage()
-
-var cfg storage.Config
 
 type ViewData struct {
 	MapG map[string]float64
@@ -208,12 +207,12 @@ func PostMetricsHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
 
-	cfg := storage.GetConfigServer()
+	//cfg := storage.GetConfigServer()
 	//log.Fatal(cfg)
 
-	//cfg := storage.GetConfigEnv()
-	if cfg.StoreInterval == 0 {
-		FileStore(cfg, MemServer)
+	//cfg := storage.getConfigEnv()
+	if config.GetConfigStoreIntervalServer() == 0 {
+		FileStore(MemServer)
 	}
 
 	log.Debug("Request completed successfully metric:" + value.ID)
@@ -277,28 +276,28 @@ func PostValueMetricsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(resp)
 }
 
-func RestoreMetricsFromFile(config storage.Config) {
+func RestoreMetricsFromFile() {
 
-	if config.Restore {
+	if config.GetConfigRestoreServer() {
 		log.Info("Restore metrics")
-		FileRestore(config, MemServer)
+		FileRestore(MemServer)
 	}
 }
 
-func StoreMetricsToFile(config storage.Config) {
+func StoreMetricsToFile() {
 
-	if config.StoreFile != "" {
-		for range time.Tick(config.StoreInterval) {
+	if config.GetConfigStoreFileServer() != "" {
+		for range time.Tick(config.GetConfigStoreIntervalServer()) {
 			log.Info("Store metrics")
-			FileStore(config, MemServer)
+			FileStore(MemServer)
 		}
 	}
 }
 
-func StartServer(cfg storage.Config, r *chi.Mux) {
+func StartServer(r *chi.Mux) {
 
-	log.Infof("Starting application %v\n", cfg.Address)
-	if con := http.ListenAndServe(cfg.Address, r); con != nil {
+	log.Infof("Starting application %v\n", config.GetConfigAddressServer())
+	if con := http.ListenAndServe(config.GetConfigAddressServer(), r); con != nil {
 		log.Fatal(con)
 	}
 }

@@ -1,8 +1,8 @@
-package storage
+package flags
 
 import "flag"
 
-var FgSrv flagsServer
+var fgSrv flagsServer
 
 // Cтруктура хранения флагов
 type flagsServer struct {
@@ -13,7 +13,7 @@ type flagsServer struct {
 }
 
 // Реализация структуры для взаимодействия с ней
-func InitFlagsServer(a, f, i *string, r *bool) flagsServer {
+func initFlagsServer(a, f, i *string, r *bool) flagsServer {
 	return flagsServer{
 		a: *a,
 		f: *f,
@@ -29,26 +29,26 @@ func SetFlagsServer() {
 	interval := flag.String("i", "2s", "Интервал времени в секундах, по истечении которого текущие показания сервера сбрасываются на диск ")
 	restore := flag.Bool("r", true, "Булево значение, определяющее, загружать или нет начальные значения из указанного файла при старте сервера")
 	flag.Parse()
-	flags := InitFlagsServer(address, file, interval, restore)
+	flags := initFlagsServer(address, file, interval, restore)
 
-	FgSrv.a = flags.a
-	FgSrv.f = flags.f
-	FgSrv.i = flags.i
-	FgSrv.r = flags.r
+	fgSrv.a = flags.a
+	fgSrv.f = flags.f
+	fgSrv.i = flags.i
+	fgSrv.r = flags.r
 }
 
 func GetFlagAddressServer() string {
-	return FgSrv.a
+	return fgSrv.a
 }
 
 func GetFlagStoreFileServer() string {
-	return FgSrv.f
+	return fgSrv.f
 }
 
 func GetFlagStoreIntervalServer() string {
-	return FgSrv.i
+	return fgSrv.i
 }
 
 func GetFlagRestoreServer() bool {
-	return FgSrv.r
+	return fgSrv.r
 }

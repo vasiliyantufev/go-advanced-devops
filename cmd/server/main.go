@@ -5,7 +5,8 @@ import (
 	"github.com/go-chi/chi/v5"
 	log "github.com/sirupsen/logrus"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/app"
-	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/storage/config"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/storage/flags"
 	"os/signal"
 	"syscall"
 	_ "time"
@@ -13,14 +14,14 @@ import (
 
 func main() {
 
-	storage.SetFlagsServer()
-	cfg := storage.GetConfigServer()
-	//cfg := storage.GetConfigEnv()
+	flags.SetFlagsServer()
+	config.SetConfigServer()
+	//cfg := storage.getConfigEnv()
 
 	log.SetLevel(log.DebugLevel)
 	//log.Fatal(cfg)
 
-	app.RestoreMetricsFromFile(cfg)
+	app.RestoreMetricsFromFile()
 
 	r := chi.NewRouter()
 	//r.Use(middleware.Logger)
@@ -38,11 +39,11 @@ func main() {
 	ctx, cnl := signal.NotifyContext(context.Background(), syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
 	defer cnl()
 
-	go app.StartServer(cfg, r)
-	if cfg.StoreInterval > 0 {
-		go app.StoreMetricsToFile(cfg)
+	go app.StartServer(r)
+	if config.GetConfigStoreIntervalServer() > 0 {
+		go app.StoreMetricsToFile()
 	}
 	<-ctx.Done()
-	app.FileStore(cfg, app.MemServer)
+	app.FileStore(app.MemServer)
 	log.Println("server shutdown on signal with:", ctx.Err())
 }

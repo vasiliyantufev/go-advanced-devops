@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	log "github.com/sirupsen/logrus"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/storage/config"
 	"io"
 	"os"
 )
@@ -45,9 +46,9 @@ func (m *metric) Close() error {
 	return m.file.Close()
 }
 
-func FileStore(config storage.Config, agent *storage.MemStorage) {
+func FileStore(agent *storage.MemStorage) {
 
-	mWrite, err := NewMetricReadWriter(config.StoreFile)
+	mWrite, err := NewMetricReadWriter(config.GetConfigStoreFileServer())
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -70,9 +71,9 @@ func FileStore(config storage.Config, agent *storage.MemStorage) {
 	}
 }
 
-func FileRestore(config storage.Config, agent *storage.MemStorage) {
+func FileRestore(agent *storage.MemStorage) {
 
-	mRead, err := NewMetricReadWriter(config.StoreFile)
+	mRead, err := NewMetricReadWriter(config.GetConfigStoreFileServer())
 	if err != nil {
 		log.Fatal(err)
 	}
