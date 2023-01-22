@@ -208,7 +208,9 @@ func PostMetricsHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
 
-	cfg = storage.GetConfig()
+	//flags := storage.GetFlagsServer()
+	//cfg := storage.GetConfigServer(flags)
+	cfg := storage.GetConfigEnv()
 	if cfg.StoreInterval == 0 {
 		FileStore(cfg, MemServer)
 	}

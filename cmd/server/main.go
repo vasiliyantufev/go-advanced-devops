@@ -13,7 +13,9 @@ import (
 
 func main() {
 
-	cfg := storage.GetConfig()
+	//flags := storage.GetFlagsServer()
+	//cfg := storage.GetConfigServer(flags)
+	cfg := storage.GetConfigEnv()
 
 	log.SetLevel(log.DebugLevel)
 	log.Info(cfg)

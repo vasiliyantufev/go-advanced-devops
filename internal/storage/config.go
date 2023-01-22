@@ -16,11 +16,45 @@ type Config struct {
 	PollInterval   time.Duration `env:"POLL_INTERVAL" envDefault:"2s"`
 }
 
-func GetConfig() Config {
+func GetConfigEnv() Config {
 	var cfg Config
 	err := env.Parse(&cfg)
 	if err != nil {
 		log.Error(err)
+	}
+	return cfg
+}
+
+func GetConfigServer(flags FlagsServer) Config {
+
+	var cfg Config
+	cfg = GetConfigEnv()
+
+	if cfg.Address == "" {
+		cfg.Address = flags.a
+	}
+	if cfg.StoreFile == "" {
+		cfg.StoreFile = flags.f
+	}
+	if cfg.StoreInterval.String() == "" {
+		cfg.StoreInterval, _ = time.ParseDuration(flags.i)
+	}
+	return cfg
+}
+
+func GetConfigAgent(flags FlagsAgent) Config {
+
+	var cfg Config
+	cfg = GetConfigEnv()
+
+	if cfg.Address == "" {
+		cfg.Address = flags.a
+	}
+	if cfg.ReportInterval.String() == "" {
+		cfg.ReportInterval, _ = time.ParseDuration(flags.r)
+	}
+	if cfg.PollInterval.String() == "" {
+		cfg.PollInterval, _ = time.ParseDuration(flags.p)
 	}
 	return cfg
 }

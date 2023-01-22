@@ -16,7 +16,9 @@ var MemAgent = storage.NewMemStorage()
 
 func main() {
 
-	cfg := storage.GetConfig()
+	//flags := storage.GetFlagsAgent()
+	//cfg := storage.GetConfigAgent(flags)
+	cfg := storage.GetConfigEnv()
 
 	ctx, cnl := signal.NotifyContext(context.Background(), syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
 	defer cnl()
