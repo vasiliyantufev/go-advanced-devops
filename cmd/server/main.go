@@ -18,6 +18,9 @@ func main() {
 	config.SetConfigServer()
 	//cfg := storage.getConfigEnv()
 
+	//log.Fatal(flags.FgSrv)
+	//log.Fatal(config.GetConfigAddressServer())
+
 	log.SetLevel(log.DebugLevel)
 	//log.Fatal(cfg)
 
@@ -45,5 +48,5 @@ func main() {
 	}
 	<-ctx.Done()
 	app.FileStore(app.MemServer)
-	log.Println("server shutdown on signal with:", ctx.Err())
+	log.Info("server shutdown on signal with:", ctx.Err())
 }

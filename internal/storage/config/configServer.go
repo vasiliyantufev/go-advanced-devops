@@ -7,45 +7,50 @@ import (
 	"time"
 )
 
-var cfgSrv configServer
+var CfgSrv configServer
 
 type configServer struct {
-	Address       string        `env:"ADDRESS" envDefault:"localhost:8080"`
-	StoreInterval time.Duration `env:"STORE_INTERVAL" envDefault:"300s"`
-	StoreFile     string        `env:"STORE_FILE" envDefault:"/tmp/devops-metrics-db.json"`
-	Restore       bool          `env:"RESTORE" envDefault:"true"`
+	//Address       string        `env:"ADDRESS" envDefault:"localhost:8080"`
+	Address string `env:"ADDRESS"`
+	//StoreInterval time.Duration `env:"STORE_INTERVAL" envDefault:"300s"`
+	StoreInterval time.Duration `env:"STORE_INTERVAL"`
+	//StoreFile string `env:"STORE_FILE" envDefault:"/tmp/devops-metrics-db.json"`
+	StoreFile string `env:"STORE_FILE"`
+	Restore   bool   `env:"RESTORE" envDefault:"true"`
 }
 
 func SetConfigServer() {
 
-	err := env.Parse(&cfgSrv)
+	err := env.Parse(&CfgSrv)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	if cfgSrv.Address == "" {
-		cfgSrv.Address = flags.GetFlagAddressServer()
+	log.Error(CfgSrv)
+
+	if CfgSrv.Address == "" {
+		CfgSrv.Address = flags.GetFlagAddressServer()
 	}
-	if cfgSrv.StoreInterval.String() == "0s" {
-		cfgSrv.StoreInterval, _ = time.ParseDuration(flags.GetFlagStoreIntervalServer())
+	if CfgSrv.StoreInterval.String() == "0s" {
+		CfgSrv.StoreInterval, _ = time.ParseDuration(flags.GetFlagStoreIntervalServer())
 	}
-	if cfgSrv.StoreFile == "" {
-		cfgSrv.StoreFile = flags.GetFlagStoreFileServer()
+	if CfgSrv.StoreFile == "" {
+		CfgSrv.StoreFile = flags.GetFlagStoreFileServer()
 	}
 }
 
 func GetConfigAddressServer() string {
-	return cfgSrv.Address
+	return CfgSrv.Address
 }
 
 func GetConfigStoreIntervalServer() time.Duration {
-	return cfgSrv.StoreInterval
+	return CfgSrv.StoreInterval
 }
 
 func GetConfigStoreFileServer() string {
-	return cfgSrv.StoreFile
+	return CfgSrv.StoreFile
 }
 
 func GetConfigRestoreServer() bool {
-	return cfgSrv.Restore
+	return CfgSrv.Restore
 }
