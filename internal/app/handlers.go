@@ -1,6 +1,7 @@
 package app
 
 import (
+	_ "compress/gzip"
 	"encoding/json"
 	"fmt"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/storage/config"
@@ -8,6 +9,7 @@ import (
 	"io"
 	"net/http"
 	"strconv"
+	_ "strings"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -301,3 +303,11 @@ func StartServer(r *chi.Mux) {
 		log.Fatal(con)
 	}
 }
+
+//func CompressMiddleware(next http.Handler) http.Handler {
+//	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+//		fmt.Println("Hi! I'm middleware")
+//		//next(rw, r)
+//		fmt.Println("Bye!")
+//	})
+//}

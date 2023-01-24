@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-var CfgSrv configServer
+var cfgSrv configServer
 
 type configServer struct {
 	//Address       string        `env:"ADDRESS" envDefault:"localhost:8080"`
@@ -21,36 +21,36 @@ type configServer struct {
 
 func SetConfigServer() {
 
-	err := env.Parse(&CfgSrv)
+	err := env.Parse(&cfgSrv)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	log.Error(CfgSrv)
+	if cfgSrv.Address == "" {
+		cfgSrv.Address = flags.GetFlagAddressServer()
+	}
+	if cfgSrv.StoreInterval.String() == "0s" {
+		cfgSrv.StoreInterval, _ = time.ParseDuration(flags.GetFlagStoreIntervalServer())
+	}
+	if cfgSrv.StoreFile == "" {
+		cfgSrv.StoreFile = flags.GetFlagStoreFileServer()
+	}
 
-	if CfgSrv.Address == "" {
-		CfgSrv.Address = flags.GetFlagAddressServer()
-	}
-	if CfgSrv.StoreInterval.String() == "0s" {
-		CfgSrv.StoreInterval, _ = time.ParseDuration(flags.GetFlagStoreIntervalServer())
-	}
-	if CfgSrv.StoreFile == "" {
-		CfgSrv.StoreFile = flags.GetFlagStoreFileServer()
-	}
+	log.Info(cfgSrv)
 }
 
 func GetConfigAddressServer() string {
-	return CfgSrv.Address
+	return cfgSrv.Address
 }
 
 func GetConfigStoreIntervalServer() time.Duration {
-	return CfgSrv.StoreInterval
+	return cfgSrv.StoreInterval
 }
 
 func GetConfigStoreFileServer() string {
-	return CfgSrv.StoreFile
+	return cfgSrv.StoreFile
 }
 
 func GetConfigRestoreServer() bool {
-	return CfgSrv.Restore
+	return cfgSrv.Restore
 }

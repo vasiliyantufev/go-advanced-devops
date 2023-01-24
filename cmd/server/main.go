@@ -28,6 +28,7 @@ func main() {
 
 	r := chi.NewRouter()
 	//r.Use(middleware.Logger)
+	r.Use(app.GzipHandle)
 
 	r.Get("/", app.IndexHandler)
 	r.Route("/value", func(r chi.Router) {

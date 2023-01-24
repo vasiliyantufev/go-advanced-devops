@@ -34,6 +34,8 @@ func SetConfigAgent() {
 	if cfgAgt.PollInterval.String() == "0s" {
 		cfgAgt.PollInterval, _ = time.ParseDuration(flags.GetFlagPollIntervalAgent())
 	}
+
+	log.Info(cfgAgt)
 }
 
 func GetConfigAddressAgent() string {
