@@ -47,6 +47,9 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	w.Header().Set("Content-Encoding", "gzip")
+	w.WriteHeader(http.StatusOK)
+
 	data := ViewData{MapG: gauges, MapC: counters}
 	err = tmpl.Execute(w, data)
 	if err != nil {
@@ -54,8 +57,6 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	w.Header().Set("Content-Encoding", "gzip")
-	w.WriteHeader(http.StatusOK)
 
 }
 
