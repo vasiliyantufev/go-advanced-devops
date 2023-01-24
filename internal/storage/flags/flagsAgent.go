@@ -25,10 +25,10 @@ func initFlagsAgent(a, r, p *string) flagsAgent {
 func SetFlagsAgent() {
 	// Установка флагов
 	address := flag.String("a", "localhost:8080", "Адрес сервера")
-	report_interval := flag.String("r", "10s", "Интервал времени в секундах, по истечении которого текущие показания отправляются на сервера.")
-	poll_interval := flag.String("p", "2s", "Интервал времени в секундах, по истечении которого текущие показания мертрик обновляются на клиенте")
+	reportInterval := flag.String("r", "10s", "Интервал времени в секундах, по истечении которого текущие показания отправляются на сервера.")
+	pollInterval := flag.String("p", "2s", "Интервал времени в секундах, по истечении которого текущие показания мертрик обновляются на клиенте")
 	flag.Parse()
-	flags := initFlagsAgent(address, report_interval, poll_interval)
+	flags := initFlagsAgent(address, reportInterval, pollInterval)
 
 	fgAgt.a = flags.a
 	fgAgt.r = flags.r

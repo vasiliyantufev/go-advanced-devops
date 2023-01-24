@@ -291,7 +291,9 @@ func RestoreMetricsFromFile() {
 func StoreMetricsToFile() {
 
 	if config.GetConfigStoreFileServer() != "" {
-		for range time.Tick(config.GetConfigStoreIntervalServer()) {
+		ticker := time.NewTicker(config.GetConfigStoreIntervalServer())
+		//for range time.Tick(config.GetConfigStoreIntervalServer()) {
+		for range ticker.C {
 			log.Info("Store metrics")
 			FileStore(MemServer)
 		}
