@@ -4,7 +4,7 @@ import (
 	_ "compress/gzip"
 	"encoding/json"
 	"fmt"
-	"github.com/vasiliyantufev/go-advanced-devops/internal/storage/config"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/config"
 	"html/template"
 	"io"
 	"net/http"
@@ -29,7 +29,7 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 	tmpl, err := template.ParseFiles("./web/templates/index.html")
 	if err != nil {
 		log.Errorf("Parse failed: %s", err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, "Error loading index page", http.StatusInternalServerError)
 		return
 	}
 
@@ -192,9 +192,9 @@ func PostMetricsHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	if value.Delta != nil {
-		var sum int64
+		sum := *value.Delta
 		if oldVal, exists := MemServer.GetMetricsCount(value.ID); exists {
-			sum = oldVal + *value.Delta
+			sum += oldVal
 		} else {
 			sum = *value.Delta
 		}
@@ -205,16 +205,13 @@ func PostMetricsHandler(w http.ResponseWriter, r *http.Request) {
 			Delta: value.Delta,
 		}
 	}
+
 	resp, err = json.Marshal(rawValue)
 	if err != nil {
 		log.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
 
-	//cfg := storage.GetConfigServer()
-	//log.Fatal(cfg)
-
-	//cfg := storage.getConfigEnv()
 	if config.GetConfigStoreIntervalServer() == 0 {
 		FileStore(MemServer)
 	}
@@ -307,11 +304,3 @@ func StartServer(r *chi.Mux) {
 		log.Fatal(con)
 	}
 }
-
-//func CompressMiddleware(next http.Handler) http.Handler {
-//	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
-//		fmt.Println("Hi! I'm middleware")
-//		//next(rw, r)
-//		fmt.Println("Bye!")
-//	})
-//}

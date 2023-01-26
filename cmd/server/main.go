@@ -5,7 +5,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	log "github.com/sirupsen/logrus"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/app"
-	"github.com/vasiliyantufev/go-advanced-devops/internal/storage/config"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/config"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/storage/flags"
 	"os/signal"
 	"syscall"
@@ -21,8 +21,8 @@ func main() {
 	//log.Fatal(flags.FgSrv)
 	//log.Fatal(config.GetConfigAddressServer())
 
-	log.SetLevel(log.DebugLevel)
-	//log.Fatal(cfg)
+	log.SetLevel(config.GetConfigDebugLevelServer())
+	//log.Fatal(log.DebugLevel)
 
 	app.RestoreMetricsFromFile()
 

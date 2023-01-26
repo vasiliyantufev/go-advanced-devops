@@ -15,8 +15,9 @@ type configServer struct {
 	//StoreInterval time.Duration `env:"STORE_INTERVAL" envDefault:"300s"`
 	StoreInterval time.Duration `env:"STORE_INTERVAL"`
 	//StoreFile string `env:"STORE_FILE" envDefault:"/tmp/devops-metrics-db.json"`
-	StoreFile string `env:"STORE_FILE"`
-	Restore   bool   `env:"RESTORE" envDefault:"true"`
+	DebugLevel log.Level `env:"DEBUG_LEVEL" envDefault:"debug"`
+	StoreFile  string    `env:"STORE_FILE"`
+	Restore    bool      `env:"RESTORE" envDefault:"true"`
 }
 
 func SetConfigServer() {
@@ -49,6 +50,10 @@ func GetConfigStoreIntervalServer() time.Duration {
 
 func GetConfigStoreFileServer() string {
 	return cfgSrv.StoreFile
+}
+
+func GetConfigDebugLevelServer() log.Level {
+	return cfgSrv.DebugLevel
 }
 
 func GetConfigRestoreServer() bool {

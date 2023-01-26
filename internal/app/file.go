@@ -3,8 +3,8 @@ package app
 import (
 	"encoding/json"
 	log "github.com/sirupsen/logrus"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/config"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
-	"github.com/vasiliyantufev/go-advanced-devops/internal/storage/config"
 	"io"
 	"os"
 )
@@ -50,7 +50,7 @@ func FileStore(agent *storage.MemStorage) {
 
 	mWrite, err := NewMetricReadWriter(config.GetConfigStoreFileServer())
 	if err != nil {
-		log.Fatal(err)
+		log.Error(err)
 	}
 	defer mWrite.Close()
 
@@ -59,10 +59,10 @@ func FileStore(agent *storage.MemStorage) {
 		return
 	}
 	if err := mWrite.file.Truncate(0); err != nil {
-		log.Fatalln("can't truncate file, cause:", err)
+		log.Errorln("can't truncate file, cause:", err)
 	}
 	if _, err := mWrite.file.Seek(0, 0); err != nil {
-		log.Fatal("failed to seek:", err)
+		log.Error("failed to seek:", err)
 	}
 	for _, val := range agent.GetAllMetrics() {
 		if err := mWrite.WriteMetric(&val); err != nil {
@@ -75,7 +75,7 @@ func FileRestore(agent *storage.MemStorage) {
 
 	mRead, err := NewMetricReadWriter(config.GetConfigStoreFileServer())
 	if err != nil {
-		log.Fatal(err)
+		log.Error(err)
 	}
 	defer mRead.Close()
 	for {
@@ -86,7 +86,7 @@ func FileRestore(agent *storage.MemStorage) {
 			return
 		}
 		if err != nil {
-			log.Fatal(err)
+			log.Error(err)
 			return
 		}
 		if mr.MType == "counter" {

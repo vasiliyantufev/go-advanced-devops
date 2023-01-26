@@ -5,8 +5,8 @@ import (
 	"github.com/go-resty/resty/v2"
 	log "github.com/sirupsen/logrus"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/app"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/config"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
-	"github.com/vasiliyantufev/go-advanced-devops/internal/storage/config"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/storage/flags"
 	"os/signal"
 	"runtime"
@@ -47,7 +47,6 @@ func PutMetrics(ctx context.Context) {
 }
 
 func SentMetrics(ctx context.Context) {
-
 	// Create a Resty Client
 	client := resty.New()
 	urlPath := "http://" + config.GetConfigAddressAgent() + "/update/"
