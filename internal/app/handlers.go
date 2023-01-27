@@ -1,13 +1,20 @@
 package app
 
 import (
+	_ "compress/gzip"
+	"encoding/json"
 	"fmt"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/config"
+	"html/template"
+	"io"
+	"net/http"
+	"strconv"
+	_ "strings"
+	"time"
+
 	"github.com/go-chi/chi/v5"
 	log "github.com/sirupsen/logrus"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
-	"html/template"
-	"net/http"
-	"strconv"
 )
 
 var MemServer = storage.NewMemStorage()
@@ -19,20 +26,37 @@ type ViewData struct {
 
 func IndexHandler(w http.ResponseWriter, r *http.Request) {
 
-	data := ViewData{
-		MapG: MemServer.DataMetricsGauge,
-		MapC: MemServer.DataMetricsCount,
-	}
-
 	tmpl, err := template.ParseFiles("./web/templates/index.html")
 	if err != nil {
 		log.Errorf("Parse failed: %s", err)
+		http.Error(w, "Error loading index page", http.StatusInternalServerError)
+		return
 	}
+
+	gauges := make(map[string]float64)
+	counters := make(map[string]int64)
+
+	metrics := MemServer.GetAllMetrics()
+
+	for _, metric := range metrics {
+		if metric.MType == "gauge" {
+			gauges[metric.ID] = *metric.Value
+		}
+		if metric.MType == "counter" {
+			counters[metric.ID] = *metric.Delta
+		}
+	}
+
+	w.Header().Set("Content-Type", "text/html")
+	w.WriteHeader(http.StatusOK)
+
+	data := ViewData{MapG: gauges, MapC: counters}
 	err = tmpl.Execute(w, data)
 	if err != nil {
 		log.Errorf("Execution failed: %s", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
-	w.WriteHeader(http.StatusOK)
 
 }
 
@@ -45,7 +69,7 @@ func MetricsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if typeMetrics != "gauge" && typeMetrics != "counter" {
-		log.Error("The type incorrect")
+		log.Error("The type incorrect " + typeMetrics)
 		http.Error(w, "The type incorrect", http.StatusNotImplemented)
 		return
 	}
@@ -82,11 +106,13 @@ func MetricsHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		var sum int64
-		for _, val := range MemServer.DataMetricsCount {
-			sum = sum + val
+		if oldVal, exists := MemServer.GetMetricsCount(nameMetrics); exists {
+			sum = oldVal + val
+		} else {
+			sum = val
 		}
-		sum = sum + val
 		MemServer.PutMetricsCount(nameMetrics, sum)
+
 		resp = "Request completed successfully " + nameMetrics + "=" + fmt.Sprint(sum)
 	}
 
@@ -105,7 +131,7 @@ func GetMetricsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if typeMetrics != "gauge" && typeMetrics != "counter" {
-		log.Error("The type incorrect")
+		log.Error("The type incorrect " + typeMetrics)
 		http.Error(w, "The type incorrect", http.StatusNotImplemented)
 		return
 	}
@@ -135,7 +161,146 @@ func GetMetricsHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		param = fmt.Sprint(val)
 	}
+
 	log.Debug("Request completed successfully " + nameMetrics + "=" + fmt.Sprint(param))
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(param))
+}
+
+func PostMetricsHandler(w http.ResponseWriter, r *http.Request) {
+
+	resp, err := io.ReadAll(r.Body)
+	if err != nil {
+		log.Error(err.Error())
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	value := storage.JSONMetrics{}
+	if err := json.Unmarshal([]byte(string(resp)), &value); err != nil {
+		log.Error(err.Error())
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	rawValue := storage.JSONMetrics{}
+	if value.Value != nil {
+		MemServer.PutMetricsGauge(value.ID, *value.Value)
+		rawValue = storage.JSONMetrics{
+			ID:    value.ID,
+			MType: value.MType,
+			Value: value.Value,
+		}
+	}
+	if value.Delta != nil {
+		sum := *value.Delta
+		if oldVal, exists := MemServer.GetMetricsCount(value.ID); exists {
+			sum += oldVal
+		} else {
+			sum = *value.Delta
+		}
+		MemServer.PutMetricsCount(value.ID, sum)
+		rawValue = storage.JSONMetrics{
+			ID:    value.ID,
+			MType: value.MType,
+			Delta: value.Delta,
+		}
+	}
+
+	resp, err = json.Marshal(rawValue)
+	if err != nil {
+		log.Error(err.Error())
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	}
+
+	if config.GetConfigStoreIntervalServer() == 0 {
+		FileStore(MemServer)
+	}
+
+	log.Debug("Request completed successfully metric:" + value.ID)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(resp)
+}
+
+func PostValueMetricsHandler(w http.ResponseWriter, r *http.Request) {
+
+	resp, err := io.ReadAll(r.Body)
+	if err != nil {
+		log.Error(err.Error())
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	value := storage.JSONMetrics{}
+	if err := json.Unmarshal([]byte(string(resp)), &value); err != nil {
+		log.Error(err.Error())
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	rawValue := storage.JSONMetrics{}
+	if value.MType == "gauge" {
+		val, exists := MemServer.GetMetricsGauge(value.ID)
+		if !exists {
+			log.Error("Element " + value.ID + " not exists")
+			http.Error(w, "Element "+value.ID+" not exists", http.StatusNotFound)
+			return
+		}
+		rawValue = storage.JSONMetrics{
+			ID:    value.ID,
+			MType: value.MType,
+			Value: &val,
+		}
+	}
+	if value.MType == "counter" {
+		val, exists := MemServer.GetMetricsCount(value.ID)
+		if !exists {
+			log.Error("Element " + value.ID + " not exists")
+			http.Error(w, "Element "+value.ID+" not exists", http.StatusNotFound)
+			return
+		}
+		rawValue = storage.JSONMetrics{
+			ID:    value.ID,
+			MType: value.MType,
+			Delta: &val,
+		}
+	}
+	resp, err = json.Marshal(rawValue)
+	if err != nil {
+		log.Error(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	log.Debug("Request completed successfully metric:" + value.ID)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(resp)
+}
+
+func RestoreMetricsFromFile() {
+
+	if config.GetConfigRestoreServer() {
+		log.Info("Restore metrics")
+		FileRestore(MemServer)
+	}
+}
+
+func StoreMetricsToFile() {
+
+	if config.GetConfigStoreFileServer() != "" {
+		ticker := time.NewTicker(config.GetConfigStoreIntervalServer())
+		//for range time.Tick(config.GetConfigStoreIntervalServer()) {
+		for range ticker.C {
+			log.Info("Store metrics")
+			FileStore(MemServer)
+		}
+	}
+}
+
+func StartServer(r *chi.Mux) {
+
+	log.Infof("Starting application %v\n", config.GetConfigAddressServer())
+	if con := http.ListenAndServe(config.GetConfigAddressServer(), r); con != nil {
+		log.Fatal(con)
+	}
 }

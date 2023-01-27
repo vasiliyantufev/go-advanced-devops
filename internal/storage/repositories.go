@@ -1,43 +1,69 @@
 package storage
 
-import "sync"
+import (
+	"sync"
+)
 
 type MemStorage struct {
-	mx               sync.RWMutex
-	DataMetricsGauge map[string]float64
-	DataMetricsCount map[string]int64
+	mx   *sync.RWMutex
+	data map[string]JSONMetrics
 }
 
-//Создаём map
+// Создаём map
 func NewMemStorage() *MemStorage {
 	return &MemStorage{
-		DataMetricsGauge: make(map[string]float64),
-		DataMetricsCount: make(map[string]int64),
+		mx:   new(sync.RWMutex),
+		data: make(map[string]JSONMetrics),
 	}
 }
-
 func (data *MemStorage) PutMetricsGauge(id string, o float64) {
 	data.mx.Lock()
 	defer data.mx.Unlock()
-	data.DataMetricsGauge[id] = o
+	data.data[id] = JSONMetrics{
+		ID:    id,
+		MType: "gauge",
+		Delta: nil,
+		Value: &o,
+	}
 }
 
 func (data *MemStorage) GetMetricsGauge(id string) (o float64, b bool) {
 	data.mx.RLock()
 	defer data.mx.RUnlock()
-	o, b = data.DataMetricsGauge[id]
-	return
+	if metric, exists := data.data[id]; exists {
+		return *metric.Value, exists
+	} else {
+		return 0, exists
+	}
 }
 
 func (data *MemStorage) PutMetricsCount(id string, o int64) {
 	data.mx.Lock()
 	defer data.mx.Unlock()
-	data.DataMetricsCount[id] = o
+	data.data[id] = JSONMetrics{
+		ID:    id,
+		MType: "counter",
+		Delta: &o,
+		Value: nil,
+	}
 }
 
 func (data *MemStorage) GetMetricsCount(id string) (o int64, b bool) {
 	data.mx.RLock()
 	defer data.mx.RUnlock()
-	o, b = data.DataMetricsCount[id]
-	return
+	if metric, exists := data.data[id]; exists {
+		return *metric.Delta, exists
+	} else {
+		return 0, exists
+	}
+}
+
+func (data *MemStorage) GetAllMetrics() []JSONMetrics {
+	data.mx.RLock()
+	defer data.mx.RUnlock()
+	result := make([]JSONMetrics, 0)
+	for _, metric := range data.data {
+		result = append(result, metric)
+	}
+	return result
 }

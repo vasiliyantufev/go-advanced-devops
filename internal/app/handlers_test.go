@@ -23,8 +23,8 @@ func TestCounterHandler(t *testing.T) {
 	})
 
 	var val1 int64 = 22
-	rtr.ServeHTTP(wp, httptest.NewRequest("POST", "/update/counter/testSetGet22/"+fmt.Sprint(val1), nil))
-	rtr.ServeHTTP(wg, httptest.NewRequest("GET", "/value/counter/testSetGet22", nil))
+	rtr.ServeHTTP(wp, httptest.NewRequest("POST", "/update/counter/testSetGet33/"+fmt.Sprint(val1), nil))
+	rtr.ServeHTTP(wg, httptest.NewRequest("GET", "/value/counter/testSetGet33", nil))
 	bodyGet := wg.Body.String()
 
 	k, _ := strconv.ParseInt(string(bodyGet), 10, 64)
