@@ -1,6 +1,10 @@
 package config
 
 import (
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/hex"
+	"fmt"
 	"github.com/caarlos0/env/v6"
 	log "github.com/sirupsen/logrus"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/storage/flags"
@@ -16,6 +20,8 @@ type configAgent struct {
 	ReportInterval time.Duration `env:"REPORT_INTERVAL"`
 	//PollInterval time.Duration `env:"POLL_INTERVAL" envDefault:"2s"`
 	PollInterval time.Duration `env:"POLL_INTERVAL"`
+	//PollInterval time.Duration `env:"POLL_INTERVAL" envDefault:"2s"`
+	Key string `env:"KEY"`
 }
 
 func SetConfigAgent() {
@@ -34,6 +40,9 @@ func SetConfigAgent() {
 	if cfgAgt.PollInterval.String() == "0s" {
 		cfgAgt.PollInterval, _ = time.ParseDuration(flags.GetFlagPollIntervalAgent())
 	}
+	if cfgAgt.Key == "" {
+		cfgAgt.Key = flags.GetKeyAgent()
+	}
 
 	log.Info(cfgAgt)
 }
@@ -48,4 +57,21 @@ func GetConfigReportIntervalAgent() time.Duration {
 
 func GetConfigPollIntervalAgent() time.Duration {
 	return cfgAgt.PollInterval
+}
+
+func GetHashAgent(mid string, mtype string, delta int64, value float64) string {
+
+	var data string
+	switch mtype {
+	case "counter":
+		data = fmt.Sprintf("%s:%s:%d", mid, mtype, delta)
+		//log.Printf("data во время хеширования: %s, дельта: %d", data, delta)
+	case "gauge":
+		data = fmt.Sprintf("%s:%s:%f", mid, mtype, value)
+		//log.Printf("data во время хеширования: %s, значение: %f", data, value)
+	}
+
+	h := hmac.New(sha256.New, []byte(cfgAgt.Key))
+	h.Write([]byte(data))
+	return hex.EncodeToString(h.Sum(nil))
 }

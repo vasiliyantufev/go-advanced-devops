@@ -16,13 +16,8 @@ func main() {
 
 	flags.SetFlagsServer()
 	config.SetConfigServer()
-	//cfg := storage.getConfigEnv()
-
-	//log.Fatal(flags.FgSrv)
-	//log.Fatal(config.GetConfigAddressServer())
 
 	log.SetLevel(config.GetConfigDebugLevelServer())
-	//log.Fatal(log.DebugLevel)
 
 	app.RestoreMetricsFromFile()
 

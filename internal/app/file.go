@@ -90,10 +90,10 @@ func FileRestore(agent *storage.MemStorage) {
 			return
 		}
 		if mr.MType == "counter" {
-			agent.PutMetricsCount(mr.ID, *mr.Delta)
+			agent.PutMetricsCount(mr.ID, *mr.Delta, mr.Hash)
 		}
 		if mr.MType == "gauge" {
-			agent.PutMetricsGauge(mr.ID, *mr.Value)
+			agent.PutMetricsGauge(mr.ID, *mr.Value, mr.Hash)
 		}
 	}
 }

@@ -2,23 +2,25 @@ package flags
 
 import "flag"
 
-var FgSrv flagsServer
+var fgSrv flagsServer
 
 // Cтруктура хранения флагов
 type flagsServer struct {
 	a string //ADDRESS
 	f string //STORE_FILE
 	i string //STORE_INTERVAL
+	k string //KEY
 	r bool   //RESTORE
 }
 
 // Реализация структуры для взаимодействия с ней
-func initFlagsServer(a, f, i *string, r *bool) flagsServer {
+func initFlagsServer(a, f, i, k *string, r *bool) flagsServer {
 	return flagsServer{
 		a: *a,
 		f: *f,
-		r: *r,
 		i: *i,
+		k: *k,
+		r: *r,
 	}
 }
 
@@ -28,27 +30,33 @@ func SetFlagsServer() {
 	file := flag.String("f", "/tmp/devops-metrics-db.json", "Строка, имя файла, где хранятся значения")
 	interval := flag.String("i", "300s", "Интервал времени в секундах, по истечении которого текущие показания сервера сбрасываются на диск ")
 	restore := flag.Bool("r", true, "Булево значение, определяющее, загружать или нет начальные значения из указанного файла при старте сервера")
+	key := flag.String("k", "key", "Ключ для генерации хеша")
 	flag.Parse()
-	flags := initFlagsServer(address, file, interval, restore)
+	flags := initFlagsServer(address, file, interval, key, restore)
 
-	FgSrv.a = flags.a
-	FgSrv.f = flags.f
-	FgSrv.i = flags.i
-	FgSrv.r = flags.r
+	fgSrv.a = flags.a
+	fgSrv.f = flags.f
+	fgSrv.i = flags.i
+	fgSrv.k = flags.k
+	fgSrv.r = flags.r
 }
 
 func GetFlagAddressServer() string {
-	return FgSrv.a
+	return fgSrv.a
 }
 
 func GetFlagStoreFileServer() string {
-	return FgSrv.f
+	return fgSrv.f
 }
 
 func GetFlagStoreIntervalServer() string {
-	return FgSrv.i
+	return fgSrv.i
 }
 
 func GetFlagRestoreServer() bool {
-	return FgSrv.r
+	return fgSrv.r
+}
+
+func GetFlagKeyServer() string {
+	return fgSrv.k
 }

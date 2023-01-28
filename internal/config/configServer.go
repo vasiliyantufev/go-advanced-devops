@@ -1,6 +1,10 @@
 package config
 
 import (
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/hex"
+	"fmt"
 	"github.com/caarlos0/env/v6"
 	log "github.com/sirupsen/logrus"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/storage/flags"
@@ -18,6 +22,7 @@ type configServer struct {
 	DebugLevel log.Level `env:"DEBUG_LEVEL" envDefault:"debug"`
 	StoreFile  string    `env:"STORE_FILE"`
 	Restore    bool      `env:"RESTORE" envDefault:"true"`
+	Key        string    `env:"KEY"`
 }
 
 func SetConfigServer() {
@@ -35,6 +40,9 @@ func SetConfigServer() {
 	}
 	if cfgSrv.StoreFile == "" {
 		cfgSrv.StoreFile = flags.GetFlagStoreFileServer()
+	}
+	if cfgSrv.Key == "" {
+		cfgSrv.Key = flags.GetFlagKeyServer()
 	}
 
 	log.Info(cfgSrv)
@@ -58,4 +66,21 @@ func GetConfigDebugLevelServer() log.Level {
 
 func GetConfigRestoreServer() bool {
 	return cfgSrv.Restore
+}
+
+func GetHashServer(mid string, mtype string, delta int64, value float64) string {
+
+	var data string
+	switch mtype {
+	case "counter":
+		data = fmt.Sprintf("%s:%s:%d", mid, mtype, delta)
+		//log.Printf("data во время хеширования: %s, дельта: %d", data, delta)
+	case "gauge":
+		data = fmt.Sprintf("%s:%s:%f", mid, mtype, value)
+		//log.Printf("data во время хеширования: %s, значение: %f", data, value)
+	}
+
+	h := hmac.New(sha256.New, []byte(cfgAgt.Key))
+	h.Write([]byte(data))
+	return hex.EncodeToString(h.Sum(nil))
 }

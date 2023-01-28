@@ -11,14 +11,16 @@ type flagsAgent struct {
 	a string //ADDRESS
 	r string //REPORT_INTERVAL
 	p string //POLL_INTERVAL
+	k string //KEY
 }
 
 // Реализация структуры для взаимодействия с ней
-func initFlagsAgent(a, r, p *string) flagsAgent {
+func initFlagsAgent(a, r, p, k *string) flagsAgent {
 	return flagsAgent{
 		a: *a,
 		r: *r,
 		p: *p,
+		k: *k,
 	}
 }
 
@@ -27,12 +29,14 @@ func SetFlagsAgent() {
 	address := flag.String("a", "localhost:8080", "Адрес сервера")
 	reportInterval := flag.String("r", "10s", "Интервал времени в секундах, по истечении которого текущие показания отправляются на сервера.")
 	pollInterval := flag.String("p", "2s", "Интервал времени в секундах, по истечении которого текущие показания мертрик обновляются на клиенте")
+	key := flag.String("k", "key", "Ключ для генерации хеша")
 	flag.Parse()
-	flags := initFlagsAgent(address, reportInterval, pollInterval)
+	flags := initFlagsAgent(address, reportInterval, pollInterval, key)
 
 	fgAgt.a = flags.a
 	fgAgt.r = flags.r
 	fgAgt.p = flags.p
+	fgAgt.k = flags.k
 }
 
 func GetFlagAddressAgent() string {
@@ -45,4 +49,8 @@ func GetFlagReportIntervalAgent() string {
 
 func GetFlagPollIntervalAgent() string {
 	return fgAgt.p
+}
+
+func GetKeyAgent() string {
+	return fgAgt.k
 }

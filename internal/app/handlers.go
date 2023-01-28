@@ -95,7 +95,16 @@ func MetricsHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "The query parameter value "+valueMetrics+" is incorrect", http.StatusBadRequest)
 			return
 		}
-		MemServer.PutMetricsGauge(nameMetrics, val)
+
+		hashServer := config.GetHashServer(nameMetrics, "gauge", 0, val)
+		hashAgent := config.GetHashAgent(nameMetrics, "gauge", 0, val)
+		//hash := config.GetHashAgent(nameMetrics, "gauge", 0, val)
+		if hashServer != hashAgent {
+			log.Error("Хеши не совпали")
+			http.Error(w, "Хеши не совпали", http.StatusBadRequest)
+			return
+		}
+		MemServer.PutMetricsGauge(nameMetrics, val, hashServer)
 		resp = "Request completed successfully " + nameMetrics + "=" + fmt.Sprint(val)
 	}
 	if typeMetrics == "counter" {
@@ -111,15 +120,22 @@ func MetricsHandler(w http.ResponseWriter, r *http.Request) {
 		} else {
 			sum = val
 		}
-		MemServer.PutMetricsCount(nameMetrics, sum)
 
+		//hash := config.GetHashAgent(nameMetrics, "counter", val, 0)
+		hashServer := config.GetHashServer(nameMetrics, "counter", val, 0)
+		hashAgent := config.GetHashAgent(nameMetrics, "counter", val, 0)
+		if hashServer != hashAgent {
+			log.Error("Хеши не совпали")
+			http.Error(w, "Хеши не совпали", http.StatusBadRequest)
+			return
+		}
+		MemServer.PutMetricsCount(nameMetrics, val, hashServer)
 		resp = "Request completed successfully " + nameMetrics + "=" + fmt.Sprint(sum)
 	}
 
 	log.Debug(resp)
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(resp))
-
 }
 
 func GetMetricsHandler(w http.ResponseWriter, r *http.Request) {
@@ -184,7 +200,17 @@ func PostMetricsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	rawValue := storage.JSONMetrics{}
 	if value.Value != nil {
-		MemServer.PutMetricsGauge(value.ID, *value.Value)
+
+		hashServer := config.GetHashServer(value.ID, "gauge", 0, *value.Value)
+		hashAgent := config.GetHashAgent(value.ID, "gauge", 0, *value.Value)
+		if hashServer != hashAgent {
+			log.Error("Хеши не совпали")
+			http.Error(w, "Хеши не совпали", http.StatusBadRequest)
+			return
+		}
+		MemServer.PutMetricsGauge(value.ID, *value.Value, hashServer)
+
+		//MemServer.PutMetricsGauge(value.ID, *value.Value)
 		rawValue = storage.JSONMetrics{
 			ID:    value.ID,
 			MType: value.MType,
@@ -198,7 +224,17 @@ func PostMetricsHandler(w http.ResponseWriter, r *http.Request) {
 		} else {
 			sum = *value.Delta
 		}
-		MemServer.PutMetricsCount(value.ID, sum)
+
+		hashServer := config.GetHashServer(value.ID, "counter", sum, 0)
+		hashAgent := config.GetHashAgent(value.ID, "counter", sum, 0)
+		if hashServer != hashAgent {
+			log.Error("Хеши не совпали")
+			http.Error(w, "Хеши не совпали", http.StatusBadRequest)
+			return
+		}
+		MemServer.PutMetricsCount(value.ID, sum, hashServer)
+
+		//MemServer.PutMetricsCount(value.ID, sum)
 		rawValue = storage.JSONMetrics{
 			ID:    value.ID,
 			MType: value.MType,
