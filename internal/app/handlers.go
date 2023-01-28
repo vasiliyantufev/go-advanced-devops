@@ -129,7 +129,7 @@ func MetricsHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Хеши не совпали", http.StatusBadRequest)
 			return
 		}
-		MemServer.PutMetricsCount(nameMetrics, val, hashServer)
+		MemServer.PutMetricsCount(nameMetrics, sum, hashServer)
 		resp = "Request completed successfully " + nameMetrics + "=" + fmt.Sprint(sum)
 	}
 
