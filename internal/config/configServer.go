@@ -74,10 +74,8 @@ func GetHashServer(mid string, mtype string, delta int64, value float64) string 
 	switch mtype {
 	case "counter":
 		data = fmt.Sprintf("%s:%s:%d", mid, mtype, delta)
-		//log.Printf("data во время хеширования: %s, дельта: %d", data, delta)
 	case "gauge":
 		data = fmt.Sprintf("%s:%s:%f", mid, mtype, value)
-		//log.Printf("data во время хеширования: %s, значение: %f", data, value)
 	}
 
 	h := hmac.New(sha256.New, []byte(cfgAgt.Key))

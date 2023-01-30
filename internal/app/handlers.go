@@ -26,6 +26,8 @@ type ViewData struct {
 
 func IndexHandler(w http.ResponseWriter, r *http.Request) {
 
+	log.Error(MemServer.GetAllMetrics())
+
 	tmpl, err := template.ParseFiles("./web/templates/index.html")
 	if err != nil {
 		log.Errorf("Parse failed: %s", err)
@@ -100,8 +102,8 @@ func MetricsHandler(w http.ResponseWriter, r *http.Request) {
 		hashAgent := config.GetHashAgent(nameMetrics, "gauge", 0, val)
 		//hash := config.GetHashAgent(nameMetrics, "gauge", 0, val)
 		if hashServer != hashAgent {
-			log.Error("Хеши не совпали")
-			http.Error(w, "Хеши не совпали", http.StatusBadRequest)
+			log.Error("Хеш-сумма не соответствует расчетной")
+			http.Error(w, "Хеш-сумма не соответствует расчетной", http.StatusBadRequest)
 			return
 		}
 		MemServer.PutMetricsGauge(nameMetrics, val, hashServer)
@@ -115,7 +117,7 @@ func MetricsHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		var sum int64
-		if oldVal, exists := MemServer.GetMetricsCount(nameMetrics); exists {
+		if oldVal, _, exists := MemServer.GetMetricsCount(nameMetrics); exists {
 			sum = oldVal + val
 		} else {
 			sum = val
@@ -125,8 +127,8 @@ func MetricsHandler(w http.ResponseWriter, r *http.Request) {
 		hashServer := config.GetHashServer(nameMetrics, "counter", val, 0)
 		hashAgent := config.GetHashAgent(nameMetrics, "counter", val, 0)
 		if hashServer != hashAgent {
-			log.Error("Хеши не совпали")
-			http.Error(w, "Хеши не совпали", http.StatusBadRequest)
+			log.Error("Хеш-сумма не соответствует расчетной")
+			http.Error(w, "Хеш-сумма не соответствует расчетной", http.StatusBadRequest)
 			return
 		}
 		MemServer.PutMetricsCount(nameMetrics, sum, hashServer)
@@ -160,7 +162,7 @@ func GetMetricsHandler(w http.ResponseWriter, r *http.Request) {
 
 	var param string
 	if typeMetrics == "gauge" {
-		val, exists := MemServer.GetMetricsGauge(nameMetrics)
+		val, _, exists := MemServer.GetMetricsGauge(nameMetrics)
 		if !exists {
 			log.Error("The name " + nameMetrics + " incorrect")
 			http.Error(w, "The name "+nameMetrics+" incorrect", http.StatusNotFound)
@@ -169,7 +171,7 @@ func GetMetricsHandler(w http.ResponseWriter, r *http.Request) {
 		param = fmt.Sprint(val)
 	}
 	if typeMetrics == "counter" {
-		val, exists := MemServer.GetMetricsCount(nameMetrics)
+		val, _, exists := MemServer.GetMetricsCount(nameMetrics)
 		if !exists {
 			log.Error("The name " + nameMetrics + " incorrect")
 			http.Error(w, "The name "+nameMetrics+" incorrect", http.StatusNotFound)
@@ -204,8 +206,8 @@ func PostMetricsHandler(w http.ResponseWriter, r *http.Request) {
 		hashServer := config.GetHashServer(value.ID, "gauge", 0, *value.Value)
 		hashAgent := config.GetHashAgent(value.ID, "gauge", 0, *value.Value)
 		if hashServer != hashAgent {
-			log.Error("Хеши не совпали")
-			http.Error(w, "Хеши не совпали", http.StatusBadRequest)
+			log.Error("Хеш-сумма не соответствует расчетной")
+			http.Error(w, "Хеш-сумма не соответствует расчетной", http.StatusBadRequest)
 			return
 		}
 		MemServer.PutMetricsGauge(value.ID, *value.Value, hashServer)
@@ -215,11 +217,12 @@ func PostMetricsHandler(w http.ResponseWriter, r *http.Request) {
 			ID:    value.ID,
 			MType: value.MType,
 			Value: value.Value,
+			Hash:  hashServer,
 		}
 	}
 	if value.Delta != nil {
 		sum := *value.Delta
-		if oldVal, exists := MemServer.GetMetricsCount(value.ID); exists {
+		if oldVal, _, exists := MemServer.GetMetricsCount(value.ID); exists {
 			sum += oldVal
 		} else {
 			sum = *value.Delta
@@ -228,8 +231,8 @@ func PostMetricsHandler(w http.ResponseWriter, r *http.Request) {
 		hashServer := config.GetHashServer(value.ID, "counter", sum, 0)
 		hashAgent := config.GetHashAgent(value.ID, "counter", sum, 0)
 		if hashServer != hashAgent {
-			log.Error("Хеши не совпали")
-			http.Error(w, "Хеши не совпали", http.StatusBadRequest)
+			log.Error("Хеш-сумма не соответствует расчетной")
+			http.Error(w, "Хеш-сумма не соответствует расчетной", http.StatusBadRequest)
 			return
 		}
 		MemServer.PutMetricsCount(value.ID, sum, hashServer)
@@ -239,6 +242,7 @@ func PostMetricsHandler(w http.ResponseWriter, r *http.Request) {
 			ID:    value.ID,
 			MType: value.MType,
 			Delta: value.Delta,
+			Hash:  hashServer,
 		}
 	}
 
@@ -247,6 +251,8 @@ func PostMetricsHandler(w http.ResponseWriter, r *http.Request) {
 		log.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
+
+	//log.Info(MemServer.GetAllMetrics())
 
 	if config.GetConfigStoreIntervalServer() == 0 {
 		FileStore(MemServer)
@@ -276,7 +282,7 @@ func PostValueMetricsHandler(w http.ResponseWriter, r *http.Request) {
 
 	rawValue := storage.JSONMetrics{}
 	if value.MType == "gauge" {
-		val, exists := MemServer.GetMetricsGauge(value.ID)
+		val, hash, exists := MemServer.GetMetricsGauge(value.ID)
 		if !exists {
 			log.Error("Element " + value.ID + " not exists")
 			http.Error(w, "Element "+value.ID+" not exists", http.StatusNotFound)
@@ -286,20 +292,25 @@ func PostValueMetricsHandler(w http.ResponseWriter, r *http.Request) {
 			ID:    value.ID,
 			MType: value.MType,
 			Value: &val,
+			Hash:  hash,
 		}
 	}
 	if value.MType == "counter" {
-		val, exists := MemServer.GetMetricsCount(value.ID)
+		val, hash, exists := MemServer.GetMetricsCount(value.ID)
 		if !exists {
 			log.Error("Element " + value.ID + " not exists")
 			http.Error(w, "Element "+value.ID+" not exists", http.StatusNotFound)
 			return
 		}
+
 		rawValue = storage.JSONMetrics{
 			ID:    value.ID,
 			MType: value.MType,
 			Delta: &val,
+			Hash:  hash,
+			//Hash: "counter",
 		}
+
 	}
 	resp, err = json.Marshal(rawValue)
 	if err != nil {
