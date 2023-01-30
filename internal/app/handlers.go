@@ -26,7 +26,7 @@ type ViewData struct {
 
 func IndexHandler(w http.ResponseWriter, r *http.Request) {
 
-	log.Error(MemServer.GetAllMetrics())
+	//log.Error(MemServer.GetAllMetrics())
 
 	tmpl, err := template.ParseFiles("./web/templates/index.html")
 	if err != nil {
