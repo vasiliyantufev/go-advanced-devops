@@ -17,10 +17,10 @@ func (J JSONMetrics) String() string {
 	switch J.MType {
 	case "gauge":
 		value := strconv.FormatFloat(*J.Value, 'f', 3, 64)
-		return fmt.Sprintf("Metric {ID: %s Type: %s Value: %s}", J.ID, J.MType, value)
+		return fmt.Sprintf("Metric {ID: %s Type: %s Value: %s Hash: %s}", J.ID, J.MType, value, J.Hash)
 	case "counter":
 		delta := strconv.FormatInt(*J.Delta, 10)
-		return fmt.Sprintf("Metric {ID: %s Type: %s Delta: %s}", J.ID, J.MType, delta)
+		return fmt.Sprintf("Metric {ID: %s Type: %s Delta: %s Hash: %s}", J.ID, J.MType, delta, J.Hash)
 	default:
 		return fmt.Sprintf("Metric {ID: %s Type: unknown}", J.ID)
 	}

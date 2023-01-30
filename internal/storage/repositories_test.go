@@ -28,7 +28,7 @@ func TestPutMetricsGauge(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			val, ok := dataTEST.GetMetricsGauge(tt.name)
+			val, _, ok := dataTEST.GetMetricsGauge(tt.name)
 
 			assert.Equal(t, ok, true,
 				fmt.Sprintf("Element %v not found", val))
@@ -56,7 +56,7 @@ func TestPutMetricsCount(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			val, ok := dataTEST.GetMetricsCount(tt.name)
+			val, _, ok := dataTEST.GetMetricsCount(tt.name)
 
 			assert.Equal(t, ok, true,
 				fmt.Sprintf("Element %v not found", val))

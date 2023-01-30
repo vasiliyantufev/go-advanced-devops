@@ -246,6 +246,8 @@ func PostMetricsHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	//log.Info(MemServer.GetAllMetrics())
+
 	resp, err = json.Marshal(rawValue)
 	if err != nil {
 		log.Error(err.Error())
