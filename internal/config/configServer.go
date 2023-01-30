@@ -22,7 +22,7 @@ type configServer struct {
 	DebugLevel log.Level `env:"DEBUG_LEVEL" envDefault:"debug"`
 	StoreFile  string    `env:"STORE_FILE"`
 	Restore    bool      `env:"RESTORE" envDefault:"true"`
-	Key        string    `env:"KEY" envDefault:"key"`
+	Key        string    `env:"KEY"`
 }
 
 func SetConfigServer() {

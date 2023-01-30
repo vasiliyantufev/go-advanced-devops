@@ -123,9 +123,9 @@ func MetricsHandler(w http.ResponseWriter, r *http.Request) {
 			sum = val
 		}
 
-		//hash := config.GetHashAgent(nameMetrics, "counter", val, 0)
 		hashServer := config.GetHashServer(nameMetrics, "counter", val, 0)
 		hashAgent := config.GetHashAgent(nameMetrics, "counter", val, 0)
+		//hash := config.GetHashAgent(nameMetrics, "counter", val, 0)
 		if hashServer != hashAgent {
 			log.Error("Хеш-сумма не соответствует расчетной")
 			http.Error(w, "Хеш-сумма не соответствует расчетной", http.StatusBadRequest)
@@ -204,15 +204,13 @@ func PostMetricsHandler(w http.ResponseWriter, r *http.Request) {
 	if value.Value != nil {
 
 		hashServer := config.GetHashServer(value.ID, "gauge", 0, *value.Value)
-		hashAgent := config.GetHashAgent(value.ID, "gauge", 0, *value.Value)
-		if hashServer != hashAgent {
+		if hashServer != value.Hash {
 			log.Error("Хеш-сумма не соответствует расчетной")
 			http.Error(w, "Хеш-сумма не соответствует расчетной", http.StatusBadRequest)
 			return
 		}
 		MemServer.PutMetricsGauge(value.ID, *value.Value, hashServer)
 
-		//MemServer.PutMetricsGauge(value.ID, *value.Value)
 		rawValue = storage.JSONMetrics{
 			ID:    value.ID,
 			MType: value.MType,
@@ -229,15 +227,13 @@ func PostMetricsHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		hashServer := config.GetHashServer(value.ID, "counter", sum, 0)
-		hashAgent := config.GetHashAgent(value.ID, "counter", sum, 0)
-		if hashServer != hashAgent {
+		if hashServer != value.Hash {
 			log.Error("Хеш-сумма не соответствует расчетной")
 			http.Error(w, "Хеш-сумма не соответствует расчетной", http.StatusBadRequest)
 			return
 		}
 		MemServer.PutMetricsCount(value.ID, sum, hashServer)
 
-		//MemServer.PutMetricsCount(value.ID, sum)
 		rawValue = storage.JSONMetrics{
 			ID:    value.ID,
 			MType: value.MType,
@@ -246,15 +242,11 @@ func PostMetricsHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	//log.Info(MemServer.GetAllMetrics())
-
 	resp, err = json.Marshal(rawValue)
 	if err != nil {
 		log.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
-
-	//log.Info(MemServer.GetAllMetrics())
 
 	if config.GetConfigStoreIntervalServer() == 0 {
 		FileStore(MemServer)
@@ -310,7 +302,6 @@ func PostValueMetricsHandler(w http.ResponseWriter, r *http.Request) {
 			MType: value.MType,
 			Delta: &val,
 			Hash:  hash,
-			//Hash: "counter",
 		}
 
 	}
