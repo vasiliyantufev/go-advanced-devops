@@ -59,6 +59,10 @@ func GetConfigPollIntervalAgent() time.Duration {
 	return cfgAgt.PollInterval
 }
 
+func GetConfigKeyAgent() string {
+	return cfgAgt.Key
+}
+
 func GetHashAgent(mid string, mtype string, delta int64, value float64) string {
 
 	var data string

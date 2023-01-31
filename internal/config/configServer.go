@@ -64,6 +64,10 @@ func GetConfigDebugLevelServer() log.Level {
 	return cfgSrv.DebugLevel
 }
 
+func GetConfigKeyServer() string {
+	return cfgSrv.Key
+}
+
 func GetConfigRestoreServer() bool {
 	return cfgSrv.Restore
 }

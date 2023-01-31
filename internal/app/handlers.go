@@ -193,9 +193,7 @@ func PostMetricsHandler(w http.ResponseWriter, r *http.Request) {
 	if value.Value != nil {
 
 		hashServer := config.GetHashServer(value.ID, "gauge", 0, *value.Value)
-		if hashServer != value.Hash {
-			log.Error(hashServer)
-			log.Error(value.Hash)
+		if hashServer != value.Hash && config.GetConfigKeyServer() != "" && config.GetConfigKeyAgent() != "" {
 			log.Error("Хеш-сумма не соответствует расчетной")
 			http.Error(w, "Хеш-сумма не соответствует расчетной", http.StatusBadRequest)
 			return
@@ -210,7 +208,7 @@ func PostMetricsHandler(w http.ResponseWriter, r *http.Request) {
 		// calculate hash
 		hashServer := config.GetHashServer(value.ID, "counter", *value.Delta, 0)
 		// compare hashes
-		if hashServer != value.Hash {
+		if hashServer != value.Hash && config.GetConfigKeyServer() != "" && config.GetConfigKeyAgent() != "" {
 			log.Error("Хеш-сумма не соответствует расчетной")
 			http.Error(w, "Хеш-сумма не соответствует расчетной", http.StatusBadRequest)
 			return
