@@ -264,7 +264,10 @@ func PostValueMetricsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	rawValue := storage.JSONMetrics{}
+	rawValue := storage.JSONMetrics{
+		ID:    value.ID,
+		MType: value.MType,
+	}
 	if value.MType == "gauge" {
 		val, hash, exists := MemServer.GetMetricsGauge(value.ID)
 		if !exists {
@@ -272,12 +275,8 @@ func PostValueMetricsHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Element "+value.ID+" not exists", http.StatusNotFound)
 			return
 		}
-		rawValue = storage.JSONMetrics{
-			ID:    value.ID,
-			MType: value.MType,
-			Value: &val,
-			Hash:  hash,
-		}
+		rawValue.Value = &val
+		rawValue.Hash = hash
 	}
 	if value.MType == "counter" {
 		val, hash, exists := MemServer.GetMetricsCount(value.ID)
@@ -286,14 +285,8 @@ func PostValueMetricsHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Element "+value.ID+" not exists", http.StatusNotFound)
 			return
 		}
-
-		rawValue = storage.JSONMetrics{
-			ID:    value.ID,
-			MType: value.MType,
-			Delta: &val,
-			Hash:  hash,
-		}
-
+		rawValue.Delta = &val
+		rawValue.Hash = hash
 	}
 	resp, err = json.Marshal(rawValue)
 	if err != nil {
