@@ -186,49 +186,50 @@ func PostMetricsHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	rawValue := storage.JSONMetrics{}
+	rawValue := storage.JSONMetrics{
+		ID:    value.ID,
+		MType: value.MType,
+	}
 	if value.Value != nil {
 
 		hashServer := config.GetHashServer(value.ID, "gauge", 0, *value.Value)
 		if hashServer != value.Hash {
+			log.Error(hashServer)
+			log.Error(value.Hash)
 			log.Error("Хеш-сумма не соответствует расчетной")
 			http.Error(w, "Хеш-сумма не соответствует расчетной", http.StatusBadRequest)
 			return
 		}
 		MemServer.PutMetricsGauge(value.ID, *value.Value, hashServer)
+		rawValue.Value = value.Value
+		rawValue.Hash = hashServer
 
-		rawValue = storage.JSONMetrics{
-			ID:    value.ID,
-			MType: value.MType,
-			Value: value.Value,
-			Hash:  hashServer,
-		}
 	}
 	if value.Delta != nil {
 
+		// calculate hash
 		hashServer := config.GetHashServer(value.ID, "counter", *value.Delta, 0)
-		_, hash, _ := MemServer.GetMetricsCount(value.ID)
-		if hashServer != hash {
+		// compare hashes
+		if hashServer != value.Hash {
 			log.Error("Хеш-сумма не соответствует расчетной")
 			http.Error(w, "Хеш-сумма не соответствует расчетной", http.StatusBadRequest)
 			return
 		}
 
-		sum := *value.Delta
+		// counter summing logic
+		var sum int64
 		if oldVal, _, exists := MemServer.GetMetricsCount(value.ID); exists {
-			sum += oldVal
+			sum = oldVal + *value.Delta
 		} else {
 			sum = *value.Delta
 		}
+		// calculate new hash
 		hashSumServer := config.GetHashServer(value.ID, "counter", sum, 0)
+		// store new metric
 		MemServer.PutMetricsCount(value.ID, sum, hashSumServer)
 
-		rawValue = storage.JSONMetrics{
-			ID:    value.ID,
-			MType: value.MType,
-			Delta: value.Delta,
-			Hash:  value.Hash,
-		}
+		rawValue.Delta = &sum
+		rawValue.Hash = hashSumServer
 	}
 
 	resp, err = json.Marshal(rawValue)

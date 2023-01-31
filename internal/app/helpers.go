@@ -18,7 +18,7 @@ func DataFromRuntime(agent *storage.MemStorage, stats *runtime.MemStats) {
 	agent.PutMetricsGauge("HeapIdle", float64(stats.HeapIdle), config.GetHashAgent("HeapIdle", "gauge", 0, float64(stats.HeapIdle)))
 	agent.PutMetricsGauge("HeapInuse", float64(stats.HeapInuse), config.GetHashAgent("HeapInuse", "gauge", 0, float64(stats.HeapInuse)))
 	agent.PutMetricsGauge("HeapObjects", float64(stats.HeapObjects), config.GetHashAgent("HeapObjects", "gauge", 0, float64(stats.HeapObjects)))
-	agent.PutMetricsGauge("HeapReleased", float64(stats.HeapReleased), config.GetHashAgent("", "gauge", 0, float64(stats.HeapReleased)))
+	agent.PutMetricsGauge("HeapReleased", float64(stats.HeapReleased), config.GetHashAgent("HeapReleased", "gauge", 0, float64(stats.HeapReleased)))
 	agent.PutMetricsGauge("HeapSys", float64(stats.HeapSys), config.GetHashAgent("HeapSys", "gauge", 0, float64(stats.HeapSys)))
 	agent.PutMetricsGauge("LastGC", float64(stats.LastGC), config.GetHashAgent("LastGC", "gauge", 0, float64(stats.LastGC)))
 	agent.PutMetricsGauge("Lookups", float64(stats.Lookups), config.GetHashAgent("Lookups", "gauge", 0, float64(stats.Lookups)))
@@ -38,11 +38,6 @@ func DataFromRuntime(agent *storage.MemStorage, stats *runtime.MemStats) {
 	agent.PutMetricsGauge("TotalAlloc", float64(stats.TotalAlloc), config.GetHashAgent("TotalAlloc", "gauge", 0, float64(stats.TotalAlloc)))
 	randV := rand.Float64()
 	agent.PutMetricsGauge("RandomValue", randV, config.GetHashAgent("RandomValue", "gauge", 0, float64(randV)))
-
-	//hashServer := config.GetHashServer("Test1", "gauge", 0, 11.111)
-	//hashServer2 := config.GetHashAgent("Test1", "gauge", 0, 11.111)
-	//log.Error(hashServer)
-	//log.Error(hashServer2)
 
 	pollCount, _, _ := agent.GetMetricsCount("PollCount")
 	agent.PutMetricsCount("PollCount", pollCount+1, config.GetHashAgent("PollCount", "counter", pollCount+1, 0))
