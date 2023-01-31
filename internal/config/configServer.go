@@ -22,7 +22,7 @@ type configServer struct {
 	DebugLevel log.Level `env:"DEBUG_LEVEL" envDefault:"debug"`
 	StoreFile  string    `env:"STORE_FILE"`
 	Restore    bool      `env:"RESTORE" envDefault:"true"`
-	Key        string    `env:"KEY"`
+	Key        string    `env:"KEY" envDefault:"key"`
 }
 
 func SetConfigServer() {
@@ -78,7 +78,7 @@ func GetHashServer(mid string, mtype string, delta int64, value float64) string 
 		data = fmt.Sprintf("%s:%s:%f", mid, mtype, value)
 	}
 
-	h := hmac.New(sha256.New, []byte(cfgAgt.Key))
+	h := hmac.New(sha256.New, []byte(cfgSrv.Key))
 	h.Write([]byte(data))
 	return hex.EncodeToString(h.Sum(nil))
 }

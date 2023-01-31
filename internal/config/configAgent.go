@@ -21,7 +21,7 @@ type configAgent struct {
 	//PollInterval time.Duration `env:"POLL_INTERVAL" envDefault:"2s"`
 	PollInterval time.Duration `env:"POLL_INTERVAL"`
 	//PollInterval time.Duration `env:"POLL_INTERVAL" envDefault:"2s"`
-	Key string `env:"KEY"`
+	Key string `env:"KEY" envDefault:"key"`
 }
 
 func SetConfigAgent() {

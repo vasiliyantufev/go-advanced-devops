@@ -39,6 +39,11 @@ func DataFromRuntime(agent *storage.MemStorage, stats *runtime.MemStats) {
 	randV := rand.Float64()
 	agent.PutMetricsGauge("RandomValue", randV, config.GetHashAgent("RandomValue", "gauge", 0, float64(randV)))
 
+	//hashServer := config.GetHashServer("Test1", "gauge", 0, 11.111)
+	//hashServer2 := config.GetHashAgent("Test1", "gauge", 0, 11.111)
+	//log.Error(hashServer)
+	//log.Error(hashServer2)
+
 	pollCount, _, _ := agent.GetMetricsCount("PollCount")
 	agent.PutMetricsCount("PollCount", pollCount+1, config.GetHashAgent("PollCount", "counter", pollCount+1, 0))
 }
