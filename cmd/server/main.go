@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"github.com/go-chi/chi/v5"
 	log "github.com/sirupsen/logrus"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/app"
@@ -10,9 +9,29 @@ import (
 	"os/signal"
 	"syscall"
 	_ "time"
+
+	"context"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 func main() {
+
+	//db, err := sql.Open("sqlite3",
+	//	"db.db")
+	//if err != nil {
+	//	panic(err)
+	//}
+	//defer db.Close()
+	//// работаем с базой
+	//// ...
+	//// можем продиагностировать соединение
+	//ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+	//defer cancel()
+	//if err = db.PingContext(ctx); err != nil {
+	//	panic(err)
+	//}
+	//// в процессе работы
+	//log.Print(db.PingContext(ctx))
 
 	flags.SetFlagsServer()
 	config.SetConfigServer()
@@ -26,6 +45,8 @@ func main() {
 	r.Use(app.GzipHandle)
 
 	r.Get("/", app.IndexHandler)
+	r.Get("/ping", app.PingHandler)
+
 	r.Route("/value", func(r chi.Router) {
 		r.Get("/{type}/{name}", app.GetMetricsHandler)
 		r.Post("/", app.PostValueMetricsHandler)
