@@ -5,6 +5,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/app"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/config"
+	database "github.com/vasiliyantufev/go-advanced-devops/internal/db"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/storage/flags"
 	"os/signal"
 	"syscall"
@@ -16,25 +17,9 @@ import (
 
 func main() {
 
-	//db, err := sql.Open("sqlite3",
-	//	"db.db")
-	//if err != nil {
-	//	panic(err)
-	//}
-	//defer db.Close()
-	//// работаем с базой
-	//// ...
-	//// можем продиагностировать соединение
-	//ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
-	//defer cancel()
-	//if err = db.PingContext(ctx); err != nil {
-	//	panic(err)
-	//}
-	//// в процессе работы
-	//log.Print(db.PingContext(ctx))
-
 	flags.SetFlagsServer()
 	config.SetConfigServer()
+	database.ConnectDB()
 
 	log.SetLevel(config.GetConfigDebugLevelServer())
 

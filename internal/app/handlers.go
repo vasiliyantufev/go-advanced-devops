@@ -2,19 +2,18 @@ package app
 
 import (
 	"context"
-	"database/sql"
 	"encoding/json"
 	"fmt"
+	"github.com/go-chi/chi/v5"
+	log "github.com/sirupsen/logrus"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/config"
+	database "github.com/vasiliyantufev/go-advanced-devops/internal/db"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
 	"html/template"
 	"io"
 	"net/http"
 	"strconv"
 	"time"
-
-	"github.com/go-chi/chi/v5"
-	log "github.com/sirupsen/logrus"
-	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
 )
 
 var MemServer = storage.NewMemStorage()
@@ -327,15 +326,16 @@ func StartServer(r *chi.Mux) {
 }
 
 func PingHandler(w http.ResponseWriter, r *http.Request) {
-	db, err := sql.Open("sqlite3", "db.db")
-	if err != nil {
-		panic(err)
-	}
-	defer db.Close()
+	//db, err := sql.Open("sqlite3", "db.db")
+	//if err != nil {
+	//	panic(err)
+	//}
+	//defer db.Close()
 
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 	defer cancel()
-	if err = db.PingContext(ctx); err != nil {
+
+	if err := database.GetDB().Ping(ctx); err != nil {
 		log.Error(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Ошибка соединения с базой данных"))
