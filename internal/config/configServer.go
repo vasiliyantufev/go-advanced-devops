@@ -19,10 +19,11 @@ type configServer struct {
 	//StoreInterval time.Duration `env:"STORE_INTERVAL" envDefault:"300s"`
 	StoreInterval time.Duration `env:"STORE_INTERVAL"`
 	//StoreFile string `env:"STORE_FILE" envDefault:"/tmp/devops-metrics-db.json"`
-	DebugLevel log.Level `env:"DEBUG_LEVEL" envDefault:"debug"`
-	StoreFile  string    `env:"STORE_FILE"`
-	Restore    bool      `env:"RESTORE" envDefault:"true"`
-	Key        string    `env:"KEY" envDefault:""`
+	DebugLevel  log.Level `env:"DEBUG_LEVEL" envDefault:"debug"`
+	StoreFile   string    `env:"STORE_FILE"`
+	Restore     bool      `env:"RESTORE" envDefault:"true"`
+	Key         string    `env:"KEY" envDefault:""`
+	DatabaseDns string    `env:"DATABASE_DSN"`
 }
 
 func SetConfigServer() {
@@ -43,6 +44,9 @@ func SetConfigServer() {
 	}
 	if cfgSrv.Key == "" {
 		cfgSrv.Key = flags.GetFlagKeyServer()
+	}
+	if cfgSrv.DatabaseDns == "" {
+		cfgSrv.DatabaseDns = flags.GetFlagDataBaseServer()
 	}
 
 	log.Info(cfgSrv)
@@ -70,6 +74,10 @@ func GetConfigKeyServer() string {
 
 func GetConfigRestoreServer() bool {
 	return cfgSrv.Restore
+}
+
+func GetConfigDBServer() string {
+	return cfgSrv.DatabaseDns
 }
 
 func GetHashServer(mid string, mtype string, delta int64, value float64) string {

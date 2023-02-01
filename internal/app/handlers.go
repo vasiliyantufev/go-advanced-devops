@@ -1,7 +1,7 @@
 package app
 
 import (
-	_ "compress/gzip"
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/config"
@@ -9,7 +9,6 @@ import (
 	"io"
 	"net/http"
 	"strconv"
-	_ "strings"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -324,4 +323,13 @@ func StartServer(r *chi.Mux) {
 	if con := http.ListenAndServe(config.GetConfigAddressServer(), r); con != nil {
 		log.Fatal(con)
 	}
+}
+
+func Ping() {
+	db, err := sql.Open("sqlite3",
+		"db.db")
+	if err != nil {
+		panic(err)
+	}
+	defer db.Close()
 }

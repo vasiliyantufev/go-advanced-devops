@@ -10,16 +10,18 @@ type flagsServer struct {
 	f string //STORE_FILE
 	i string //STORE_INTERVAL
 	k string //KEY
+	d string //DATABASE_DSN
 	r bool   //RESTORE
 }
 
 // Реализация структуры для взаимодействия с ней
-func initFlagsServer(a, f, i, k *string, r *bool) flagsServer {
+func initFlagsServer(a, f, i, k, d *string, r *bool) flagsServer {
 	return flagsServer{
 		a: *a,
 		f: *f,
 		i: *i,
 		k: *k,
+		d: *d,
 		r: *r,
 	}
 }
@@ -31,14 +33,17 @@ func SetFlagsServer() {
 	interval := flag.String("i", "300s", "Интервал времени в секундах, по истечении которого текущие показания сервера сбрасываются на диск ")
 	restore := flag.Bool("r", true, "Булево значение, определяющее, загружать или нет начальные значения из указанного файла при старте сервера")
 	key := flag.String("k", "key", "Ключ для генерации хеша")
+	db := flag.String("d", "db", "База данных")
+
 	flag.Parse()
-	flags := initFlagsServer(address, file, interval, key, restore)
+	flags := initFlagsServer(address, file, interval, key, db, restore)
 
 	fgSrv.a = flags.a
 	fgSrv.f = flags.f
 	fgSrv.i = flags.i
 	fgSrv.k = flags.k
 	fgSrv.r = flags.r
+	fgSrv.d = flags.d
 }
 
 func GetFlagAddressServer() string {
@@ -59,4 +64,8 @@ func GetFlagRestoreServer() bool {
 
 func GetFlagKeyServer() string {
 	return fgSrv.k
+}
+
+func GetFlagDataBaseServer() string {
+	return fgSrv.d
 }

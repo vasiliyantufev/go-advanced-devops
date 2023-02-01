@@ -20,6 +20,7 @@ type configAgent struct {
 	ReportInterval time.Duration `env:"REPORT_INTERVAL"`
 	//PollInterval time.Duration `env:"POLL_INTERVAL" envDefault:"2s"`
 	PollInterval time.Duration `env:"POLL_INTERVAL"`
+	DatabaseDns  string        `env:"DATABASE_DSN"`
 	//PollInterval time.Duration `env:"POLL_INTERVAL" envDefault:"2s"`
 	Key string `env:"KEY" envDefault:""`
 }
