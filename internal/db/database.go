@@ -17,11 +17,11 @@ type DB struct {
 func ConnectDB() {
 	pool, err := pgxpool.Connect(context.Background(), config.GetConfigDBServer())
 	if err != nil {
-		log.Fatal(err)
+		log.Error(err)
 	}
 	db = DB{pool: pool}
 }
 
-func GetDB() *pgxpool.Pool {
+func GetPool() *pgxpool.Pool {
 	return db.pool
 }
