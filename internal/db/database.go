@@ -14,17 +14,15 @@ type DB struct {
 	pool *pgxpool.Pool
 }
 
-func ConnectDB() {
+func ConnectDB() error {
 	pool, err := pgxpool.Connect(context.Background(), config.GetConfigDBServer())
 	if err != nil {
 		log.Error(err)
+		return err
 	}
 	db = DB{pool: pool}
+	return nil
 }
-
-//func GetPool() *pgxpool.Pool {
-//	return db.pool
-//}
 
 func Ping() error {
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
@@ -36,4 +34,23 @@ func Ping() error {
 	}
 
 	return nil
+}
+
+func CreateTables() {
+
+	var metricsTable = `
+        CREATE TABLE IF NOT EXISTS metrics(
+			id    varchar(32) PRIMARY KEY,
+			mtype varchar(32),
+			delta int,
+			value double precision,
+			hash  varchar(32)
+        )
+  `
+	result, err := db.pool.Exec(context.Background(), metricsTable)
+	if err != nil {
+		log.Error(err)
+		return
+	}
+	log.Info(result.String() + " metrics")
 }

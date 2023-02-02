@@ -19,7 +19,10 @@ func main() {
 
 	flags.SetFlagsServer()
 	config.SetConfigServer()
-	database.ConnectDB()
+
+	if err := database.ConnectDB(); err == nil {
+		database.CreateTables()
+	}
 
 	log.SetLevel(config.GetConfigDebugLevelServer())
 
@@ -28,10 +31,8 @@ func main() {
 	r := chi.NewRouter()
 	//r.Use(middleware.Logger)
 	r.Use(app.GzipHandle)
-
 	r.Get("/", app.IndexHandler)
 	r.Get("/ping", app.PingHandler)
-
 	r.Route("/value", func(r chi.Router) {
 		r.Get("/{type}/{name}", app.GetMetricsHandler)
 		r.Post("/", app.PostValueMetricsHandler)
