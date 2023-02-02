@@ -1,7 +1,6 @@
 package app
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/go-chi/chi/v5"
@@ -327,10 +326,7 @@ func StartServer(r *chi.Mux) {
 
 func PingHandler(w http.ResponseWriter, r *http.Request) {
 
-	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
-	defer cancel()
-
-	if err := database.GetPool().Ping(ctx); err != nil {
+	if err := database.Ping(); err != nil {
 		log.Error(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Ошибка соединения с базой данных"))
