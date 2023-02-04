@@ -58,7 +58,7 @@ func CreateTables() {
 
 	//log.Info(res.LastInsertId())
 	if err != nil {
-		log.Fatal(err)
+		log.Error(err)
 		return
 	}
 	log.Info("CREATE TABLE metrics")
