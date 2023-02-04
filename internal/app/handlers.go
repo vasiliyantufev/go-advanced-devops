@@ -234,6 +234,9 @@ func PostMetricsHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
 
+	if config.GetConfigDBServer() != "" {
+		database.InsertOrUpdateMetrics(MemServer)
+	}
 	if config.GetConfigStoreIntervalServer() == 0 {
 		FileStore(MemServer)
 	}
@@ -306,7 +309,7 @@ func RestoreMetricsFromFile() {
 
 func StoreMetricsToFile() {
 
-	if config.GetConfigStoreFileServer() != "" {
+	if config.GetConfigStoreFileServer() != "" && config.GetConfigDBServer() == "" {
 		ticker := time.NewTicker(config.GetConfigStoreIntervalServer())
 		//for range time.Tick(config.GetConfigStoreIntervalServer()) {
 		for range ticker.C {

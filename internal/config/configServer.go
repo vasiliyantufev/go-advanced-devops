@@ -19,12 +19,13 @@ type configServer struct {
 	//StoreInterval time.Duration `env:"STORE_INTERVAL" envDefault:"300s"`
 	StoreInterval time.Duration `env:"STORE_INTERVAL"`
 	//StoreFile string `env:"STORE_FILE" envDefault:"/tmp/devops-metrics-db.json"`
-	DebugLevel  log.Level `env:"DEBUG_LEVEL" envDefault:"debug"`
-	StoreFile   string    `env:"STORE_FILE"`
-	Restore     bool      `env:"RESTORE" envDefault:"true"`
-	Key         string    `env:"KEY" envDefault:""`
-	DatabaseDns string    `env:"DATABASE_DSN"`
-	//DatabaseDns string `env:"DATABASE_DSN" envDefault:"host=localhost port=5432 user=postgres password=myPassword dbname=praktikum sslmode=disable"`
+	DebugLevel log.Level `env:"DEBUG_LEVEL" envDefault:"debug"`
+	StoreFile  string    `env:"STORE_FILE"`
+	Restore    bool      `env:"RESTORE" envDefault:"true"`
+	Key        string    `env:"KEY" envDefault:""`
+	//DatabaseDns string    `env:"DATABASE_DSN"`
+	DatabaseDns string `env:"DATABASE_DSN" envDefault:"host=localhost port=5432 user=postgres password=myPassword dbname=praktikum sslmode=disable"`
+	//DatabaseDns string `env:"DATABASE_DSN" envDefault:"host=localhost port=5432 user=postgres password=myPassword dbname=test sslmode=disable"`
 }
 
 func SetConfigServer() {

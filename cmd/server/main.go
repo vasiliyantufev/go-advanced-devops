@@ -20,6 +20,7 @@ func main() {
 	flags.SetFlagsServer()
 	config.SetConfigServer()
 
+	//database.ConnectDB()
 	if err := database.ConnectDB(); err == nil {
 		database.CreateTables()
 	}
