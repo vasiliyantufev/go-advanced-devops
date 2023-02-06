@@ -309,9 +309,7 @@ func PostMetricsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Debug("Request completed successfully metric")
-	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	w.Write(nil)
 }
 
 func PostValueMetricsHandler(w http.ResponseWriter, r *http.Request) {
