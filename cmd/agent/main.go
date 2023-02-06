@@ -49,7 +49,7 @@ func PutMetrics(ctx context.Context) {
 func SentMetrics(ctx context.Context) {
 	// Create a Resty Client
 	client := resty.New()
-	urlPath := "http://" + config.GetConfigAddressAgent() + "/update/"
+	urlPath := "http://" + config.GetConfigAddressAgent() + "/updates/"
 	ticker := time.NewTicker(config.GetConfigReportIntervalAgent())
 	defer ticker.Stop()
 	for {

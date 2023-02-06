@@ -169,6 +169,84 @@ func GetMetricsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(param))
 }
 
+func PostMetricHandler(w http.ResponseWriter, r *http.Request) {
+
+	resp, err := io.ReadAll(r.Body)
+	if err != nil {
+		log.Error(err.Error())
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	value := storage.JSONMetrics{}
+	if err := json.Unmarshal([]byte(string(resp)), &value); err != nil {
+		log.Error(err.Error())
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	rawValue := storage.JSONMetrics{
+		ID:    value.ID,
+		MType: value.MType,
+	}
+	if value.Value != nil {
+
+		hashServer := config.GetHashServer(value.ID, "gauge", 0, *value.Value)
+		if hashServer != value.Hash && config.GetConfigKeyServer() != "" && config.GetConfigKeyAgent() != "" {
+			log.Error("Хеш-сумма не соответствует расчетной")
+			http.Error(w, "Хеш-сумма не соответствует расчетной", http.StatusBadRequest)
+			return
+		}
+		MemServer.PutMetricsGauge(value.ID, *value.Value, hashServer)
+		rawValue.Value = value.Value
+		rawValue.Hash = hashServer
+
+	}
+	if value.Delta != nil {
+
+		// calculate hash
+		hashServer := config.GetHashServer(value.ID, "counter", *value.Delta, 0)
+		// compare hashes
+		if hashServer != value.Hash && config.GetConfigKeyServer() != "" && config.GetConfigKeyAgent() != "" {
+			log.Error("Хеш-сумма не соответствует расчетной")
+			http.Error(w, "Хеш-сумма не соответствует расчетной", http.StatusBadRequest)
+			return
+		}
+
+		// counter summing logic
+		var sum int64
+		if oldVal, _, exists := MemServer.GetMetricsCount(value.ID); exists {
+			sum = oldVal + *value.Delta
+		} else {
+			sum = *value.Delta
+		}
+		// calculate new hash
+		hashSumServer := config.GetHashServer(value.ID, "counter", sum, 0)
+		// store new metric
+		MemServer.PutMetricsCount(value.ID, sum, hashSumServer)
+
+		rawValue.Delta = &sum
+		rawValue.Hash = hashSumServer
+	}
+
+	resp, err = json.Marshal(rawValue)
+	if err != nil {
+		log.Error(err.Error())
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	}
+
+	if config.GetConfigDBServer() != "" {
+		database.InsertOrUpdateMetrics(MemServer)
+	}
+	if config.GetConfigStoreIntervalServer() == 0 {
+		FileStore(MemServer)
+	}
+
+	log.Debug("Request completed successfully metric:" + value.ID)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(resp)
+}
+
 func PostMetricsHandler(w http.ResponseWriter, r *http.Request) {
 
 	resp, err := io.ReadAll(r.Body)

@@ -40,8 +40,9 @@ func main() {
 	})
 	r.Route("/update", func(r chi.Router) {
 		r.Post("/{type}/{name}/{value}", app.MetricsHandler)
-		r.Post("/", app.PostMetricsHandler)
+		r.Post("/", app.PostMetricHandler)
 	})
+	r.Post("/updates/", app.PostMetricsHandler)
 
 	ctx, cnl := signal.NotifyContext(context.Background(), syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
 	defer cnl()
