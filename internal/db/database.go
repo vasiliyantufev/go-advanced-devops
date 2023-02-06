@@ -99,7 +99,7 @@ func InsertOrUpdateMetrics(metrics *storage.MemStorage) error {
 		}
 	}
 	// шаг 4 — сохраняем изменения
-	return tx.Commit()
+	tx.Commit()
 
 	return nil
 }
