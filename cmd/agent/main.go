@@ -60,14 +60,13 @@ func SentMetrics(ctx context.Context) {
 		case <-ticker.C:
 			log.Info("Sent metrics")
 			metrics := MemAgent.GetAllMetrics()
-			for _, metric := range metrics {
-				_, err := client.R().
-					SetHeader("Content-Type", "application/json").
-					SetBody(metric).
-					Post(urlPath)
-				if err != nil {
-					log.Error(err)
-				}
+
+			_, err := client.R().
+				SetHeader("Content-Type", "application/json").
+				SetBody(metrics).
+				Post(urlPath)
+			if err != nil {
+				log.Error(err)
 			}
 		}
 	}

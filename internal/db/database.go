@@ -64,7 +64,7 @@ func CreateTables() {
 	log.Info("CREATE TABLE metrics")
 }
 
-func InsertOrUpdateMetrics(agent *storage.MemStorage) error {
+func InsertOrUpdateMetrics(metrics *storage.MemStorage) error {
 
 	// шаг 1 — объявляем транзакцию
 	tx, err := db.pool.Begin()
@@ -92,16 +92,15 @@ func InsertOrUpdateMetrics(agent *storage.MemStorage) error {
 	// шаг 2.1 — не забываем закрыть инструкцию, когда она больше не нужна
 	defer stmt.Close()
 
-	for _, val := range agent.GetAllMetrics() {
+	for _, metric := range metrics.GetAllMetrics() {
 		// шаг 3 — указываем, что будет добавлено в транзакцию
-		if _, err = stmt.Exec(val.ID, val.MType, val.Value, val.Delta, val.Hash); err != nil {
+		if _, err = stmt.Exec(metric.ID, metric.MType, metric.Value, metric.Delta, metric.Hash); err != nil {
 			log.Error(err)
 			return err
 		}
 	}
 	// шаг 4 — сохраняем изменения
 	return tx.Commit()
-	//log.Info(stmt.)
 
 	return nil
 }

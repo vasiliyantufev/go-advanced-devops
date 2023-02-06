@@ -178,60 +178,49 @@ func PostMetricsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	value := storage.JSONMetrics{}
-	if err := json.Unmarshal([]byte(string(resp)), &value); err != nil {
+	var metrics []*storage.JSONMetrics
+	if err := json.Unmarshal([]byte(string(resp)), &metrics); err != nil {
 		log.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	rawValue := storage.JSONMetrics{
-		ID:    value.ID,
-		MType: value.MType,
-	}
-	if value.Value != nil {
 
-		hashServer := config.GetHashServer(value.ID, "gauge", 0, *value.Value)
-		if hashServer != value.Hash && config.GetConfigKeyServer() != "" && config.GetConfigKeyAgent() != "" {
-			log.Error("Хеш-сумма не соответствует расчетной")
-			http.Error(w, "Хеш-сумма не соответствует расчетной", http.StatusBadRequest)
-			return
+	for _, metric := range metrics {
+
+		if metric.Value != nil {
+
+			hashServer := config.GetHashServer(metric.ID, "gauge", 0, *metric.Value)
+			if hashServer != metric.Hash && config.GetConfigKeyServer() != "" && config.GetConfigKeyAgent() != "" {
+				log.Error("Хеш-сумма не соответствует расчетной")
+				http.Error(w, "Хеш-сумма не соответствует расчетной", http.StatusBadRequest)
+				return
+			}
+			MemServer.PutMetricsGauge(metric.ID, *metric.Value, hashServer)
+
 		}
-		MemServer.PutMetricsGauge(value.ID, *value.Value, hashServer)
-		rawValue.Value = value.Value
-		rawValue.Hash = hashServer
+		if metric.Delta != nil {
 
-	}
-	if value.Delta != nil {
+			// calculate hash
+			hashServer := config.GetHashServer(metric.ID, "counter", *metric.Delta, 0)
+			// compare hashes
+			if hashServer != metric.Hash && config.GetConfigKeyServer() != "" && config.GetConfigKeyAgent() != "" {
+				log.Error("Хеш-сумма не соответствует расчетной")
+				http.Error(w, "Хеш-сумма не соответствует расчетной", http.StatusBadRequest)
+				return
+			}
 
-		// calculate hash
-		hashServer := config.GetHashServer(value.ID, "counter", *value.Delta, 0)
-		// compare hashes
-		if hashServer != value.Hash && config.GetConfigKeyServer() != "" && config.GetConfigKeyAgent() != "" {
-			log.Error("Хеш-сумма не соответствует расчетной")
-			http.Error(w, "Хеш-сумма не соответствует расчетной", http.StatusBadRequest)
-			return
+			// counter summing logic
+			var sum int64
+			if oldVal, _, exists := MemServer.GetMetricsCount(metric.ID); exists {
+				sum = oldVal + *metric.Delta
+			} else {
+				sum = *metric.Delta
+			}
+			// calculate new hash
+			hashSumServer := config.GetHashServer(metric.ID, "counter", sum, 0)
+			// store new metric
+			MemServer.PutMetricsCount(metric.ID, sum, hashSumServer)
 		}
-
-		// counter summing logic
-		var sum int64
-		if oldVal, _, exists := MemServer.GetMetricsCount(value.ID); exists {
-			sum = oldVal + *value.Delta
-		} else {
-			sum = *value.Delta
-		}
-		// calculate new hash
-		hashSumServer := config.GetHashServer(value.ID, "counter", sum, 0)
-		// store new metric
-		MemServer.PutMetricsCount(value.ID, sum, hashSumServer)
-
-		rawValue.Delta = &sum
-		rawValue.Hash = hashSumServer
-	}
-
-	resp, err = json.Marshal(rawValue)
-	if err != nil {
-		log.Error(err.Error())
-		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
 
 	if config.GetConfigDBServer() != "" {
@@ -241,10 +230,10 @@ func PostMetricsHandler(w http.ResponseWriter, r *http.Request) {
 		FileStore(MemServer)
 	}
 
-	log.Debug("Request completed successfully metric:" + value.ID)
+	log.Debug("Request completed successfully metric")
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	w.Write(resp)
+	w.Write([]byte("Metrics save"))
 }
 
 func PostValueMetricsHandler(w http.ResponseWriter, r *http.Request) {
