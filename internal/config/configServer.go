@@ -23,9 +23,8 @@ type configServer struct {
 	StoreFile   string    `env:"STORE_FILE"`
 	Restore     bool      `env:"RESTORE" envDefault:"true"`
 	Key         string    `env:"KEY" envDefault:""`
-	DatabaseDns string    `env:"DATABASE_DSN"`
-	//DatabaseDns string `env:"DATABASE_DSN" envDefault:"host=localhost port=5432 user=postgres password=myPassword dbname=praktikum sslmode=disable"`
-	//DatabaseDns string `env:"DATABASE_DSN" envDefault:"host=localhost port=5432 user=postgres password=myPassword dbname=test sslmode=disable"`
+	DatabaseDNS string    `env:"DATABASE_DSN"`
+	//DatabaseDNS string `env:"DATABASE_DSN" envDefault:"host=localhost port=5432 user=postgres password=myPassword dbname=praktikum sslmode=disable"`
 }
 
 func SetConfigServer() {
@@ -47,8 +46,8 @@ func SetConfigServer() {
 	if cfgSrv.Key == "" {
 		cfgSrv.Key = flags.GetFlagKeyServer()
 	}
-	if cfgSrv.DatabaseDns == "" {
-		cfgSrv.DatabaseDns = flags.GetFlagDataBaseServer()
+	if cfgSrv.DatabaseDNS == "" {
+		cfgSrv.DatabaseDNS = flags.GetFlagDataBaseServer()
 	}
 
 	log.Info(cfgSrv)
@@ -79,7 +78,7 @@ func GetConfigRestoreServer() bool {
 }
 
 func GetConfigDBServer() string {
-	return cfgSrv.DatabaseDns
+	return cfgSrv.DatabaseDNS
 }
 
 func GetHashServer(mid string, mtype string, delta int64, value float64) string {
