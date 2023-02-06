@@ -12,7 +12,6 @@ import (
 	_ "time"
 
 	"context"
-	_ "github.com/mattn/go-sqlite3"
 )
 
 func main() {

@@ -5,7 +5,6 @@ import (
 	"github.com/vasiliyantufev/go-advanced-devops/internal/config"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
 
-	//_ "github.com/mattn/go-sqlite3"
 	log "github.com/sirupsen/logrus"
 
 	_ "github.com/lib/pq"
