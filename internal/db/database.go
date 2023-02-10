@@ -2,12 +2,10 @@ package database
 
 import (
 	"database/sql"
+	_ "github.com/lib/pq"
+	log "github.com/sirupsen/logrus"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/config"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
-
-	log "github.com/sirupsen/logrus"
-
-	_ "github.com/lib/pq"
 )
 
 var db DB

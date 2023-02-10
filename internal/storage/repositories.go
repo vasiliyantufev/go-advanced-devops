@@ -16,6 +16,7 @@ func NewMemStorage() *MemStorage {
 		data: make(map[string]JSONMetrics),
 	}
 }
+
 func (data *MemStorage) PutMetricsGauge(id string, o float64, h string) {
 	data.mx.Lock()
 	defer data.mx.Unlock()

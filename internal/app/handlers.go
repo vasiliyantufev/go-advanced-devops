@@ -15,16 +15,38 @@ import (
 	"time"
 )
 
-var MemServer = storage.NewMemStorage()
-
 type ViewData struct {
 	MapG map[string]float64
 	MapC map[string]int64
 }
 
-func IndexHandler(w http.ResponseWriter, r *http.Request) {
+type Server struct {
+	mem *storage.MemStorage
+}
 
-	//log.Error(MemServer.GetAllMetrics())
+func NewServer(param *storage.MemStorage) *Server {
+	return &Server{mem: param}
+}
+
+func (s Server) Route() *chi.Mux {
+
+	r := chi.NewRouter()
+	r.Get("/", s.indexHandler)
+	r.Get("/ping", s.pingHandler)
+	r.Route("/value", func(r chi.Router) {
+		r.Get("/{type}/{name}", s.getMetricsHandler)
+		r.Post("/", s.postValueMetricsHandler)
+	})
+	r.Route("/update", func(r chi.Router) {
+		r.Post("/{type}/{name}/{value}", s.metricsHandler)
+		r.Post("/", s.postMetricHandler)
+	})
+	r.Post("/updates/", s.postMetricsHandler)
+
+	return r
+}
+
+func (s Server) indexHandler(w http.ResponseWriter, r *http.Request) {
 
 	tmpl, err := template.ParseFiles("./web/templates/index.html")
 	if err != nil {
@@ -36,7 +58,7 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 	gauges := make(map[string]float64)
 	counters := make(map[string]int64)
 
-	metrics := MemServer.GetAllMetrics()
+	metrics := s.mem.GetAllMetrics()
 
 	for _, metric := range metrics {
 		if metric.MType == "gauge" {
@@ -60,30 +82,15 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func MetricsHandler(w http.ResponseWriter, r *http.Request) {
+func (s Server) metricsHandler(w http.ResponseWriter, r *http.Request) {
 
 	typeMetrics := chi.URLParam(r, "type")
-	if typeMetrics == "" {
-		log.Error("The query parameter type is missing")
-		http.Error(w, "The query parameter type is missing", http.StatusBadRequest)
-		return
-	}
-	if typeMetrics != "gauge" && typeMetrics != "counter" {
-		log.Error("The type incorrect " + typeMetrics)
-		http.Error(w, "The type incorrect", http.StatusNotImplemented)
-		return
-	}
 	nameMetrics := chi.URLParam(r, "name")
-	if nameMetrics == "" {
-		log.Error("The query parameter name is missing")
-		http.Error(w, "The query parameter name is missing", http.StatusBadRequest)
-		return
-	}
-
 	valueMetrics := chi.URLParam(r, "value")
-	if valueMetrics == "" {
-		log.Error("The query parameter value is missing")
-		http.Error(w, "The query parameter value is missing", http.StatusBadRequest)
+
+	if err := storage.ValidURLParamMetrics(typeMetrics, nameMetrics, valueMetrics); err != nil {
+		log.Error(err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -97,7 +104,7 @@ func MetricsHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		hashServer := config.GetHashServer(nameMetrics, "gauge", 0, val)
-		MemServer.PutMetricsGauge(nameMetrics, val, hashServer)
+		s.mem.PutMetricsGauge(nameMetrics, val, hashServer)
 		resp = "Request completed successfully " + nameMetrics + "=" + fmt.Sprint(val)
 	}
 	if typeMetrics == "counter" {
@@ -108,14 +115,14 @@ func MetricsHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		var sum int64
-		if oldVal, _, exists := MemServer.GetMetricsCount(nameMetrics); exists {
+		if oldVal, _, exists := s.mem.GetMetricsCount(nameMetrics); exists {
 			sum = oldVal + val
 		} else {
 			sum = val
 		}
 
 		hashServer := config.GetHashServer(nameMetrics, "counter", val, 0)
-		MemServer.PutMetricsCount(nameMetrics, sum, hashServer)
+		s.mem.PutMetricsCount(nameMetrics, sum, hashServer)
 		resp = "Request completed successfully " + nameMetrics + "=" + fmt.Sprint(sum)
 	}
 
@@ -124,29 +131,20 @@ func MetricsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(resp))
 }
 
-func GetMetricsHandler(w http.ResponseWriter, r *http.Request) {
+func (s Server) getMetricsHandler(w http.ResponseWriter, r *http.Request) {
 
 	typeMetrics := chi.URLParam(r, "type")
-	if typeMetrics == "" {
-		log.Error("The query parameter type is missing")
-		http.Error(w, "The query parameter type is missing", http.StatusBadRequest)
-		return
-	}
-	if typeMetrics != "gauge" && typeMetrics != "counter" {
-		log.Error("The type incorrect " + typeMetrics)
-		http.Error(w, "The type incorrect", http.StatusNotImplemented)
-		return
-	}
 	nameMetrics := chi.URLParam(r, "name")
-	if nameMetrics == "" {
-		log.Error("The query parameter name is missing")
-		http.Error(w, "The query parameter name is missing", http.StatusBadRequest)
+
+	if err := storage.ValidURLParamGetMetrics(typeMetrics, nameMetrics); err != nil {
+		log.Error(err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	var param string
 	if typeMetrics == "gauge" {
-		val, _, exists := MemServer.GetMetricsGauge(nameMetrics)
+		val, _, exists := s.mem.GetMetricsGauge(nameMetrics)
 		if !exists {
 			log.Error("The name " + nameMetrics + " incorrect")
 			http.Error(w, "The name "+nameMetrics+" incorrect", http.StatusNotFound)
@@ -155,7 +153,7 @@ func GetMetricsHandler(w http.ResponseWriter, r *http.Request) {
 		param = fmt.Sprint(val)
 	}
 	if typeMetrics == "counter" {
-		val, _, exists := MemServer.GetMetricsCount(nameMetrics)
+		val, _, exists := s.mem.GetMetricsCount(nameMetrics)
 		if !exists {
 			log.Error("The name " + nameMetrics + " incorrect")
 			http.Error(w, "The name "+nameMetrics+" incorrect", http.StatusNotFound)
@@ -169,7 +167,7 @@ func GetMetricsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(param))
 }
 
-func PostMetricHandler(w http.ResponseWriter, r *http.Request) {
+func (s Server) postMetricHandler(w http.ResponseWriter, r *http.Request) {
 
 	resp, err := io.ReadAll(r.Body)
 	if err != nil {
@@ -196,7 +194,7 @@ func PostMetricHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Хеш-сумма не соответствует расчетной", http.StatusBadRequest)
 			return
 		}
-		MemServer.PutMetricsGauge(value.ID, *value.Value, hashServer)
+		s.mem.PutMetricsGauge(value.ID, *value.Value, hashServer)
 		rawValue.Value = value.Value
 		rawValue.Hash = hashServer
 
@@ -214,7 +212,7 @@ func PostMetricHandler(w http.ResponseWriter, r *http.Request) {
 
 		// counter summing logic
 		var sum int64
-		if oldVal, _, exists := MemServer.GetMetricsCount(value.ID); exists {
+		if oldVal, _, exists := s.mem.GetMetricsCount(value.ID); exists {
 			sum = oldVal + *value.Delta
 		} else {
 			sum = *value.Delta
@@ -222,7 +220,7 @@ func PostMetricHandler(w http.ResponseWriter, r *http.Request) {
 		// calculate new hash
 		hashSumServer := config.GetHashServer(value.ID, "counter", sum, 0)
 		// store new metric
-		MemServer.PutMetricsCount(value.ID, sum, hashSumServer)
+		s.mem.PutMetricsCount(value.ID, sum, hashSumServer)
 
 		rawValue.Delta = &sum
 		rawValue.Hash = hashSumServer
@@ -235,10 +233,10 @@ func PostMetricHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if config.GetConfigDBServer() != "" {
-		database.InsertOrUpdateMetrics(MemServer)
+		database.InsertOrUpdateMetrics(s.mem)
 	}
 	if config.GetConfigStoreIntervalServer() == 0 {
-		FileStore(MemServer)
+		FileStore(s.mem)
 	}
 
 	log.Debug("Request completed successfully metric:" + value.ID)
@@ -247,7 +245,7 @@ func PostMetricHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(resp)
 }
 
-func PostMetricsHandler(w http.ResponseWriter, r *http.Request) {
+func (s Server) postMetricsHandler(w http.ResponseWriter, r *http.Request) {
 
 	resp, err := io.ReadAll(r.Body)
 	if err != nil {
@@ -273,7 +271,7 @@ func PostMetricsHandler(w http.ResponseWriter, r *http.Request) {
 				http.Error(w, "Хеш-сумма не соответствует расчетной", http.StatusBadRequest)
 				return
 			}
-			MemServer.PutMetricsGauge(metric.ID, *metric.Value, hashServer)
+			s.mem.PutMetricsGauge(metric.ID, *metric.Value, hashServer)
 
 		}
 		if metric.Delta != nil {
@@ -289,7 +287,7 @@ func PostMetricsHandler(w http.ResponseWriter, r *http.Request) {
 
 			// counter summing logic
 			var sum int64
-			if oldVal, _, exists := MemServer.GetMetricsCount(metric.ID); exists {
+			if oldVal, _, exists := s.mem.GetMetricsCount(metric.ID); exists {
 				sum = oldVal + *metric.Delta
 			} else {
 				sum = *metric.Delta
@@ -297,22 +295,22 @@ func PostMetricsHandler(w http.ResponseWriter, r *http.Request) {
 			// calculate new hash
 			hashSumServer := config.GetHashServer(metric.ID, "counter", sum, 0)
 			// store new metric
-			MemServer.PutMetricsCount(metric.ID, sum, hashSumServer)
+			s.mem.PutMetricsCount(metric.ID, sum, hashSumServer)
 		}
 	}
 
 	if config.GetConfigDBServer() != "" {
-		database.InsertOrUpdateMetrics(MemServer)
+		database.InsertOrUpdateMetrics(s.mem)
 	}
 	if config.GetConfigStoreIntervalServer() == 0 {
-		FileStore(MemServer)
+		FileStore(s.mem)
 	}
 
 	log.Debug("Request completed successfully metric")
 	w.WriteHeader(http.StatusOK)
 }
 
-func PostValueMetricsHandler(w http.ResponseWriter, r *http.Request) {
+func (s Server) postValueMetricsHandler(w http.ResponseWriter, r *http.Request) {
 
 	resp, err := io.ReadAll(r.Body)
 	if err != nil {
@@ -333,7 +331,7 @@ func PostValueMetricsHandler(w http.ResponseWriter, r *http.Request) {
 		MType: value.MType,
 	}
 	if value.MType == "gauge" {
-		val, hash, exists := MemServer.GetMetricsGauge(value.ID)
+		val, hash, exists := s.mem.GetMetricsGauge(value.ID)
 		if !exists {
 			log.Error("Element " + value.ID + " not exists")
 			http.Error(w, "Element "+value.ID+" not exists", http.StatusNotFound)
@@ -343,7 +341,7 @@ func PostValueMetricsHandler(w http.ResponseWriter, r *http.Request) {
 		rawValue.Hash = hash
 	}
 	if value.MType == "counter" {
-		val, hash, exists := MemServer.GetMetricsCount(value.ID)
+		val, hash, exists := s.mem.GetMetricsCount(value.ID)
 		if !exists {
 			log.Error("Element " + value.ID + " not exists")
 			http.Error(w, "Element "+value.ID+" not exists", http.StatusNotFound)
@@ -364,22 +362,22 @@ func PostValueMetricsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(resp)
 }
 
-func RestoreMetricsFromFile() {
+func (s Server) RestoreMetricsFromFile() {
 
 	if config.GetConfigRestoreServer() {
 		log.Info("Restore metrics")
-		FileRestore(MemServer)
+		FileRestore(s.mem)
 	}
 }
 
-func StoreMetricsToFile() {
+func (s Server) StoreMetricsToFile() {
 
 	if config.GetConfigStoreFileServer() != "" && config.GetConfigDBServer() == "" {
 		ticker := time.NewTicker(config.GetConfigStoreIntervalServer())
 		//for range time.Tick(config.GetConfigStoreIntervalServer()) {
 		for range ticker.C {
 			log.Info("Store metrics")
-			FileStore(MemServer)
+			FileStore(s.mem)
 		}
 	}
 }
@@ -392,7 +390,7 @@ func StartServer(r *chi.Mux) {
 	}
 }
 
-func PingHandler(w http.ResponseWriter, r *http.Request) {
+func (s Server) pingHandler(w http.ResponseWriter, r *http.Request) {
 
 	if err := database.Ping(); err != nil {
 		log.Error(err)

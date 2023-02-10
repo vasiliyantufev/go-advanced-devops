@@ -31,6 +31,8 @@ func SetConfigAgent() {
 		log.Fatal(err)
 	}
 
+	flags.SetFlagsAgent()
+
 	if cfgAgt.Address == "" {
 		cfgAgt.Address = flags.GetFlagAddressAgent()
 	}

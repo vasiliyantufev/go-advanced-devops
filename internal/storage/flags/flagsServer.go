@@ -6,25 +6,23 @@ var fgSrv flagsServer
 
 // Cтруктура хранения флагов
 type flagsServer struct {
-	a string //ADDRESS
-	f string //STORE_FILE
-	i string //STORE_INTERVAL
-	k string //KEY
-	d string //DATABASE_DSN
-	r bool   //RESTORE
-	//buildvcs bool
+	address       string
+	storeFile     string
+	storeInterval string
+	key           string
+	databaseDns   string
+	restore       bool
 }
 
 // Реализация структуры для взаимодействия с ней
-func initFlagsServer(a, f, i, k, d *string, r /*,buildvcs*/ *bool) flagsServer {
+func initFlagsServer(a, f, i, k, d *string, r *bool) flagsServer {
 	return flagsServer{
-		a: *a,
-		f: *f,
-		i: *i,
-		k: *k,
-		d: *d,
-		r: *r,
-		//buildvcs: *buildvcs,
+		address:       *a,
+		storeFile:     *f,
+		storeInterval: *i,
+		key:           *k,
+		databaseDns:   *d,
+		restore:       *r,
 	}
 }
 
@@ -36,41 +34,37 @@ func SetFlagsServer() {
 	restore := flag.Bool("r", true, "Булево значение, определяющее, загружать или нет начальные значения из указанного файла при старте сервера")
 	key := flag.String("k", "key", "Ключ для генерации хеша")
 	db := flag.String("d", "db", "База данных")
-	//buildvcs := flag.Bool("buildvcs", false, "")
 
 	flag.Parse()
-	//flags := initFlagsServer(address, file, interval, key, db, restore, buildvcs)
-	flags := initFlagsServer(address, file, interval, key, db, restore /*, buildvcs*/)
-
-	fgSrv.a = flags.a
-	fgSrv.f = flags.f
-	fgSrv.i = flags.i
-	fgSrv.k = flags.k
-	fgSrv.r = flags.r
-	fgSrv.d = flags.d
-	//fgSrv.buildvcs = flags.buildvcs
+	flags := initFlagsServer(address, file, interval, key, db, restore)
+	fgSrv.address = flags.address
+	fgSrv.storeFile = flags.storeFile
+	fgSrv.storeInterval = flags.storeInterval
+	fgSrv.key = flags.key
+	fgSrv.restore = flags.restore
+	fgSrv.databaseDns = flags.databaseDns
 }
 
 func GetFlagAddressServer() string {
-	return fgSrv.a
+	return fgSrv.address
 }
 
 func GetFlagStoreFileServer() string {
-	return fgSrv.f
+	return fgSrv.storeFile
 }
 
 func GetFlagStoreIntervalServer() string {
-	return fgSrv.i
+	return fgSrv.storeInterval
 }
 
 func GetFlagRestoreServer() bool {
-	return fgSrv.r
+	return fgSrv.restore
 }
 
 func GetFlagKeyServer() string {
-	return fgSrv.k
+	return fgSrv.key
 }
 
 func GetFlagDataBaseServer() string {
-	return fgSrv.d
+	return fgSrv.databaseDns
 }

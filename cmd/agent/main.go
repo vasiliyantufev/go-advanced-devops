@@ -7,29 +7,26 @@ import (
 	"github.com/vasiliyantufev/go-advanced-devops/internal/app"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/config"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
-	"github.com/vasiliyantufev/go-advanced-devops/internal/storage/flags"
 	"os/signal"
 	"runtime"
 	"syscall"
 	"time"
 )
 
-var MemAgent = storage.NewMemStorage()
-
 func main() {
 
-	flags.SetFlagsAgent()
 	config.SetConfigAgent()
+	mem := storage.NewMemStorage()
 
 	ctx, cnl := signal.NotifyContext(context.Background(), syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
 	defer cnl()
-	go PutMetrics(ctx)
-	go SentMetrics(ctx)
+	go PutMetrics(ctx, mem)
+	go SentMetrics(ctx, mem)
 	<-ctx.Done()
 	log.Println("agent shutdown on signal with:", ctx.Err())
 }
 
-func PutMetrics(ctx context.Context) {
+func PutMetrics(ctx context.Context, mem *storage.MemStorage) {
 	ticker := time.NewTicker(config.GetConfigPollIntervalAgent())
 	defer ticker.Stop()
 	for {
@@ -41,12 +38,12 @@ func PutMetrics(ctx context.Context) {
 			log.Info("Put metrics")
 			stats := new(runtime.MemStats)
 			runtime.ReadMemStats(stats)
-			app.DataFromRuntime(MemAgent, stats)
+			app.DataFromRuntime(mem, stats)
 		}
 	}
 }
 
-func SentMetrics(ctx context.Context) {
+func SentMetrics(ctx context.Context, mem *storage.MemStorage) {
 	// Create a Resty Client
 	client := resty.New()
 	urlPath := "http://" + config.GetConfigAddressAgent() + "/updates/"
@@ -59,7 +56,7 @@ func SentMetrics(ctx context.Context) {
 			return
 		case <-ticker.C:
 			log.Info("Sent metrics")
-			metrics := MemAgent.GetAllMetrics()
+			metrics := mem.GetAllMetrics()
 
 			_, err := client.R().
 				SetHeader("Content-Type", "application/json").
