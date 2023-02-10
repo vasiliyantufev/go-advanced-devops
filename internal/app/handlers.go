@@ -21,11 +21,11 @@ type ViewData struct {
 }
 
 type Server struct {
-	mem *storage.MemStorage
+	Mem *storage.MemStorage
 }
 
 func NewServer(param *storage.MemStorage) *Server {
-	return &Server{mem: param}
+	return &Server{Mem: param}
 }
 
 func (s Server) Route() *chi.Mux {
@@ -58,7 +58,7 @@ func (s Server) indexHandler(w http.ResponseWriter, r *http.Request) {
 	gauges := make(map[string]float64)
 	counters := make(map[string]int64)
 
-	metrics := s.mem.GetAllMetrics()
+	metrics := s.Mem.GetAllMetrics()
 
 	for _, metric := range metrics {
 		if metric.MType == "gauge" {
@@ -105,7 +105,7 @@ func (s Server) metricsHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		hashServer := config.GetHashServer(nameMetrics, "gauge", 0, val)
-		s.mem.PutMetricsGauge(nameMetrics, val, hashServer)
+		s.Mem.PutMetricsGauge(nameMetrics, val, hashServer)
 		resp = "Request completed successfully " + nameMetrics + "=" + fmt.Sprint(val)
 	}
 	if typeMetrics == "counter" {
@@ -116,14 +116,14 @@ func (s Server) metricsHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		var sum int64
-		if oldVal, _, exists := s.mem.GetMetricsCount(nameMetrics); exists {
+		if oldVal, _, exists := s.Mem.GetMetricsCount(nameMetrics); exists {
 			sum = oldVal + val
 		} else {
 			sum = val
 		}
 
 		hashServer := config.GetHashServer(nameMetrics, "counter", val, 0)
-		s.mem.PutMetricsCount(nameMetrics, sum, hashServer)
+		s.Mem.PutMetricsCount(nameMetrics, sum, hashServer)
 		resp = "Request completed successfully " + nameMetrics + "=" + fmt.Sprint(sum)
 	}
 
@@ -143,10 +143,10 @@ func (s Server) getMetricsHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), status)
 		return
 	}
-	
+
 	var param string
 	if typeMetrics == "gauge" {
-		val, _, exists := s.mem.GetMetricsGauge(nameMetrics)
+		val, _, exists := s.Mem.GetMetricsGauge(nameMetrics)
 		if !exists {
 			log.Error("The name " + nameMetrics + " incorrect")
 			http.Error(w, "The name "+nameMetrics+" incorrect", http.StatusNotFound)
@@ -155,7 +155,7 @@ func (s Server) getMetricsHandler(w http.ResponseWriter, r *http.Request) {
 		param = fmt.Sprint(val)
 	}
 	if typeMetrics == "counter" {
-		val, _, exists := s.mem.GetMetricsCount(nameMetrics)
+		val, _, exists := s.Mem.GetMetricsCount(nameMetrics)
 		if !exists {
 			log.Error("The name " + nameMetrics + " incorrect")
 			http.Error(w, "The name "+nameMetrics+" incorrect", http.StatusNotFound)
@@ -196,7 +196,7 @@ func (s Server) postMetricHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Хеш-сумма не соответствует расчетной", http.StatusBadRequest)
 			return
 		}
-		s.mem.PutMetricsGauge(value.ID, *value.Value, hashServer)
+		s.Mem.PutMetricsGauge(value.ID, *value.Value, hashServer)
 		rawValue.Value = value.Value
 		rawValue.Hash = hashServer
 
@@ -214,7 +214,7 @@ func (s Server) postMetricHandler(w http.ResponseWriter, r *http.Request) {
 
 		// counter summing logic
 		var sum int64
-		if oldVal, _, exists := s.mem.GetMetricsCount(value.ID); exists {
+		if oldVal, _, exists := s.Mem.GetMetricsCount(value.ID); exists {
 			sum = oldVal + *value.Delta
 		} else {
 			sum = *value.Delta
@@ -222,7 +222,7 @@ func (s Server) postMetricHandler(w http.ResponseWriter, r *http.Request) {
 		// calculate new hash
 		hashSumServer := config.GetHashServer(value.ID, "counter", sum, 0)
 		// store new metric
-		s.mem.PutMetricsCount(value.ID, sum, hashSumServer)
+		s.Mem.PutMetricsCount(value.ID, sum, hashSumServer)
 
 		rawValue.Delta = &sum
 		rawValue.Hash = hashSumServer
@@ -235,10 +235,10 @@ func (s Server) postMetricHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if config.GetConfigDBServer() != "" {
-		database.InsertOrUpdateMetrics(s.mem)
+		database.InsertOrUpdateMetrics(s.Mem)
 	}
 	if config.GetConfigStoreIntervalServer() == 0 {
-		FileStore(s.mem)
+		FileStore(s.Mem)
 	}
 
 	log.Debug("Request completed successfully metric:" + value.ID)
@@ -273,7 +273,7 @@ func (s Server) postMetricsHandler(w http.ResponseWriter, r *http.Request) {
 				http.Error(w, "Хеш-сумма не соответствует расчетной", http.StatusBadRequest)
 				return
 			}
-			s.mem.PutMetricsGauge(metric.ID, *metric.Value, hashServer)
+			s.Mem.PutMetricsGauge(metric.ID, *metric.Value, hashServer)
 
 		}
 		if metric.Delta != nil {
@@ -289,7 +289,7 @@ func (s Server) postMetricsHandler(w http.ResponseWriter, r *http.Request) {
 
 			// counter summing logic
 			var sum int64
-			if oldVal, _, exists := s.mem.GetMetricsCount(metric.ID); exists {
+			if oldVal, _, exists := s.Mem.GetMetricsCount(metric.ID); exists {
 				sum = oldVal + *metric.Delta
 			} else {
 				sum = *metric.Delta
@@ -297,15 +297,15 @@ func (s Server) postMetricsHandler(w http.ResponseWriter, r *http.Request) {
 			// calculate new hash
 			hashSumServer := config.GetHashServer(metric.ID, "counter", sum, 0)
 			// store new metric
-			s.mem.PutMetricsCount(metric.ID, sum, hashSumServer)
+			s.Mem.PutMetricsCount(metric.ID, sum, hashSumServer)
 		}
 	}
 
 	if config.GetConfigDBServer() != "" {
-		database.InsertOrUpdateMetrics(s.mem)
+		database.InsertOrUpdateMetrics(s.Mem)
 	}
 	if config.GetConfigStoreIntervalServer() == 0 {
-		FileStore(s.mem)
+		FileStore(s.Mem)
 	}
 
 	log.Debug("Request completed successfully metric")
@@ -333,7 +333,7 @@ func (s Server) postValueMetricsHandler(w http.ResponseWriter, r *http.Request) 
 		MType: value.MType,
 	}
 	if value.MType == "gauge" {
-		val, hash, exists := s.mem.GetMetricsGauge(value.ID)
+		val, hash, exists := s.Mem.GetMetricsGauge(value.ID)
 		if !exists {
 			log.Error("Element " + value.ID + " not exists")
 			http.Error(w, "Element "+value.ID+" not exists", http.StatusNotFound)
@@ -343,7 +343,7 @@ func (s Server) postValueMetricsHandler(w http.ResponseWriter, r *http.Request) 
 		rawValue.Hash = hash
 	}
 	if value.MType == "counter" {
-		val, hash, exists := s.mem.GetMetricsCount(value.ID)
+		val, hash, exists := s.Mem.GetMetricsCount(value.ID)
 		if !exists {
 			log.Error("Element " + value.ID + " not exists")
 			http.Error(w, "Element "+value.ID+" not exists", http.StatusNotFound)
@@ -368,7 +368,7 @@ func (s Server) RestoreMetricsFromFile() {
 
 	if config.GetConfigRestoreServer() {
 		log.Info("Restore metrics")
-		FileRestore(s.mem)
+		FileRestore(s.Mem)
 	}
 }
 
@@ -379,7 +379,7 @@ func (s Server) StoreMetricsToFile() {
 		//for range time.Tick(config.GetConfigStoreIntervalServer()) {
 		for range ticker.C {
 			log.Info("Store metrics")
-			FileStore(s.mem)
+			FileStore(s.Mem)
 		}
 	}
 }

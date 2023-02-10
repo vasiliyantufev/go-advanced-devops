@@ -40,6 +40,6 @@ func main() {
 		go srv.StoreMetricsToFile()
 	}
 	<-ctx.Done()
-	//!!app.FileStore(srv.)
+	app.FileStore(srv.Mem)
 	log.Info("server shutdown on signal with:", ctx.Err())
 }
