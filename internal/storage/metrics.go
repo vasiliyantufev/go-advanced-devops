@@ -2,36 +2,36 @@ package storage
 
 import (
 	"fmt"
-	log "github.com/sirupsen/logrus"
+	"net/http"
 )
 
-func ValidURLParamMetrics(typeMetrics, nameMetrics, valueMetrics string) error {
+func ValidURLParamMetrics(typeMetrics, nameMetrics, valueMetrics string) (int, error) {
 
 	if typeMetrics == "" {
-		return fmt.Errorf("The query parameter type is missing")
+		return http.StatusBadRequest, fmt.Errorf("The query parameter type is missing")
 	}
 	if typeMetrics != "gauge" && typeMetrics != "counter" {
-		return fmt.Errorf("The type incorrect " + typeMetrics)
+		return http.StatusNotImplemented, fmt.Errorf("The type incorrect " + typeMetrics)
 	}
 	if nameMetrics == "" {
-		return fmt.Errorf("The query parameter name is missing")
+		return http.StatusBadRequest, fmt.Errorf("The query parameter name is missing")
 	}
 	if valueMetrics == "" {
-		log.Error("The query parameter value is missing")
+		return http.StatusBadRequest, fmt.Errorf("The query parameter name is missing")
 	}
-	return nil
+	return 0, nil
 }
 
-func ValidURLParamGetMetrics(typeMetrics, nameMetrics string) error {
+func ValidURLParamGetMetrics(typeMetrics, nameMetrics string) (int, error) {
 
 	if typeMetrics == "" {
-		return fmt.Errorf("The query parameter type is missing")
+		return http.StatusBadRequest, fmt.Errorf("The query parameter type is missing")
 	}
 	if typeMetrics != "gauge" && typeMetrics != "counter" {
-		return fmt.Errorf("The type incorrect " + typeMetrics)
+		return http.StatusNotImplemented, fmt.Errorf("The type incorrect " + typeMetrics)
 	}
 	if nameMetrics == "" {
-		return fmt.Errorf("The query parameter name is missing")
+		return http.StatusBadRequest, fmt.Errorf("The query parameter name is missing")
 	}
-	return nil
+	return 0, nil
 }

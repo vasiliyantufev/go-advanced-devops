@@ -10,7 +10,7 @@ type flagsServer struct {
 	storeFile     string
 	storeInterval string
 	key           string
-	databaseDns   string
+	databaseDNS   string
 	restore       bool
 }
 
@@ -21,7 +21,7 @@ func initFlagsServer(a, f, i, k, d *string, r *bool) flagsServer {
 		storeFile:     *f,
 		storeInterval: *i,
 		key:           *k,
-		databaseDns:   *d,
+		databaseDNS:   *d,
 		restore:       *r,
 	}
 }
@@ -42,7 +42,7 @@ func SetFlagsServer() {
 	fgSrv.storeInterval = flags.storeInterval
 	fgSrv.key = flags.key
 	fgSrv.restore = flags.restore
-	fgSrv.databaseDns = flags.databaseDns
+	fgSrv.databaseDNS = flags.databaseDNS
 }
 
 func GetFlagAddressServer() string {
@@ -66,5 +66,5 @@ func GetFlagKeyServer() string {
 }
 
 func GetFlagDataBaseServer() string {
-	return fgSrv.databaseDns
+	return fgSrv.databaseDNS
 }

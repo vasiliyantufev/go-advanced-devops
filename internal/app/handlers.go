@@ -88,9 +88,10 @@ func (s Server) metricsHandler(w http.ResponseWriter, r *http.Request) {
 	nameMetrics := chi.URLParam(r, "name")
 	valueMetrics := chi.URLParam(r, "value")
 
-	if err := storage.ValidURLParamMetrics(typeMetrics, nameMetrics, valueMetrics); err != nil {
+	status, err := storage.ValidURLParamMetrics(typeMetrics, nameMetrics, valueMetrics)
+	if err != nil {
 		log.Error(err)
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		http.Error(w, err.Error(), status)
 		return
 	}
 
@@ -136,12 +137,13 @@ func (s Server) getMetricsHandler(w http.ResponseWriter, r *http.Request) {
 	typeMetrics := chi.URLParam(r, "type")
 	nameMetrics := chi.URLParam(r, "name")
 
-	if err := storage.ValidURLParamGetMetrics(typeMetrics, nameMetrics); err != nil {
+	status, err := storage.ValidURLParamGetMetrics(typeMetrics, nameMetrics)
+	if err != nil {
 		log.Error(err)
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		http.Error(w, err.Error(), status)
 		return
 	}
-
+	
 	var param string
 	if typeMetrics == "gauge" {
 		val, _, exists := s.mem.GetMetricsGauge(nameMetrics)
