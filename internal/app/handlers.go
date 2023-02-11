@@ -397,10 +397,8 @@ func (s Server) pingHandler(w http.ResponseWriter, r *http.Request) {
 	if err := database.Ping(); err != nil {
 		log.Error(err)
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Ошибка соединения с базой данных"))
+		return
 	}
-
 	log.Info("ping")
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("ping"))
 }

@@ -29,6 +29,9 @@ func ConnectDB() error {
 	}
 	//defer pool.Close()
 	db = DB{pool: pool}
+	if err := Ping(); err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -42,6 +45,7 @@ func Ping() error {
 }
 
 func CreateTables() {
+
 	var metricsTable = `
 		CREATE TABLE IF NOT EXISTS metrics (
     		id VARCHAR(256),
@@ -63,9 +67,8 @@ func CreateTables() {
 		return
 	}
 	log.Info("CREATE TABLE metrics")
-} /**/
+}
 
-/**/
 func CreateTablesMigration() {
 
 	driver, err := postgres.WithInstance(db.pool, &postgres.Config{})

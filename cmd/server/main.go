@@ -17,7 +17,7 @@ func main() {
 	config.SetConfigServer()
 
 	if err := database.ConnectDB(); err == nil {
-		database.CreateTables()
+		database.CreateTablesMigration()
 	}
 
 	log.SetLevel(config.GetConfigDebugLevelServer())
