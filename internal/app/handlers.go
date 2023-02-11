@@ -3,16 +3,18 @@ package app
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/go-chi/chi/v5"
-	log "github.com/sirupsen/logrus"
-	"github.com/vasiliyantufev/go-advanced-devops/internal/config"
-	database "github.com/vasiliyantufev/go-advanced-devops/internal/db"
-	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
 	"html/template"
 	"io"
 	"net/http"
 	"strconv"
 	"time"
+
+	"github.com/vasiliyantufev/go-advanced-devops/internal/config"
+	database "github.com/vasiliyantufev/go-advanced-devops/internal/db"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
+
+	"github.com/go-chi/chi/v5"
+	log "github.com/sirupsen/logrus"
 )
 
 type ViewData struct {

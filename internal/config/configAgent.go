@@ -5,10 +5,12 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
+	"time"
+
+	"github.com/vasiliyantufev/go-advanced-devops/internal/storage/flags"
+
 	"github.com/caarlos0/env/v6"
 	log "github.com/sirupsen/logrus"
-	"github.com/vasiliyantufev/go-advanced-devops/internal/storage/flags"
-	"time"
 )
 
 var cfgAgt configAgent

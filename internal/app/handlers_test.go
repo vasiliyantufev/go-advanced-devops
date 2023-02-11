@@ -2,12 +2,14 @@ package app
 
 import (
 	"fmt"
-	"github.com/go-chi/chi/v5"
-	"github.com/stretchr/testify/assert"
-	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
 	"net/http/httptest"
 	"strconv"
 	"testing"
+
+	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestCounterHandler(t *testing.T) {

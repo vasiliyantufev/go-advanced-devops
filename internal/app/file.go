@@ -2,11 +2,13 @@ package app
 
 import (
 	"encoding/json"
-	log "github.com/sirupsen/logrus"
-	"github.com/vasiliyantufev/go-advanced-devops/internal/config"
-	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
 	"io"
 	"os"
+
+	"github.com/vasiliyantufev/go-advanced-devops/internal/config"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
+
+	log "github.com/sirupsen/logrus"
 )
 
 type metric struct {

@@ -2,15 +2,17 @@ package main
 
 import (
 	"context"
-	"github.com/go-resty/resty/v2"
-	log "github.com/sirupsen/logrus"
-	"github.com/vasiliyantufev/go-advanced-devops/internal/app"
-	"github.com/vasiliyantufev/go-advanced-devops/internal/config"
-	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
 	"os/signal"
 	"runtime"
 	"syscall"
 	"time"
+
+	"github.com/vasiliyantufev/go-advanced-devops/internal/app"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/config"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
+
+	"github.com/go-resty/resty/v2"
+	log "github.com/sirupsen/logrus"
 )
 
 func main() {

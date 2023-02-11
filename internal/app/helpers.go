@@ -1,10 +1,11 @@
 package app
 
 import (
-	"github.com/vasiliyantufev/go-advanced-devops/internal/config"
-	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
 	"math/rand"
 	"runtime"
+
+	"github.com/vasiliyantufev/go-advanced-devops/internal/config"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
 )
 
 func DataFromRuntime(agent *storage.MemStorage, stats *runtime.MemStats) {
