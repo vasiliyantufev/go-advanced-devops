@@ -2,10 +2,14 @@ package database
 
 import (
 	"database/sql"
+	"github.com/golang-migrate/migrate/v4"
+	"github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/lib/pq"
 	log "github.com/sirupsen/logrus"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/config"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
+
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 )
 
 var db DB
@@ -37,8 +41,8 @@ func Ping() error {
 	return nil
 }
 
-func CreateTables() {
-	var metricsTable = `		
+/*func CreateTables() {
+	var metricsTable = `
 		CREATE TABLE IF NOT EXISTS metrics (
     		id VARCHAR(256),
 		    mtype VARCHAR(10),
@@ -59,7 +63,27 @@ func CreateTables() {
 		return
 	}
 	log.Info("CREATE TABLE metrics")
-}
+} */
+
+func CreateTables() {
+
+	driver, err := postgres.WithInstance(db.pool, &postgres.Config{})
+	if err != nil {
+		log.Error(err)
+	}
+	m, err := migrate.NewWithDatabaseInstance(
+		"file://./migrations",
+		"postgres", driver)
+	if err != nil {
+		log.Error(err)
+	}
+	if err = m.Up(); err != nil {
+		log.Error(err)
+	}
+	//if !errors.Is(err, migrate.ErrNoChange) {
+	//	log.Info("CREATE TABLE metrics")
+	//}
+} /**/
 
 func InsertOrUpdateMetrics(metrics *storage.MemStorage) error {
 
