@@ -41,7 +41,6 @@ func Ping() error {
 	return nil
 }
 
-/*
 func CreateTables() {
 	var metricsTable = `
 		CREATE TABLE IF NOT EXISTS metrics (
@@ -64,9 +63,10 @@ func CreateTables() {
 		return
 	}
 	log.Info("CREATE TABLE metrics")
-} */
+} /**/
 
-func CreateTables() {
+/**/
+func CreateTablesMigration() {
 
 	driver, err := postgres.WithInstance(db.pool, &postgres.Config{})
 	if err != nil {
@@ -84,7 +84,7 @@ func CreateTables() {
 	//if !errors.Is(err, migrate.ErrNoChange) {
 	//	log.Info("CREATE TABLE metrics")
 	//}
-} /**/
+}
 
 func InsertOrUpdateMetrics(metrics *storage.MemStorage) error {
 
