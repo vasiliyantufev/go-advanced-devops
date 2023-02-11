@@ -30,6 +30,7 @@ func main() {
 	r := chi.NewRouter()
 	//r.Use(middleware.Logger)
 	r.Use(app.GzipHandle)
+
 	r.Mount("/", srv.Route())
 
 	ctx, cnl := signal.NotifyContext(context.Background(), syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)

@@ -41,7 +41,8 @@ func Ping() error {
 	return nil
 }
 
-/*func CreateTables() {
+/*
+func CreateTables() {
 	var metricsTable = `
 		CREATE TABLE IF NOT EXISTS metrics (
     		id VARCHAR(256),
