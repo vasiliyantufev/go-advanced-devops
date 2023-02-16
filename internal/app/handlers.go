@@ -399,13 +399,18 @@ func StartServer(r *chi.Mux, config *config.ConfigServer) {
 
 func (s Server) pingHandler(w http.ResponseWriter, r *http.Request) {
 
-	if err := s.database.Ping(); err != nil {
-		log.Error(err)
-		w.WriteHeader(http.StatusInternalServerError)
+	if s.database != nil {
+		if err := s.database.Ping(); err != nil {
+			log.Error(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		log.Info("ping")
+		w.WriteHeader(http.StatusOK)
 		return
 	}
-	log.Info("ping")
-	w.WriteHeader(http.StatusOK)
+	log.Error("db is nil")
+	w.WriteHeader(http.StatusInternalServerError)
 }
 
 func (s Server) GetMem() *storage.MemStorage {
