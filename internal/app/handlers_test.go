@@ -23,7 +23,7 @@ func TestCounterHandler(t *testing.T) {
 	mem := storage.NewMemStorage()
 	hashServer := &config.HashServer{}
 	configServer := config.NewConfigServer()
-	srv := NewServer(mem, configServer, hashServer)
+	srv := NewServer(mem, configServer, nil, hashServer)
 
 	rtr := chi.NewRouter()
 	rtr.Get("/value/{type}/{name}", srv.getMetricsHandler)

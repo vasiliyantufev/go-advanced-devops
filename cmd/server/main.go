@@ -2,12 +2,12 @@ package main
 
 import (
 	"context"
+	database "github.com/vasiliyantufev/go-advanced-devops/internal/db"
 	"os/signal"
 	"syscall"
 
 	"github.com/vasiliyantufev/go-advanced-devops/internal/app"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/config"
-	database "github.com/vasiliyantufev/go-advanced-devops/internal/db"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
 
 	"github.com/go-chi/chi/v5"
@@ -16,20 +16,24 @@ import (
 
 func main() {
 
-	cfg := config.NewConfigServer()
+	configServer := config.NewConfigServer()
 
-	if err := database.ConnectDB(cfg); err == nil {
-		database.CreateTablesMigration()
+	//if err := database.ConnectDB(cfg); err == nil {
+	//	database.CreateTablesMigration()
+	//}
+	db, err := database.NewDB(configServer)
+	if err != nil {
+		log.Error(err)
+	} else {
+		defer db.Close()
+		db.CreateTablesMigration()
 	}
 
 	mem := storage.NewMemStorage()
 	hashServer := &config.HashServer{}
 
-	log.SetLevel(cfg.GetConfigDebugLevelServer())
-	//log.SetLevel(config.GetConfigDebugLevelServer())
-
-	//srv := app.NewServer(mem, cfg, hashServer)
-	srv := app.NewServer(mem, cfg, hashServer)
+	log.SetLevel(configServer.GetConfigDebugLevelServer())
+	srv := app.NewServer(mem, configServer, db, hashServer)
 
 	srv.RestoreMetricsFromFile()
 
@@ -43,8 +47,7 @@ func main() {
 	defer cnl()
 
 	go app.StartServer(r, srv.GetConfig())
-	if cfg.GetConfigStoreIntervalServer() > 0 {
-		//if config.GetConfigStoreIntervalServer() > 0 {
+	if configServer.GetConfigStoreIntervalServer() > 0 {
 		go srv.StoreMetricsToFile()
 	}
 	<-ctx.Done()
