@@ -48,7 +48,7 @@ func (m *metric) Close() error {
 	return m.file.Close()
 }
 
-func FileStore(agent *storage.MemStorage) {
+func FileStore(mem *storage.MemStorage, config *config.ConfigServer) {
 
 	mWrite, err := NewMetricReadWriter(config.GetConfigStoreFileServer())
 	if err != nil {
@@ -56,7 +56,7 @@ func FileStore(agent *storage.MemStorage) {
 	}
 	defer mWrite.Close()
 
-	metrics := agent.GetAllMetrics()
+	metrics := mem.GetAllMetrics()
 	if len(metrics) == 0 {
 		return
 	}
@@ -66,14 +66,14 @@ func FileStore(agent *storage.MemStorage) {
 	if _, err := mWrite.file.Seek(0, 0); err != nil {
 		log.Error("failed to seek:", err)
 	}
-	for _, val := range agent.GetAllMetrics() {
+	for _, val := range mem.GetAllMetrics() {
 		if err := mWrite.WriteMetric(&val); err != nil {
 			log.Error("write to file failed with", err)
 		}
 	}
 }
 
-func FileRestore(agent *storage.MemStorage) {
+func FileRestore(mem *storage.MemStorage, config *config.ConfigServer) {
 
 	mRead, err := NewMetricReadWriter(config.GetConfigStoreFileServer())
 	if err != nil {
@@ -92,10 +92,10 @@ func FileRestore(agent *storage.MemStorage) {
 			return
 		}
 		if mr.MType == "counter" {
-			agent.PutMetricsCount(mr.ID, *mr.Delta, mr.Hash)
+			mem.PutMetricsCount(mr.ID, *mr.Delta, mr.Hash)
 		}
 		if mr.MType == "gauge" {
-			agent.PutMetricsGauge(mr.ID, *mr.Value, mr.Hash)
+			mem.PutMetricsGauge(mr.ID, *mr.Value, mr.Hash)
 		}
 	}
 }

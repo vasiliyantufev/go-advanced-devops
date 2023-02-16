@@ -1,32 +1,37 @@
 package flags
 
-import "flag"
+import (
+	"flag"
+)
 
-var fgSrv flagsServer
+//var fgSrv flagsServer
 
 // Cтруктура хранения флагов
 type flagsServer struct {
-	address       string
-	storeFile     string
-	storeInterval string
-	key           string
-	databaseDNS   string
-	restore       bool
+	Address       string
+	StoreFile     string
+	StoreInterval string
+	Key           string
+	DNS           string
+	Restore       bool
 }
 
 // Реализация структуры для взаимодействия с ней
-func initFlagsServer(a, f, i, k, d *string, r *bool) flagsServer {
+func initFlagsServer(address, storeFile, storeInterval, key, DNS *string, restore *bool) flagsServer {
 	return flagsServer{
-		address:       *a,
-		storeFile:     *f,
-		storeInterval: *i,
-		key:           *k,
-		databaseDNS:   *d,
-		restore:       *r,
+		Address:       *address,
+		StoreFile:     *storeFile,
+		StoreInterval: *storeInterval,
+		Key:           *key,
+		DNS:           *DNS,
+		Restore:       *restore,
 	}
 }
 
-func SetFlagsServer() {
+func NewFlagsServer() flagsServer {
+
+	var fgSrv flagsServer
+
 	// Установка флагов
 	address := flag.String("a", "localhost:8080", "Адрес сервера")
 	file := flag.String("f", "/tmp/devops-metrics-db.json", "Строка, имя файла, где хранятся значения")
@@ -37,34 +42,14 @@ func SetFlagsServer() {
 
 	flag.Parse()
 	flags := initFlagsServer(address, file, interval, key, db, restore)
-	fgSrv.address = flags.address
-	fgSrv.storeFile = flags.storeFile
-	fgSrv.storeInterval = flags.storeInterval
-	fgSrv.key = flags.key
-	fgSrv.restore = flags.restore
-	fgSrv.databaseDNS = flags.databaseDNS
-}
+	fgSrv.Address = flags.Address
+	fgSrv.StoreFile = flags.StoreFile
+	fgSrv.StoreInterval = flags.StoreInterval
+	fgSrv.Key = flags.Key
+	fgSrv.Restore = flags.Restore
+	fgSrv.DNS = flags.DNS
 
-func GetFlagAddressServer() string {
-	return fgSrv.address
-}
+	//log.Fatal(fgSrv.DNS)
 
-func GetFlagStoreFileServer() string {
-	return fgSrv.storeFile
-}
-
-func GetFlagStoreIntervalServer() string {
-	return fgSrv.storeInterval
-}
-
-func GetFlagRestoreServer() bool {
-	return fgSrv.restore
-}
-
-func GetFlagKeyServer() string {
-	return fgSrv.key
-}
-
-func GetFlagDataBaseServer() string {
-	return fgSrv.databaseDNS
+	return fgSrv
 }

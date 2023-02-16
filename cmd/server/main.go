@@ -16,16 +16,20 @@ import (
 
 func main() {
 
-	config.SetConfigServer()
+	cfg := config.NewConfigServer()
 
-	if err := database.ConnectDB(); err == nil {
+	if err := database.ConnectDB(cfg); err == nil {
 		database.CreateTablesMigration()
 	}
 
-	log.SetLevel(config.GetConfigDebugLevelServer())
-
 	mem := storage.NewMemStorage()
-	srv := app.NewServer(mem)
+	hashServer := &config.HashServer{}
+
+	log.SetLevel(cfg.GetConfigDebugLevelServer())
+	//log.SetLevel(config.GetConfigDebugLevelServer())
+
+	//srv := app.NewServer(mem, cfg, hashServer)
+	srv := app.NewServer(mem, cfg, hashServer)
 
 	srv.RestoreMetricsFromFile()
 
@@ -38,11 +42,12 @@ func main() {
 	ctx, cnl := signal.NotifyContext(context.Background(), syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
 	defer cnl()
 
-	go app.StartServer(r)
-	if config.GetConfigStoreIntervalServer() > 0 {
+	go app.StartServer(r, srv.GetConfig())
+	if cfg.GetConfigStoreIntervalServer() > 0 {
+		//if config.GetConfigStoreIntervalServer() > 0 {
 		go srv.StoreMetricsToFile()
 	}
 	<-ctx.Done()
-	app.FileStore(srv.Mem)
+	app.FileStore(srv.GetMem(), srv.GetConfig())
 	log.Info("server shutdown on signal with:", ctx.Err())
 }

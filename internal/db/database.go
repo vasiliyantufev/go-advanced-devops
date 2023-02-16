@@ -20,10 +20,11 @@ type DB struct {
 	pool *sql.DB
 }
 
-func ConnectDB() error {
+func ConnectDB(cfg *config.ConfigServer) error {
 
 	pool, err := sql.Open("postgres",
-		config.GetConfigDBServer())
+		cfg.DNS)
+	//config.GetConfigDBServer())
 
 	if err != nil {
 		log.Error(err)
@@ -44,31 +45,6 @@ func Ping() error {
 		return err
 	}
 	return nil
-}
-
-func CreateTables() {
-
-	var metricsTable = `
-		CREATE TABLE IF NOT EXISTS metrics (
-    		id VARCHAR(256),
-		    mtype VARCHAR(10),
-		    value NUMERIC,
-		    delta BIGINT,
-			hash  varchar,
-		    UNIQUE (id, mtype)
-		);
-
-		CREATE UNIQUE INDEX IF NOT EXISTS id_mtype_index
-		ON metrics (id, mtype)
- `
-	_, err := db.pool.Exec(metricsTable)
-
-	//log.Info(res.LastInsertId())
-	if err != nil {
-		log.Error(err)
-		return
-	}
-	log.Info("CREATE TABLE metrics")
 }
 
 func CreateTablesMigration() {

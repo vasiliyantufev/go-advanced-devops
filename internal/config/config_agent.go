@@ -1,10 +1,6 @@
 package config
 
 import (
-	"crypto/hmac"
-	"crypto/sha256"
-	"encoding/hex"
-	"fmt"
 	"time"
 
 	"github.com/vasiliyantufev/go-advanced-devops/internal/storage/flags"
@@ -33,19 +29,19 @@ func SetConfigAgent() {
 		log.Fatal(err)
 	}
 
-	flags.SetFlagsAgent()
+	flags := flags.NewFlagsAgent()
 
 	if cfgAgt.Address == "" {
-		cfgAgt.Address = flags.GetFlagAddressAgent()
+		cfgAgt.Address = flags.Address
 	}
 	if cfgAgt.ReportInterval.String() == "0s" {
-		cfgAgt.ReportInterval, _ = time.ParseDuration(flags.GetFlagReportIntervalAgent())
+		cfgAgt.ReportInterval, _ = time.ParseDuration(flags.ReportInterval)
 	}
 	if cfgAgt.PollInterval.String() == "0s" {
-		cfgAgt.PollInterval, _ = time.ParseDuration(flags.GetFlagPollIntervalAgent())
+		cfgAgt.PollInterval, _ = time.ParseDuration(flags.PollInterval)
 	}
 	if cfgAgt.Key == "" {
-		cfgAgt.Key = flags.GetKeyAgent()
+		cfgAgt.Key = flags.Key
 	}
 
 	log.Info(cfgAgt)
@@ -65,19 +61,4 @@ func GetConfigPollIntervalAgent() time.Duration {
 
 func GetConfigKeyAgent() string {
 	return cfgAgt.Key
-}
-
-func GetHashAgent(mid string, mtype string, delta int64, value float64) string {
-
-	var data string
-	switch mtype {
-	case "counter":
-		data = fmt.Sprintf("%s:%s:%d", mid, mtype, delta)
-	case "gauge":
-		data = fmt.Sprintf("%s:%s:%f", mid, mtype, value)
-	}
-
-	h := hmac.New(sha256.New, []byte(cfgAgt.Key))
-	h.Write([]byte(data))
-	return hex.EncodeToString(h.Sum(nil))
 }

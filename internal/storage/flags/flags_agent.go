@@ -4,27 +4,28 @@ import (
 	"flag"
 )
 
-var fgAgt flagsAgent
-
 // Cтруктура хранения флагов
 type flagsAgent struct {
-	address        string
-	reportInterval string
-	pollInterval   string
-	key            string
+	Address        string
+	ReportInterval string
+	PollInterval   string
+	Key            string
 }
 
 // Реализация структуры для взаимодействия с ней
-func initFlagsAgent(a, r, p, k *string) flagsAgent {
+func initFlagsAgent(address, reportInterval, pollInterval, key *string) flagsAgent {
 	return flagsAgent{
-		address:        *a,
-		reportInterval: *r,
-		pollInterval:   *p,
-		key:            *k,
+		Address:        *address,
+		ReportInterval: *reportInterval,
+		PollInterval:   *pollInterval,
+		Key:            *key,
 	}
 }
 
-func SetFlagsAgent() {
+func NewFlagsAgent() *flagsAgent {
+
+	var fgAgt flagsAgent
+
 	// Установка флагов
 	address := flag.String("a", "localhost:8080", "Адрес сервера")
 	reportInterval := flag.String("r", "10s", "Интервал времени в секундах, по истечении которого текущие показания отправляются на сервера.")
@@ -33,24 +34,10 @@ func SetFlagsAgent() {
 
 	flag.Parse()
 	flags := initFlagsAgent(address, reportInterval, pollInterval, key)
-	fgAgt.address = flags.address
-	fgAgt.reportInterval = flags.reportInterval
-	fgAgt.pollInterval = flags.pollInterval
-	fgAgt.key = flags.key
-}
+	fgAgt.Address = flags.Address
+	fgAgt.ReportInterval = flags.ReportInterval
+	fgAgt.PollInterval = flags.PollInterval
+	fgAgt.Key = flags.Key
 
-func GetFlagAddressAgent() string {
-	return fgAgt.address
-}
-
-func GetFlagReportIntervalAgent() string {
-	return fgAgt.reportInterval
-}
-
-func GetFlagPollIntervalAgent() string {
-	return fgAgt.pollInterval
-}
-
-func GetKeyAgent() string {
-	return fgAgt.key
+	return &fgAgt
 }

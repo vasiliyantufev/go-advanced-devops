@@ -18,17 +18,20 @@ import (
 func main() {
 
 	config.SetConfigAgent()
+
+	//cfg := config.NewConfigAgent()
 	mem := storage.NewMemStorage()
+	hashServer := &config.HashServer{}
 
 	ctx, cnl := signal.NotifyContext(context.Background(), syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
 	defer cnl()
-	go PutMetrics(ctx, mem)
+	go PutMetrics(ctx, mem, hashServer)
 	go SentMetrics(ctx, mem)
 	<-ctx.Done()
 	log.Println("agent shutdown on signal with:", ctx.Err())
 }
 
-func PutMetrics(ctx context.Context, mem *storage.MemStorage) {
+func PutMetrics(ctx context.Context, mem *storage.MemStorage, hashServer *config.HashServer) {
 	ticker := time.NewTicker(config.GetConfigPollIntervalAgent())
 	defer ticker.Stop()
 	for {
@@ -40,7 +43,7 @@ func PutMetrics(ctx context.Context, mem *storage.MemStorage) {
 			log.Info("Put metrics")
 			stats := new(runtime.MemStats)
 			runtime.ReadMemStats(stats)
-			app.DataFromRuntime(mem, stats)
+			app.DataFromRuntime(mem, stats, hashServer)
 		}
 	}
 }
