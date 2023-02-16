@@ -4,8 +4,6 @@ import (
 	"flag"
 )
 
-//var fgSrv flagsServer
-
 // Cтруктура хранения флагов
 type flagsServer struct {
 	Address       string

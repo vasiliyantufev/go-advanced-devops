@@ -9,9 +9,14 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-var cfgAgt configAgent
+type ConfigServicerAgent interface {
+	GetConfigAddressAgent() string
+	GetConfigReportIntervalAgent() time.Duration
+	GetConfigPollIntervalAgent() time.Duration
+	GetConfigKeyAgent() string
+}
 
-type configAgent struct {
+type ConfigAgent struct {
 	//Address        string        `env:"ADDRESS" envDefault:"localhost:8080"`
 	Address string `env:"ADDRESS"`
 	//ReportInterval time.Duration `env:"REPORT_INTERVAL" envDefault:"10s"`
@@ -22,7 +27,9 @@ type configAgent struct {
 	Key string `env:"KEY" envDefault:""`
 }
 
-func SetConfigAgent() {
+func NewConfigAgent() *ConfigAgent {
+
+	var cfgAgt ConfigAgent
 
 	err := env.Parse(&cfgAgt)
 	if err != nil {
@@ -45,20 +52,22 @@ func SetConfigAgent() {
 	}
 
 	log.Info(cfgAgt)
+
+	return &cfgAgt
 }
 
-func GetConfigAddressAgent() string {
-	return cfgAgt.Address
+func (cfg ConfigAgent) GetConfigAddressAgent() string {
+	return cfg.Address
 }
 
-func GetConfigReportIntervalAgent() time.Duration {
-	return cfgAgt.ReportInterval
+func (cfg ConfigAgent) GetConfigReportIntervalAgent() time.Duration {
+	return cfg.ReportInterval
 }
 
-func GetConfigPollIntervalAgent() time.Duration {
-	return cfgAgt.PollInterval
+func (cfg ConfigAgent) GetConfigPollIntervalAgent() time.Duration {
+	return cfg.PollInterval
 }
 
-func GetConfigKeyAgent() string {
-	return cfgAgt.Key
+func (cfg ConfigAgent) GetConfigKeyAgent() string {
+	return cfg.Key
 }

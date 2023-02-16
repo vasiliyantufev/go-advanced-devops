@@ -2,12 +2,12 @@ package main
 
 import (
 	"context"
-	database "github.com/vasiliyantufev/go-advanced-devops/internal/db"
 	"os/signal"
 	"syscall"
 
 	"github.com/vasiliyantufev/go-advanced-devops/internal/app"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/config"
+	database "github.com/vasiliyantufev/go-advanced-devops/internal/db"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
 
 	"github.com/go-chi/chi/v5"
@@ -18,9 +18,6 @@ func main() {
 
 	configServer := config.NewConfigServer()
 
-	//if err := database.ConnectDB(cfg); err == nil {
-	//	database.CreateTablesMigration()
-	//}
 	db, err := database.NewDB(configServer)
 	if err != nil {
 		log.Error(err)
