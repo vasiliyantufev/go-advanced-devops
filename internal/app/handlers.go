@@ -196,7 +196,7 @@ func (s Server) postMetricHandler(w http.ResponseWriter, r *http.Request) {
 	if value.Value != nil {
 
 		hashServer := s.hashServer.GetHashServer(value.ID, "gauge", 0, *value.Value, s.config.GetConfigKeyServer())
-		if hashServer != value.Hash && s.config.GetConfigKeyServer() != "" && config.GetConfigKeyAgent() != "" /**/ {
+		if hashServer != value.Hash && value.Hash != "" {
 			log.Error("Хеш-сумма не соответствует расчетной")
 			http.Error(w, "Хеш-сумма не соответствует расчетной", http.StatusBadRequest)
 			return
@@ -211,7 +211,7 @@ func (s Server) postMetricHandler(w http.ResponseWriter, r *http.Request) {
 		// calculate hash
 		hashServer := s.hashServer.GetHashServer(value.ID, "counter", *value.Delta, 0, s.config.GetConfigKeyServer())
 		// compare hashes
-		if hashServer != value.Hash && s.config.GetConfigKeyServer() != "" && config.GetConfigKeyAgent() != "" /**/ {
+		if hashServer != value.Hash && value.Hash != "" {
 			log.Error("Хеш-сумма не соответствует расчетной")
 			http.Error(w, "Хеш-сумма не соответствует расчетной", http.StatusBadRequest)
 			return
@@ -231,6 +231,7 @@ func (s Server) postMetricHandler(w http.ResponseWriter, r *http.Request) {
 
 		rawValue.Delta = &sum
 		rawValue.Hash = hashSumServer
+
 	}
 
 	resp, err = json.Marshal(rawValue)
@@ -273,7 +274,7 @@ func (s Server) postMetricsHandler(w http.ResponseWriter, r *http.Request) {
 		if metric.Value != nil {
 
 			hashServer := s.hashServer.GetHashServer(metric.ID, "gauge", 0, *metric.Value, s.config.GetConfigKeyServer())
-			if hashServer != metric.Hash && s.config.GetConfigKeyServer() != "" && config.GetConfigKeyAgent() != "" /**/ {
+			if hashServer != metric.Hash && metric.Hash != "" {
 				log.Error("Хеш-сумма не соответствует расчетной")
 				http.Error(w, "Хеш-сумма не соответствует расчетной", http.StatusBadRequest)
 				return
@@ -286,7 +287,7 @@ func (s Server) postMetricsHandler(w http.ResponseWriter, r *http.Request) {
 			// calculate hash
 			hashServer := s.hashServer.GetHashServer(metric.ID, "counter", *metric.Delta, 0, s.config.GetConfigKeyServer())
 			// compare hashes
-			if hashServer != metric.Hash && s.config.GetConfigKeyServer() != "" && config.GetConfigKeyAgent() != "" /* почему если проверку ключа для агента не сделать тесты падают7 */ {
+			if hashServer != metric.Hash && metric.Hash != "" {
 				log.Error("Хеш-сумма не соответствует расчетной")
 				http.Error(w, "Хеш-сумма не соответствует расчетной", http.StatusBadRequest)
 				return
