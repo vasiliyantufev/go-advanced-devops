@@ -29,9 +29,9 @@ type ConfigServer struct {
 	StoreFile  string    `env:"STORE_FILE"`
 	Restore    bool      `env:"RESTORE" envDefault:"true"`
 	Key        string    `env:"KEY" envDefault:""`
-	//DNS        string    `env:"DATABASE_DSN"`
+	DNS        string    `env:"DATABASE_DSN"`
 	//DNS string `env:"DATABASE_DSN" envDefault:"host=localhost port=5432 user=postgres password=myPassword dbname=praktikum sslmode=disable"`
-	DNS string `env:"DATABASE_DSN" envDefault:"host=localhost port=5432 user=postgres password=postgres dbname=praktikum sslmode=disable"`
+	//DNS string `env:"DATABASE_DSN" envDefault:"host=localhost port=5432 user=postgres password=postgres dbname=praktikum sslmode=disable"`
 }
 
 func NewConfigServer() *ConfigServer {
