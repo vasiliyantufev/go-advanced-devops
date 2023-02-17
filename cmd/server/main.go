@@ -2,52 +2,52 @@ package main
 
 import (
 	"context"
-	"github.com/go-chi/chi/v5"
-	log "github.com/sirupsen/logrus"
-	"github.com/vasiliyantufev/go-advanced-devops/internal/app"
-	"github.com/vasiliyantufev/go-advanced-devops/internal/config"
-	"github.com/vasiliyantufev/go-advanced-devops/internal/storage/flags"
 	"os/signal"
 	"syscall"
-	_ "time"
+
+	"github.com/vasiliyantufev/go-advanced-devops/internal/app"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/config"
+	database "github.com/vasiliyantufev/go-advanced-devops/internal/db"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
+
+	"github.com/go-chi/chi/v5"
+	log "github.com/sirupsen/logrus"
 )
 
 func main() {
 
-	flags.SetFlagsServer()
-	config.SetConfigServer()
-	//cfg := storage.getConfigEnv()
+	configServer := config.NewConfigServer()
 
-	//log.Fatal(flags.FgSrv)
-	//log.Fatal(config.GetConfigAddressServer())
+	db, err := database.NewDB(configServer)
+	if err != nil {
+		log.Error(err)
+	} else {
+		defer db.Close()
+		db.CreateTablesMigration()
+	}
 
-	log.SetLevel(config.GetConfigDebugLevelServer())
-	//log.Fatal(log.DebugLevel)
+	mem := storage.NewMemStorage()
+	hashServer := &config.HashServer{}
 
-	app.RestoreMetricsFromFile()
+	log.SetLevel(configServer.GetConfigDebugLevelServer())
+	srv := app.NewServer(mem, configServer, db, hashServer)
+
+	srv.RestoreMetricsFromFile()
 
 	r := chi.NewRouter()
 	//r.Use(middleware.Logger)
 	r.Use(app.GzipHandle)
 
-	r.Get("/", app.IndexHandler)
-	r.Route("/value", func(r chi.Router) {
-		r.Get("/{type}/{name}", app.GetMetricsHandler)
-		r.Post("/", app.PostValueMetricsHandler)
-	})
-	r.Route("/update", func(r chi.Router) {
-		r.Post("/{type}/{name}/{value}", app.MetricsHandler)
-		r.Post("/", app.PostMetricsHandler)
-	})
+	r.Mount("/", srv.Route())
 
 	ctx, cnl := signal.NotifyContext(context.Background(), syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
 	defer cnl()
 
-	go app.StartServer(r)
-	if config.GetConfigStoreIntervalServer() > 0 {
-		go app.StoreMetricsToFile()
+	go app.StartServer(r, srv.GetConfig())
+	if configServer.GetConfigStoreIntervalServer() > 0 {
+		go srv.StoreMetricsToFile()
 	}
 	<-ctx.Done()
-	app.FileStore(app.MemServer)
+	app.FileStore(srv.GetMem(), srv.GetConfig())
 	log.Info("server shutdown on signal with:", ctx.Err())
 }

@@ -16,7 +16,8 @@ func NewMemStorage() *MemStorage {
 		data: make(map[string]JSONMetrics),
 	}
 }
-func (data *MemStorage) PutMetricsGauge(id string, o float64) {
+
+func (data *MemStorage) PutMetricsGauge(id string, o float64, h string) {
 	data.mx.Lock()
 	defer data.mx.Unlock()
 	data.data[id] = JSONMetrics{
@@ -24,20 +25,21 @@ func (data *MemStorage) PutMetricsGauge(id string, o float64) {
 		MType: "gauge",
 		Delta: nil,
 		Value: &o,
+		Hash:  h,
 	}
 }
 
-func (data *MemStorage) GetMetricsGauge(id string) (o float64, b bool) {
+func (data *MemStorage) GetMetricsGauge(id string) (o float64, h string, b bool) {
 	data.mx.RLock()
 	defer data.mx.RUnlock()
 	if metric, exists := data.data[id]; exists {
-		return *metric.Value, exists
+		return *metric.Value, metric.Hash, exists
 	} else {
-		return 0, exists
+		return 0, "", exists
 	}
 }
 
-func (data *MemStorage) PutMetricsCount(id string, o int64) {
+func (data *MemStorage) PutMetricsCount(id string, o int64, h string) {
 	data.mx.Lock()
 	defer data.mx.Unlock()
 	data.data[id] = JSONMetrics{
@@ -45,16 +47,17 @@ func (data *MemStorage) PutMetricsCount(id string, o int64) {
 		MType: "counter",
 		Delta: &o,
 		Value: nil,
+		Hash:  h,
 	}
 }
 
-func (data *MemStorage) GetMetricsCount(id string) (o int64, b bool) {
+func (data *MemStorage) GetMetricsCount(id string) (o int64, h string, b bool) {
 	data.mx.RLock()
 	defer data.mx.RUnlock()
 	if metric, exists := data.data[id]; exists {
-		return *metric.Delta, exists
+		return *metric.Delta, metric.Hash, exists
 	} else {
-		return 0, exists
+		return 0, "", exists
 	}
 }
 
