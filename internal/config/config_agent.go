@@ -24,7 +24,8 @@ type ConfigAgent struct {
 	//PollInterval time.Duration `env:"POLL_INTERVAL" envDefault:"2s"`
 	PollInterval time.Duration `env:"POLL_INTERVAL"`
 	//PollInterval time.Duration `env:"POLL_INTERVAL" envDefault:"2s"`
-	Key string `env:"KEY" envDefault:""`
+	Key       string `env:"KEY" envDefault:""`
+	RateLimit int    `env:"RATE_LIMIT"`
 }
 
 func NewConfigAgent() *ConfigAgent {
@@ -49,6 +50,9 @@ func NewConfigAgent() *ConfigAgent {
 	}
 	if cfgAgt.Key == "" {
 		cfgAgt.Key = flags.Key
+	}
+	if cfgAgt.RateLimit == 0 {
+		cfgAgt.RateLimit = flags.RateLimit
 	}
 
 	log.Info(cfgAgt)
