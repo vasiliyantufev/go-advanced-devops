@@ -14,6 +14,7 @@ type ConfigServicerAgent interface {
 	GetConfigReportIntervalAgent() time.Duration
 	GetConfigPollIntervalAgent() time.Duration
 	GetConfigKeyAgent() string
+	GetConfigRateLimitAgent() int
 }
 
 type ConfigAgent struct {
@@ -74,4 +75,8 @@ func (cfg ConfigAgent) GetConfigPollIntervalAgent() time.Duration {
 
 func (cfg ConfigAgent) GetConfigKeyAgent() string {
 	return cfg.Key
+}
+
+func (cfg ConfigAgent) GetConfigRateLimitAgent() int {
+	return cfg.RateLimit
 }

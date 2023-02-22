@@ -33,7 +33,7 @@ func NewFlagsAgent() *flagsAgent {
 	reportInterval := flag.String("r", "10s", "Интервал времени в секундах, по истечении которого текущие показания отправляются на сервера.")
 	pollInterval := flag.String("p", "2s", "Интервал времени в секундах, по истечении которого текущие показания мертрик обновляются на клиенте")
 	key := flag.String("k", "key", "Ключ для генерации хеша")
-	rateLimit := flag.Int("l", 100, "Количество одновременно исходящих запросов на сервер")
+	rateLimit := flag.Int("l", 1, "Количество одновременно исходящих запросов на сервер")
 
 	flag.Parse()
 	flags := initFlagsAgent(address, reportInterval, pollInterval, key, rateLimit)
