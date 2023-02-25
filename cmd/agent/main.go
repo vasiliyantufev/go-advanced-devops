@@ -18,31 +18,34 @@ import (
 
 func main() {
 
-	cfg := config.NewConfigAgent()
+	configAgent := config.NewConfigAgent()
 	memAgent := storage.NewMemStorage()
 	memAgentPsutil := storage.NewMemStorage()
-	hashServer := &config.HashServer{}
-	urlPath := "http://" + cfg.GetConfigAddressAgent() + "/updates/"
+	//hashServer := &app.HashServer{}
+	hashServer := app.NewHashServer(configAgent.GetConfigKeyAgent())
+	urlPath := "http://" + configAgent.GetConfigAddressAgent() + "/updates/"
+
+	//log.Fatal(hashServer.Key)
 
 	ctx, cnl := signal.NotifyContext(context.Background(), syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
 	defer cnl()
 
-	jobs := make(chan []storage.JSONMetrics, cfg.RateLimit)
+	jobs := make(chan []storage.JSONMetrics, configAgent.RateLimit)
+	defer close(jobs)
 
-	go PutMetrics(ctx, memAgent, cfg, hashServer)
-	go PutMetricsUsePsutil(ctx, memAgentPsutil, cfg, hashServer)
-	go WrireMetricsToChan(ctx, jobs, memAgent, memAgentPsutil, cfg)
+	go PutMetrics(ctx, memAgent, configAgent, hashServer)
+	go PutMetricsUsePsutil(ctx, memAgentPsutil, configAgent, hashServer)
+	go WrireMetricsToChan(ctx, jobs, memAgent, memAgentPsutil, configAgent)
 
-	for i := 0; i < cfg.RateLimit; i++ {
+	for i := 0; i < configAgent.RateLimit; i++ {
 		go SentMetrics(ctx, jobs, urlPath)
 	}
 
 	<-ctx.Done()
-	close(jobs)
 	log.Println("agent shutdown on signal with:", ctx.Err())
 }
 
-func PutMetrics(ctx context.Context, memAgent *storage.MemStorage, cfg *config.ConfigAgent, hashServer *config.HashServer) {
+func PutMetrics(ctx context.Context, memAgent *storage.MemStorage, cfg *config.ConfigAgent, hashServer *app.HashServer) {
 
 	ticker := time.NewTicker(cfg.GetConfigPollIntervalAgent())
 	defer ticker.Stop()
@@ -55,12 +58,12 @@ func PutMetrics(ctx context.Context, memAgent *storage.MemStorage, cfg *config.C
 			log.Info("Put metrics")
 			stats := new(runtime.MemStats)
 			runtime.ReadMemStats(stats)
-			app.DataFromRuntime(memAgent, cfg, stats, hashServer)
+			app.DataFromRuntime(memAgent, stats, hashServer)
 		}
 	}
 }
 
-func PutMetricsUsePsutil(ctx context.Context, memAgent *storage.MemStorage, cfg *config.ConfigAgent, hashServer *config.HashServer) {
+func PutMetricsUsePsutil(ctx context.Context, memAgent *storage.MemStorage, cfg *config.ConfigAgent, hashServer *app.HashServer) {
 
 	ticker := time.NewTicker(cfg.GetConfigPollIntervalAgent())
 	defer ticker.Stop()
@@ -75,7 +78,7 @@ func PutMetricsUsePsutil(ctx context.Context, memAgent *storage.MemStorage, cfg 
 			if err != nil {
 				log.Error(err)
 			}
-			app.DataFromRuntimeUsePsutil(memAgent, cfg, v, hashServer)
+			app.DataFromRuntimeUsePsutil(memAgent, v, hashServer)
 		}
 	}
 }

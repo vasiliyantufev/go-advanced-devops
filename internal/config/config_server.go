@@ -1,11 +1,10 @@
 package config
 
 import (
+	"flag"
+	"github.com/caarlos0/env/v6"
 	"time"
 
-	"github.com/vasiliyantufev/go-advanced-devops/internal/storage/flags"
-
-	"github.com/caarlos0/env/v6"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -20,48 +19,32 @@ type ConfigServicerServer interface {
 }
 
 type ConfigServer struct {
-	//Address       string        `env:"ADDRESS" envDefault:"localhost:8080"`
-	Address string `env:"ADDRESS"`
-	//StoreInterval time.Duration `env:"STORE_INTERVAL" envDefault:"300s"`
+	Address       string        `env:"ADDRESS"`
 	StoreInterval time.Duration `env:"STORE_INTERVAL"`
-	//StoreFile string `env:"STORE_FILE" envDefault:"/tmp/devops-metrics-db.json"`
-	DebugLevel log.Level `env:"DEBUG_LEVEL" envDefault:"debug"`
-	StoreFile  string    `env:"STORE_FILE"`
-	Restore    bool      `env:"RESTORE" envDefault:"true"`
-	Key        string    `env:"KEY" envDefault:""`
-	DNS        string    `env:"DATABASE_DSN"`
-	//DNS string `env:"DATABASE_DSN" envDefault:"host=localhost port=5432 user=postgres password=myPassword dbname=praktikum sslmode=disable"`
-	//DNS string `env:"DATABASE_DSN" envDefault:"host=localhost port=5432 user=postgres password=postgres dbname=praktikum sslmode=disable"`
+	DebugLevel    log.Level     `env:"DEBUG_LEVEL" envDefault:"debug"`
+	StoreFile     string        `env:"STORE_FILE"`
+	Restore       bool          `env:"RESTORE" envDefault:"true"`
+	Key           string        `env:"KEY"`
+	DSN           string        `env:"DATABASE_DSN"`
+	//DSN string `env:"DATABASE_DSN" envDefault:"host=localhost port=5432 user=postgres password=postgres dbname=praktikum sslmode=disable"`
 }
 
 func NewConfigServer() *ConfigServer {
 
-	var cfgSrv ConfigServer
+	cfgSrv := ConfigServer{}
+
+	// Установка флагов
+	flag.StringVar(&cfgSrv.Address, "a", "localhost:8080", "Адрес сервера")
+	flag.BoolVar(&cfgSrv.Restore, "r", true, "Булево значение, определяющее, загружать или нет начальные значения из указанного файла при старте сервера")
+	flag.DurationVar(&cfgSrv.StoreInterval, "i", 300*time.Second, "Интервал времени в секундах, по истечении которого текущие показания сервера сбрасываются на диск")
+	flag.StringVar(&cfgSrv.StoreFile, "f", "/tmp/devops-metrics-db.json", "Файл где хранятся значения")
+	flag.StringVar(&cfgSrv.Key, "k", "", "Ключ для генерации хеша")
+	flag.StringVar(&cfgSrv.DSN, "d", "", "База данных")
+	flag.Parse()
 
 	err := env.Parse(&cfgSrv)
 	if err != nil {
 		log.Fatal(err)
-	}
-
-	flagsSrv := flags.NewFlagsServer()
-
-	if cfgSrv.Address == "" {
-		cfgSrv.Address = flagsSrv.Address
-	}
-	if cfgSrv.StoreInterval.String() == "0s" {
-		cfgSrv.StoreInterval, _ = time.ParseDuration(flagsSrv.StoreInterval)
-	}
-	if cfgSrv.StoreFile == "" {
-		cfgSrv.StoreFile = flagsSrv.StoreFile
-	}
-	if cfgSrv.Key == "" {
-		cfgSrv.Key = flagsSrv.Key
-	}
-	if cfgSrv.DNS == "" {
-		cfgSrv.DNS = flagsSrv.DNS
-		if cfgSrv.DNS == "" {
-			cfgSrv.DNS = "host=localhost port=5432 user=postgres password=postgres dbname=praktikum sslmode=disable"
-		}
 	}
 
 	log.Info(cfgSrv)
@@ -94,5 +77,5 @@ func (cfg ConfigServer) GetConfigRestoreServer() bool {
 }
 
 func (cfg ConfigServer) GetConfigDBServer() string {
-	return cfg.DNS
+	return cfg.DSN
 }
