@@ -27,7 +27,9 @@ func main() {
 	}
 
 	mem := storage.NewMemStorage()
-	hashServer := &config.HashServer{}
+	//hashServer := &app.HashServer{}
+
+	hashServer := app.NewHashServer(configServer.GetConfigKeyServer())
 
 	log.SetLevel(configServer.GetConfigDebugLevelServer())
 	srv := app.NewServer(mem, configServer, db, hashServer)

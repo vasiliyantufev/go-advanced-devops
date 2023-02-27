@@ -13,7 +13,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestCounterHandler(t *testing.T) {
+func TestHandler(t *testing.T) {
 
 	wg := httptest.NewRecorder()
 	wp := httptest.NewRecorder()
@@ -21,7 +21,7 @@ func TestCounterHandler(t *testing.T) {
 	wp2 := httptest.NewRecorder()
 
 	mem := storage.NewMemStorage()
-	hashServer := &config.HashServer{}
+	hashServer := &HashServer{}
 	configServer := config.NewConfigServer()
 	srv := NewServer(mem, configServer, nil, hashServer)
 
@@ -49,30 +49,3 @@ func TestCounterHandler(t *testing.T) {
 	assert.Equal(t, val1+val2, k,
 		fmt.Sprintf("Incorrect body. Expect %s, got %s", fmt.Sprint(val1+val2), bodyGet))
 }
-
-//func TestGaugeHandler(t *testing.T) {
-//
-//	wg := httptest.NewRecorder()
-//	wp := httptest.NewRecorder()
-//
-//	mem := storage.NewMemStorage()
-//	hashServer := &config.HashServer{}
-//	configServer := config.NewConfigServer()
-//	srv := NewServer(mem, configServer, hashServer)
-//
-//	rtr := chi.NewRouter()
-//	rtr.Get("/value/{type}/{name}", srv.getMetricsHandler)
-//	rtr.Route("/update", func(r chi.Router) {
-//		r.Post("/{type}/{name}/{value}", srv.metricsHandler)
-//	})
-//
-//	var val int64 = 22
-//	rtr.ServeHTTP(wp, httptest.NewRequest("POST", "/update/gauge/testSetGet22/"+fmt.Sprint(val), nil))
-//	rtr.ServeHTTP(wg, httptest.NewRequest("GET", "/value/gauge/testSetGet22", nil))
-//	bodyGet := wg.Body.String()
-//
-//	k, _ := strconv.ParseInt(string(bodyGet), 10, 64)
-//	assert.Equal(t, val, k,
-//		fmt.Sprintf("Incorrect body. Expect %s, got %s", fmt.Sprint(val), bodyGet))
-//
-//} /**/

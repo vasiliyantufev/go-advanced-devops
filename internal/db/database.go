@@ -16,14 +16,14 @@ import (
 	_ "github.com/lib/pq"
 )
 
-var db DB
+//var db DB
 
 type DB struct {
 	pool *sql.DB
 }
 
 func NewDB(c *config.ConfigServer) (*DB, error) {
-	pool, err := sql.Open("postgres", c.DNS)
+	pool, err := sql.Open("postgres", c.DSN)
 	if err != nil {
 		log.Error(err)
 		return nil, err
@@ -68,17 +68,7 @@ func (db DB) CreateTablesMigration() {
 
 func (db DB) InsertOrUpdateMetrics(metrics *storage.MemStorage) error {
 
-	// шаг 1 — объявляем транзакцию
-	tx, err := db.pool.Begin()
-	if err != nil {
-		return err
-	}
-
-	// шаг 1.1 — если возникает ошибка, откатываем изменения
-	defer tx.Rollback()
-
-	// шаг 2 — готовим инструкцию
-	stmt, err := tx.Prepare(`
+	stmt, err := db.pool.Prepare(`
 			INSERT INTO metrics 
 			VALUES($1, $2, $3, $4, $5)
 			ON CONFLICT (id, mtype)
@@ -91,18 +81,15 @@ func (db DB) InsertOrUpdateMetrics(metrics *storage.MemStorage) error {
 		log.Error(err)
 		return err
 	}
-	// шаг 2.1 — не забываем закрыть инструкцию, когда она больше не нужна
+
 	defer stmt.Close()
 
 	for _, metric := range metrics.GetAllMetrics() {
-		// шаг 3 — указываем, что будет добавлено в транзакцию
 		if _, err = stmt.Exec(metric.ID, metric.MType, metric.Value, metric.Delta, metric.Hash); err != nil {
 			log.Error(err)
 			return err
 		}
 	}
-	// шаг 4 — сохраняем изменения
-	tx.Commit()
 
 	return nil
 }

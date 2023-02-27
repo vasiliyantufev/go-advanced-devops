@@ -16,10 +16,20 @@ type JSONMetrics struct {
 func (J JSONMetrics) String() string {
 	switch J.MType {
 	case "gauge":
-		value := strconv.FormatFloat(*J.Value, 'f', 3, 64)
+		var value string
+		if J.Value != nil {
+			value = strconv.FormatFloat(*J.Value, 'f', 3, 64)
+		} else {
+			value = "empty"
+		}
 		return fmt.Sprintf("Metric {ID: %s Type: %s Value: %s Hash: %s}", J.ID, J.MType, value, J.Hash)
 	case "counter":
-		delta := strconv.FormatInt(*J.Delta, 10)
+		var delta string
+		if J.Delta != nil {
+			delta = strconv.FormatInt(*J.Delta, 10)
+		} else {
+			delta = "empty"
+		}
 		return fmt.Sprintf("Metric {ID: %s Type: %s Delta: %s Hash: %s}", J.ID, J.MType, delta, J.Hash)
 	default:
 		return fmt.Sprintf("Metric {ID: %s Type: unknown}", J.ID)
