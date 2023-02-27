@@ -14,10 +14,10 @@ import (
 )
 
 type Agent interface {
-	StartWorkers()
+	StartWorkers(ctx context.Context, ai Agent)
 	putMetricsWorker(ctx context.Context)
 	putMetricsUsePsutilWorker(ctx context.Context)
-	writeMetricsToChan(ctx context.Context)
+	writeMetricsToChanWorker(ctx context.Context)
 	sentMetricsWorker(ctx context.Context, url string)
 	makePostRequest(client *resty.Client, j []storage.JSONMetrics, url string)
 }
@@ -34,16 +34,16 @@ func NewAgent(jobs chan []storage.JSONMetrics, mem *storage.MemStorage, memPsuti
 	return &agent{jobs: jobs, mem: mem, psutil: memPsutil, cfg: cfg, hashServer: hashServer}
 }
 
-func (a agent) StartWorkers(ctx context.Context) {
+func (a agent) StartWorkers(ctx context.Context, ai Agent) {
 
 	urlPath := "http://" + a.cfg.GetConfigAddressAgent() + "/updates/"
 
-	go a.putMetricsWorker(ctx)
-	go a.putMetricsUsePsutilWorker(ctx)
-	go a.writeMetricsToChan(ctx)
+	go ai.putMetricsWorker(ctx)
+	go ai.putMetricsUsePsutilWorker(ctx)
+	go ai.writeMetricsToChanWorker(ctx)
 
 	for i := 0; i < a.cfg.RateLimit; i++ {
-		go a.sentMetrics(ctx, urlPath)
+		go ai.sentMetricsWorker(ctx, urlPath)
 	}
 }
 
@@ -85,7 +85,7 @@ func (a agent) putMetricsUsePsutilWorker(ctx context.Context) {
 	}
 }
 
-func (a agent) writeMetricsToChan(ctx context.Context) {
+func (a agent) writeMetricsToChanWorker(ctx context.Context) {
 
 	ticker := time.NewTicker(a.cfg.GetConfigReportIntervalAgent())
 	defer ticker.Stop()
@@ -102,7 +102,7 @@ func (a agent) writeMetricsToChan(ctx context.Context) {
 	}
 }
 
-func (a agent) sentMetrics(ctx context.Context, url string) {
+func (a agent) sentMetricsWorker(ctx context.Context, url string) {
 
 	client := resty.New()
 	for {

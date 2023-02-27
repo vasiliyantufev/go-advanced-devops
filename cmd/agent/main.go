@@ -25,7 +25,7 @@ func main() {
 	defer close(jobs)
 
 	agent := app.NewAgent(jobs, memAgent, memAgentPsutil, configAgent, hashServer)
-	agent.StartWorkers(ctx)
+	agent.StartWorkers(ctx, agent)
 
 	<-ctx.Done()
 	log.Println("agent shutdown on signal with:", ctx.Err())
