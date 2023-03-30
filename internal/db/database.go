@@ -16,8 +16,6 @@ import (
 	_ "github.com/lib/pq"
 )
 
-//var db DB
-
 type DB struct {
 	pool *sql.DB
 }
@@ -49,14 +47,17 @@ func (db DB) Close() error {
 	return db.pool.Close()
 }
 
-func (db DB) CreateTablesMigration() {
+func (db DB) CreateTablesMigration(cfg *config.ConfigServer) {
+
+	//log.Fatal(cfg.RootPath)
 
 	driver, err := postgres.WithInstance(db.pool, &postgres.Config{})
 	if err != nil {
 		log.Error(err)
 	}
 	m, err := migrate.NewWithDatabaseInstance(
-		"file://./migrations",
+		//"file://./migrations",
+		cfg.RootPath,
 		"postgres", driver)
 	if err != nil {
 		log.Error(err)

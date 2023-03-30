@@ -7,6 +7,7 @@ import (
 	"html/template"
 	"io"
 	"net/http"
+	"net/http/pprof"
 	"strconv"
 	"time"
 
@@ -46,6 +47,14 @@ func (s Server) Route() *chi.Mux {
 	r.Route("/update", func(r chi.Router) {
 		r.Post("/{type}/{name}/{value}", s.metricsHandler)
 		r.Post("/", s.postMetricHandler)
+	})
+	r.Route("/debug/pprof/", func(r chi.Router) {
+		r.Get("/", pprof.Index)
+		r.Get("/profile", pprof.Profile)
+		r.Get("/cmdline", pprof.Cmdline)
+		r.Get("/symbol", pprof.Symbol)
+		r.Get("/trace", pprof.Trace)
+		r.Get("/{cmd}", pprof.Index)
 	})
 	r.Post("/updates/", s.postMetricsHandler)
 

@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"github.com/go-chi/chi/v5/middleware"
 	"os/signal"
 	"syscall"
 
@@ -12,6 +13,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	log "github.com/sirupsen/logrus"
+	_ "net/http/pprof" // подключаем пакет pprof
 )
 
 func main() {
@@ -23,7 +25,7 @@ func main() {
 		log.Error(err)
 	} else {
 		defer db.Close()
-		db.CreateTablesMigration()
+		db.CreateTablesMigration(configServer)
 	}
 
 	mem := storage.NewMemStorage()
@@ -38,6 +40,7 @@ func main() {
 
 	r := chi.NewRouter()
 	//r.Use(middleware.Logger)
+	r.Use(middleware.Compress(1, "application/json", "text/html"))
 	r.Use(app.GzipHandle)
 
 	r.Mount("/", srv.Route())
