@@ -17,7 +17,6 @@ import (
 )
 
 func main() {
-
 	configServer := config.NewConfigServer()
 
 	db, err := database.NewDB(configServer)
@@ -29,7 +28,6 @@ func main() {
 	}
 
 	mem := storage.NewMemStorage()
-	//hashServer := &app.HashServer{}
 
 	hashServer := app.NewHashServer(configServer.GetConfigKeyServer())
 
@@ -39,7 +37,6 @@ func main() {
 	srv.RestoreMetricsFromFile()
 
 	r := chi.NewRouter()
-	//r.Use(middleware.Logger)
 	r.Use(middleware.Compress(1, "application/json", "text/html"))
 	r.Use(app.GzipHandle)
 

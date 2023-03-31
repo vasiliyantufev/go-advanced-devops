@@ -3,7 +3,6 @@ package app
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/vasiliyantufev/go-advanced-devops/internal/converter"
 	"html/template"
 	"io"
 	"net/http"
@@ -11,12 +10,12 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/vasiliyantufev/go-advanced-devops/internal/config"
-	database "github.com/vasiliyantufev/go-advanced-devops/internal/db"
-	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
-
 	"github.com/go-chi/chi/v5"
 	log "github.com/sirupsen/logrus"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/config"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/converter"
+	database "github.com/vasiliyantufev/go-advanced-devops/internal/db"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
 )
 
 type ViewData struct {
