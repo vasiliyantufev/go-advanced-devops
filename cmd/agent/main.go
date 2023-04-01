@@ -1,16 +1,19 @@
+// module agent
 package main
 
 import (
 	"context"
+	"os/signal"
+	"syscall"
+
 	"github.com/vasiliyantufev/go-advanced-devops/internal/app"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/config"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
-	"os/signal"
-	"syscall"
 
 	log "github.com/sirupsen/logrus"
 )
 
+// agent main
 func main() {
 
 	configAgent := config.NewConfigAgent()

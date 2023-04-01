@@ -1,3 +1,4 @@
+// Module hash server
 package app
 
 import (
@@ -5,6 +6,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
+
 	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
 )
 
@@ -22,10 +24,12 @@ func NewHashServer(key string) *HashServer {
 	return &HashServer{key: key}
 }
 
+// Checks if the hash is available
 func (hs HashServer) IsEnabled() bool {
 	return hs.key != ""
 }
 
+// Compares the hash received from the client with the hash stored on the server
 func (hs HashServer) ValidHashServer(clientMetric storage.JSONMetrics) bool {
 
 	if hs.IsEnabled() {

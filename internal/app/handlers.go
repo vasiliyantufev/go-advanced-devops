@@ -1,3 +1,4 @@
+// Module server
 package app
 
 import (
@@ -30,12 +31,13 @@ type Server struct {
 	hashServer *HashServer
 }
 
+// Creates a new server instance
 func NewServer(mem *storage.MemStorage, cfg *config.ConfigServer, db *database.DB, hash *HashServer) *Server {
 	return &Server{mem: mem, config: cfg, database: db, hashServer: hash}
 }
 
+// Setting routes
 func (s Server) Route() *chi.Mux {
-
 	r := chi.NewRouter()
 	r.Get("/", s.indexHandler)
 	r.Get("/ping", s.pingHandler)
@@ -60,6 +62,7 @@ func (s Server) Route() *chi.Mux {
 	return r
 }
 
+// The page that displays all the metrics with parameters
 func (s Server) indexHandler(w http.ResponseWriter, r *http.Request) {
 
 	tmpl, err := template.ParseFiles("./web/templates/index.html")
@@ -96,6 +99,7 @@ func (s Server) indexHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
+// Writing metric using url parameters
 func (s Server) metricsHandler(w http.ResponseWriter, r *http.Request) {
 
 	typeMetrics := chi.URLParam(r, "type")
@@ -144,6 +148,7 @@ func (s Server) metricsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(resp))
 }
 
+// Getting metric using url parameters
 func (s Server) getMetricsHandler(w http.ResponseWriter, r *http.Request) {
 
 	typeMetrics := chi.URLParam(r, "type")
@@ -181,6 +186,7 @@ func (s Server) getMetricsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(param))
 }
 
+// Writing metric using json
 func (s Server) postMetricHandler(w http.ResponseWriter, r *http.Request) {
 
 	resp, err := io.ReadAll(r.Body)
@@ -264,6 +270,7 @@ func (s Server) postMetricHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(resp)
 }
 
+// Writing multiple metrics using json
 func (s Server) postMetricsHandler(w http.ResponseWriter, r *http.Request) {
 
 	resp, err := io.ReadAll(r.Body)
@@ -325,6 +332,7 @@ func (s Server) postMetricsHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
+// Getting metric parameters using json
 func (s Server) postValueMetricsHandler(w http.ResponseWriter, r *http.Request) {
 
 	resp, err := io.ReadAll(r.Body)
@@ -391,7 +399,6 @@ func (s Server) StoreMetricsToFile() {
 
 	if s.config.GetConfigStoreFileServer() != "" && s.config.GetConfigDBServer() == "" {
 		ticker := time.NewTicker(s.config.GetConfigStoreIntervalServer())
-		//for range time.Tick(config.GetConfigStoreIntervalServer()) {
 		for range ticker.C {
 			log.Info("Store metrics")
 			FileStore(s.mem, s.config)
@@ -407,6 +414,7 @@ func StartServer(r *chi.Mux, config *config.ConfigServer) {
 	}
 }
 
+// Checking if the database is available
 func (s Server) pingHandler(w http.ResponseWriter, r *http.Request) {
 
 	if s.database != nil {

@@ -1,11 +1,13 @@
+// Module agent
 package app
 
 import (
 	"context"
-	"github.com/go-resty/resty/v2"
-	"github.com/shirou/gopsutil/v3/mem"
 	"runtime"
 	"time"
+
+	"github.com/go-resty/resty/v2"
+	"github.com/shirou/gopsutil/v3/mem"
 
 	"github.com/vasiliyantufev/go-advanced-devops/internal/config"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
@@ -30,6 +32,7 @@ type agent struct {
 	hashServer *HashServer
 }
 
+// Creates a new agent instance
 func NewAgent(jobs chan []storage.JSONMetrics, mem *storage.MemStorage, memPsutil *storage.MemStorage, cfg *config.ConfigAgent, hashServer *HashServer) *agent {
 	return &agent{jobs: jobs, mem: mem, psutil: memPsutil, cfg: cfg, hashServer: hashServer}
 }
@@ -47,6 +50,7 @@ func (a agent) StartWorkers(ctx context.Context, ai Agent) {
 	}
 }
 
+// Get metrics using runtime and write them to memory
 func (a agent) putMetricsWorker(ctx context.Context) {
 
 	ticker := time.NewTicker(a.cfg.GetConfigPollIntervalAgent())
@@ -65,6 +69,7 @@ func (a agent) putMetricsWorker(ctx context.Context) {
 	}
 }
 
+// Gets metrics using psutil and write to memory
 func (a agent) putMetricsUsePsutilWorker(ctx context.Context) {
 
 	ticker := time.NewTicker(a.cfg.GetConfigPollIntervalAgent())
@@ -85,6 +90,7 @@ func (a agent) putMetricsUsePsutilWorker(ctx context.Context) {
 	}
 }
 
+// Writes metrics to a channel
 func (a agent) writeMetricsToChanWorker(ctx context.Context) {
 
 	ticker := time.NewTicker(a.cfg.GetConfigReportIntervalAgent())
@@ -94,7 +100,7 @@ func (a agent) writeMetricsToChanWorker(ctx context.Context) {
 		case <-ctx.Done():
 			log.Println("Read ticker stopped by ctx")
 			return
-		case <-ticker.C: // Запись в канал
+		case <-ticker.C: // Writes
 			log.Info("Write metrics to chan")
 			a.jobs <- a.mem.GetAllMetrics()
 			a.jobs <- a.psutil.GetAllMetrics()
@@ -102,6 +108,7 @@ func (a agent) writeMetricsToChanWorker(ctx context.Context) {
 	}
 }
 
+// Listens to the channel, if the metrics have arrived, forms a request and sends it to the server
 func (a agent) sentMetricsWorker(ctx context.Context, url string) {
 
 	client := resty.New()

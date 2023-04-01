@@ -1,3 +1,4 @@
+// Module config server
 package config
 
 import (
@@ -32,6 +33,7 @@ type ConfigServer struct {
 	RootPath string `env:"ROOT_PATH" envDefault:"file://./migrations"`
 }
 
+// Creates a new instance with the configuration for the server
 func NewConfigServer() *ConfigServer {
 
 	cfgSrv := ConfigServer{}

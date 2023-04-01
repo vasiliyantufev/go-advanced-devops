@@ -1,3 +1,4 @@
+// Module file
 package app
 
 import (
@@ -17,6 +18,7 @@ type metric struct {
 	decoder *json.Decoder
 }
 
+// Creates a new file instance
 func NewMetricReadWriter(fileName string) (*metric, error) {
 	file, err := os.OpenFile(fileName, os.O_CREATE|os.O_RDWR, 0644)
 	if err != nil {
@@ -48,6 +50,7 @@ func (m *metric) Close() error {
 	return m.file.Close()
 }
 
+// Saves metrics from memory to a file
 func FileStore(mem *storage.MemStorage, config *config.ConfigServer) {
 
 	mWrite, err := NewMetricReadWriter(config.GetConfigStoreFileServer())
@@ -73,6 +76,7 @@ func FileStore(mem *storage.MemStorage, config *config.ConfigServer) {
 	}
 }
 
+// Restores metrics from file to storage
 func FileRestore(mem *storage.MemStorage, config *config.ConfigServer) {
 
 	mRead, err := NewMetricReadWriter(config.GetConfigStoreFileServer())

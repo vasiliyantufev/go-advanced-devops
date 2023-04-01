@@ -1,3 +1,4 @@
+// Module database
 package database
 
 import (
@@ -20,6 +21,7 @@ type DB struct {
 	pool *sql.DB
 }
 
+// Creates a new database instance
 func NewDB(c *config.ConfigServer) (*DB, error) {
 	pool, err := sql.Open("postgres", c.DSN)
 	if err != nil {
@@ -47,16 +49,14 @@ func (db DB) Close() error {
 	return db.pool.Close()
 }
 
+// Creates database tables using migrations
 func (db DB) CreateTablesMigration(cfg *config.ConfigServer) {
-
-	//log.Fatal(cfg.RootPath)
 
 	driver, err := postgres.WithInstance(db.pool, &postgres.Config{})
 	if err != nil {
 		log.Error(err)
 	}
 	m, err := migrate.NewWithDatabaseInstance(
-		//"file://./migrations",
 		cfg.RootPath,
 		"postgres", driver)
 	if err != nil {
@@ -67,6 +67,7 @@ func (db DB) CreateTablesMigration(cfg *config.ConfigServer) {
 	}
 }
 
+// Adds new metrics to the database or updates if the entry is already present
 func (db DB) InsertOrUpdateMetrics(metrics *storage.MemStorage) error {
 
 	stmt, err := db.pool.Prepare(`

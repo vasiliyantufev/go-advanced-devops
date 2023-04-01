@@ -1,10 +1,13 @@
+// module main
 package main
 
 import (
 	"context"
-	"github.com/go-chi/chi/v5/middleware"
+	_ "net/http/pprof" // подключаем пакет pprof
 	"os/signal"
 	"syscall"
+
+	"github.com/go-chi/chi/v5/middleware"
 
 	"github.com/vasiliyantufev/go-advanced-devops/internal/app"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/config"
@@ -13,9 +16,9 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	log "github.com/sirupsen/logrus"
-	_ "net/http/pprof" // подключаем пакет pprof
 )
 
+// main server
 func main() {
 	configServer := config.NewConfigServer()
 

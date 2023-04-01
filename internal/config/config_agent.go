@@ -1,3 +1,4 @@
+// Module config agent
 package config
 
 import (
@@ -24,6 +25,7 @@ type ConfigAgent struct {
 	RateLimit      int           `env:"RATE_LIMIT"`
 }
 
+// Creates a new instance with the configuration for the agent
 func NewConfigAgent() *ConfigAgent {
 
 	var cfgAgt ConfigAgent

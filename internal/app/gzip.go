@@ -1,3 +1,4 @@
+// Module gzip
 package app
 
 import (
@@ -13,21 +14,20 @@ type gzipWriter struct {
 }
 
 func (w gzipWriter) Write(b []byte) (int, error) {
-	// w.Writer будет отвечать за gzip-сжатие, поэтому пишем в него
+	// w.Writer will be responsible for gzip compression
 	return w.Writer.Write(b)
 }
 
 func GzipHandle(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// проверяем, что клиент поддерживает gzip-сжатие
+		// Checks if the client supports gzip compression
 		if !strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
-			// если gzip не поддерживается, передаём управление
-			// дальше без изменений
+			// If gzip is not supported, transfer control
 			next.ServeHTTP(w, r)
 			return
 		}
 
-		// создаём gzip.Writer поверх текущего w
+		// Create a gzip.Writer on top of the current w
 		gz, err := gzip.NewWriterLevel(w, gzip.BestSpeed)
 		if err != nil {
 			io.WriteString(w, err.Error())
@@ -36,7 +36,7 @@ func GzipHandle(next http.Handler) http.Handler {
 		defer gz.Close()
 
 		w.Header().Set("Content-Encoding", "gzip")
-		// передаём обработчику страницы переменную типа gzipWriter для вывода данных
+		// Passes a gzipWriter type variable to the page handler to output data
 		next.ServeHTTP(gzipWriter{ResponseWriter: w, Writer: gz}, r)
 	})
 }
