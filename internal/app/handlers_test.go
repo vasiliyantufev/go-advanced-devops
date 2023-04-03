@@ -2,11 +2,11 @@ package app
 
 import (
 	"fmt"
-	"github.com/vasiliyantufev/go-advanced-devops/internal/config"
 	"net/http/httptest"
 	"strconv"
 	"testing"
 
+	"github.com/vasiliyantufev/go-advanced-devops/internal/config"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
 
 	"github.com/go-chi/chi/v5"

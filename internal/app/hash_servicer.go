@@ -31,7 +31,6 @@ func (hs HashServer) IsEnabled() bool {
 
 // Compares the hash received from the client with the hash stored on the server
 func (hs HashServer) ValidHashServer(clientMetric storage.JSONMetrics) bool {
-
 	if hs.IsEnabled() {
 		return clientMetric.Hash == hs.GenerateHash(clientMetric)
 	}
@@ -39,7 +38,6 @@ func (hs HashServer) ValidHashServer(clientMetric storage.JSONMetrics) bool {
 }
 
 func (hs HashServer) GenerateHash(metric storage.JSONMetrics) string {
-
 	var data string
 	switch metric.MType {
 	case "counter":
