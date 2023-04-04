@@ -7,8 +7,11 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/go-chi/chi/v5/middleware"
-	"github.com/vasiliyantufev/go-advanced-devops/internal/app"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/api/file"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/api/hashservicer"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/api/server"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/api/server/handlers"
+	routerdevops "github.com/vasiliyantufev/go-advanced-devops/internal/api/server/router"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/config/configserver"
 	database "github.com/vasiliyantufev/go-advanced-devops/internal/db"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
@@ -31,27 +34,26 @@ func main() {
 
 	mem := storage.NewMemStorage()
 
-	hashServer := app.NewHashServer(configServer.GetConfigKeyServer())
+	hashServer := hashservicer.NewHashServer(configServer.GetConfigKeyServer())
 
 	log.SetLevel(configServer.GetConfigDebugLevelServer())
-	srv := app.NewServer(mem, configServer, db, hashServer)
+
+	srv := handlers.NewHandler(mem, configServer, db, hashServer)
+	router := routerdevops.Route(srv)
 
 	srv.RestoreMetricsFromFile()
 
 	r := chi.NewRouter()
-	r.Use(middleware.Compress(1, "application/json", "text/html"))
-	r.Use(app.GzipHandle)
-
-	r.Mount("/", srv.Route())
+	r.Mount("/", router)
 
 	ctx, cnl := signal.NotifyContext(context.Background(), syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
 	defer cnl()
 
-	go app.StartServer(r, srv.GetConfig())
+	go server.StartServer(r, srv.GetConfig())
 	if configServer.GetConfigStoreIntervalServer() > 0 {
 		go srv.StoreMetricsToFile()
 	}
 	<-ctx.Done()
-	app.FileStore(srv.GetMem(), srv.GetConfig())
+	file.FileStore(srv.GetMem(), srv.GetConfig())
 	log.Info("server shutdown on signal with:", ctx.Err())
 }

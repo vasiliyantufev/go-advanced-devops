@@ -1,5 +1,5 @@
 // Module hash server
-package app
+package hashservicer
 
 import (
 	"crypto/hmac"

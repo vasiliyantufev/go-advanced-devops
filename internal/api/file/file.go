@@ -1,5 +1,5 @@
 // Module file
-package app
+package file
 
 import (
 	"encoding/json"

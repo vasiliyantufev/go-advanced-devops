@@ -1,5 +1,5 @@
 // Module agent
-package app
+package agent
 
 import (
 	"context"
@@ -8,6 +8,8 @@ import (
 
 	"github.com/go-resty/resty/v2"
 	"github.com/shirou/gopsutil/v3/mem"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/api/hashservicer"
+	runtime2 "github.com/vasiliyantufev/go-advanced-devops/internal/api/runtime"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/config/configagent"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
 
@@ -28,11 +30,11 @@ type agent struct {
 	mem        *storage.MemStorage
 	psutil     *storage.MemStorage
 	cfg        *configagent.ConfigAgent
-	hashServer *HashServer
+	hashServer *hashservicer.HashServer
 }
 
 // Creates a new agent instance
-func NewAgent(jobs chan []storage.JSONMetrics, mem *storage.MemStorage, memPsutil *storage.MemStorage, cfg *configagent.ConfigAgent, hashServer *HashServer) *agent {
+func NewAgent(jobs chan []storage.JSONMetrics, mem *storage.MemStorage, memPsutil *storage.MemStorage, cfg *configagent.ConfigAgent, hashServer *hashservicer.HashServer) *agent {
 	return &agent{jobs: jobs, mem: mem, psutil: memPsutil, cfg: cfg, hashServer: hashServer}
 }
 
@@ -63,7 +65,7 @@ func (a agent) putMetricsWorker(ctx context.Context) {
 			log.Info("Put metrics")
 			stats := new(runtime.MemStats)
 			runtime.ReadMemStats(stats)
-			DataFromRuntime(a.mem, stats, a.hashServer)
+			runtime2.DataFromRuntime(a.mem, stats, a.hashServer)
 		}
 	}
 }
@@ -84,7 +86,7 @@ func (a agent) putMetricsUsePsutilWorker(ctx context.Context) {
 			if err != nil {
 				log.Error(err)
 			}
-			DataFromRuntimeUsePsutil(a.psutil, v, a.hashServer)
+			runtime2.DataFromRuntimeUsePsutil(a.psutil, v, a.hashServer)
 		}
 	}
 }
