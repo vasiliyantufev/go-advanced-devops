@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/vasiliyantufev/go-advanced-devops/internal/config/config_server"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/config/configserver"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
 
 	"github.com/go-chi/chi/v5"
@@ -22,7 +22,7 @@ func TestHandler(t *testing.T) {
 
 	mem := storage.NewMemStorage()
 	hashServer := &HashServer{}
-	configServer := config_server.NewConfigServer()
+	configServer := configserver.NewConfigServer()
 	srv := NewServer(mem, configServer, nil, hashServer)
 
 	rtr := chi.NewRouter()

@@ -8,7 +8,7 @@ import (
 
 	"github.com/go-resty/resty/v2"
 	"github.com/shirou/gopsutil/v3/mem"
-	"github.com/vasiliyantufev/go-advanced-devops/internal/config/config_agent"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/config/configagent"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
 
 	log "github.com/sirupsen/logrus"
@@ -27,12 +27,12 @@ type agent struct {
 	jobs       chan []storage.JSONMetrics
 	mem        *storage.MemStorage
 	psutil     *storage.MemStorage
-	cfg        *config_agent.ConfigAgent
+	cfg        *configagent.ConfigAgent
 	hashServer *HashServer
 }
 
 // Creates a new agent instance
-func NewAgent(jobs chan []storage.JSONMetrics, mem *storage.MemStorage, memPsutil *storage.MemStorage, cfg *config_agent.ConfigAgent, hashServer *HashServer) *agent {
+func NewAgent(jobs chan []storage.JSONMetrics, mem *storage.MemStorage, memPsutil *storage.MemStorage, cfg *configagent.ConfigAgent, hashServer *HashServer) *agent {
 	return &agent{jobs: jobs, mem: mem, psutil: memPsutil, cfg: cfg, hashServer: hashServer}
 }
 

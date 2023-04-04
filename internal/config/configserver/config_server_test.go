@@ -1,4 +1,4 @@
-package config_server
+package configserver
 
 import (
 	"testing"

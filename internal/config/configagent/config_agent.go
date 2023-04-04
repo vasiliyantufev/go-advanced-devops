@@ -1,5 +1,5 @@
 // Module config agent
-package config_agent
+package configagent
 
 import (
 	"flag"

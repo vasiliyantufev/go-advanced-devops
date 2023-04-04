@@ -6,7 +6,7 @@ import (
 	"database/sql"
 	"time"
 
-	"github.com/vasiliyantufev/go-advanced-devops/internal/config/config_server"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/config/configserver"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
 
 	"github.com/golang-migrate/migrate/v4"
@@ -22,7 +22,7 @@ type DB struct {
 }
 
 // Creates a new database instance
-func NewDB(c *config_server.ConfigServer) (*DB, error) {
+func NewDB(c *configserver.ConfigServer) (*DB, error) {
 	pool, err := sql.Open("postgres", c.DSN)
 	if err != nil {
 		log.Error(err)
@@ -50,7 +50,7 @@ func (db DB) Close() error {
 }
 
 // Creates database tables using migrations
-func (db DB) CreateTablesMigration(cfg *config_server.ConfigServer) {
+func (db DB) CreateTablesMigration(cfg *configserver.ConfigServer) {
 
 	driver, err := postgres.WithInstance(db.pool, &postgres.Config{})
 	if err != nil {
