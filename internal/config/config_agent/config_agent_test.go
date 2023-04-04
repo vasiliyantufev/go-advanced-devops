@@ -1,4 +1,4 @@
-package configAgent
+package config_agent
 
 import (
 	"testing"

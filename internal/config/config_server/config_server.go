@@ -1,5 +1,5 @@
 // Module config server
-package configServer
+package config_server
 
 import (
 	"flag"

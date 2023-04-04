@@ -6,7 +6,7 @@ import (
 	"io"
 	"os"
 
-	"github.com/vasiliyantufev/go-advanced-devops/internal/config/configServer"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/config/config_server"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
 
 	log "github.com/sirupsen/logrus"
@@ -51,7 +51,7 @@ func (m *metric) Close() error {
 }
 
 // Saves metrics from memory to a file
-func FileStore(mem *storage.MemStorage, config *configServer.ConfigServer) {
+func FileStore(mem *storage.MemStorage, config *config_server.ConfigServer) {
 
 	mWrite, err := NewMetricReadWriter(config.GetConfigStoreFileServer())
 	if err != nil {
@@ -77,7 +77,7 @@ func FileStore(mem *storage.MemStorage, config *configServer.ConfigServer) {
 }
 
 // Restores metrics from file to storage
-func FileRestore(mem *storage.MemStorage, config *configServer.ConfigServer) {
+func FileRestore(mem *storage.MemStorage, config *config_server.ConfigServer) {
 
 	mRead, err := NewMetricReadWriter(config.GetConfigStoreFileServer())
 	if err != nil {

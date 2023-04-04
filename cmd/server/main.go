@@ -9,7 +9,7 @@ import (
 
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/app"
-	"github.com/vasiliyantufev/go-advanced-devops/internal/config/configServer"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/config/config_server"
 	database "github.com/vasiliyantufev/go-advanced-devops/internal/db"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
 
@@ -19,7 +19,7 @@ import (
 
 // main server
 func main() {
-	configServer := configServer.NewConfigServer()
+	configServer := config_server.NewConfigServer()
 
 	db, err := database.NewDB(configServer)
 	if err != nil {

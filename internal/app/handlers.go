@@ -13,7 +13,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	log "github.com/sirupsen/logrus"
-	"github.com/vasiliyantufev/go-advanced-devops/internal/config/configServer"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/config/config_server"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/converter"
 	database "github.com/vasiliyantufev/go-advanced-devops/internal/db"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
@@ -26,13 +26,13 @@ type ViewData struct {
 
 type Server struct {
 	mem        *storage.MemStorage
-	config     *configServer.ConfigServer
+	config     *config_server.ConfigServer
 	database   *database.DB
 	hashServer *HashServer
 }
 
 // Creates a new server instance
-func NewServer(mem *storage.MemStorage, cfg *configServer.ConfigServer, db *database.DB, hash *HashServer) *Server {
+func NewServer(mem *storage.MemStorage, cfg *config_server.ConfigServer, db *database.DB, hash *HashServer) *Server {
 	return &Server{mem: mem, config: cfg, database: db, hashServer: hash}
 }
 
@@ -406,7 +406,7 @@ func (s Server) StoreMetricsToFile() {
 	}
 }
 
-func StartServer(r *chi.Mux, config *configServer.ConfigServer) {
+func StartServer(r *chi.Mux, config *config_server.ConfigServer) {
 
 	log.Infof("Starting application %v\n", config.GetConfigAddressServer())
 	if con := http.ListenAndServe(config.GetConfigAddressServer(), r); con != nil {
@@ -435,6 +435,6 @@ func (s Server) GetMem() *storage.MemStorage {
 	return s.mem
 }
 
-func (s Server) GetConfig() *configServer.ConfigServer {
+func (s Server) GetConfig() *config_server.ConfigServer {
 	return s.config
 }
