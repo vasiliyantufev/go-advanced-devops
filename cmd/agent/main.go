@@ -7,7 +7,7 @@ import (
 	"syscall"
 
 	"github.com/vasiliyantufev/go-advanced-devops/internal/app"
-	"github.com/vasiliyantufev/go-advanced-devops/internal/config"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/config/configAgent"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
 
 	log "github.com/sirupsen/logrus"
@@ -16,7 +16,7 @@ import (
 // agent main
 func main() {
 
-	configAgent := config.NewConfigAgent()
+	configAgent := configAgent.NewConfigAgent()
 	memAgent := storage.NewMemStorage()
 	memAgentPsutil := storage.NewMemStorage()
 	hashServer := app.NewHashServer(configAgent.GetConfigKeyAgent())

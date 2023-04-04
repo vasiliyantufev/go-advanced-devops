@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/vasiliyantufev/go-advanced-devops/internal/config"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/config/configServer"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
 
 	"github.com/go-chi/chi/v5"
@@ -22,14 +22,15 @@ func TestHandler(t *testing.T) {
 
 	mem := storage.NewMemStorage()
 	hashServer := &HashServer{}
-	configServer := config.NewConfigServer()
+	configServer := configServer.NewConfigServer()
 	srv := NewServer(mem, configServer, nil, hashServer)
 
 	rtr := chi.NewRouter()
 	rtr.Get("/value/{type}/{name}", srv.getMetricsHandler)
-	rtr.Route("/update", func(r chi.Router) {
-		r.Post("/{type}/{name}/{value}", srv.metricsHandler)
-	})
+	rtr.Post("/update/{type}/{name}/{value}", srv.metricsHandler)
+	//rtr.Route("/update", func(r chi.Router) {
+	//	r.Post("/{type}/{name}/{value}", srv.metricsHandler)
+	//})
 
 	var val1 int64 = 22
 	rtr.ServeHTTP(wp, httptest.NewRequest("POST", "/update/counter/testSetGet33/"+fmt.Sprint(val1), nil))

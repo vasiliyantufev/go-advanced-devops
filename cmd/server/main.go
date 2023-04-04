@@ -8,9 +8,8 @@ import (
 	"syscall"
 
 	"github.com/go-chi/chi/v5/middleware"
-
 	"github.com/vasiliyantufev/go-advanced-devops/internal/app"
-	"github.com/vasiliyantufev/go-advanced-devops/internal/config"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/config/configServer"
 	database "github.com/vasiliyantufev/go-advanced-devops/internal/db"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
 
@@ -20,7 +19,7 @@ import (
 
 // main server
 func main() {
-	configServer := config.NewConfigServer()
+	configServer := configServer.NewConfigServer()
 
 	db, err := database.NewDB(configServer)
 	if err != nil {

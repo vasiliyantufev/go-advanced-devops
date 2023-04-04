@@ -1,5 +1,5 @@
 // Module config server
-package config
+package configServer
 
 import (
 	"flag"
@@ -35,6 +35,19 @@ type ConfigServer struct {
 
 // Creates a new instance with the configuration for the server
 func NewConfigServer() *ConfigServer {
+
+	//f := flag.NewFlagSet(os.Args[0], flag.ExitOnError)
+	//
+	//cfgSrv := ConfigServer{}
+	//
+	//// Установка флагов
+	//f.StringVar(&cfgSrv.Address, "a", "localhost:8080", "Адрес сервера")
+	//f.BoolVar(&cfgSrv.Restore, "r", true, "Булево значение, определяющее, загружать или нет начальные значения из указанного файла при старте сервера")
+	//f.DurationVar(&cfgSrv.StoreInterval, "i", 300*time.Second, "Интервал времени в секундах, по истечении которого текущие показания сервера сбрасываются на диск")
+	//f.StringVar(&cfgSrv.StoreFile, "f", "/tmp/devops-metrics-db.json", "Файл где хранятся значения")
+	//f.StringVar(&cfgSrv.Key, "k", "", "Ключ для генерации хеша")
+	//f.StringVar(&cfgSrv.DSN, "d", "", "База данных")
+	//f.Parse(os.Args)
 
 	cfgSrv := ConfigServer{}
 

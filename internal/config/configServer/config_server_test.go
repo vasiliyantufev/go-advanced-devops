@@ -1,4 +1,4 @@
-package config
+package configServer
 
 import (
 	"testing"
@@ -9,9 +9,7 @@ import (
 )
 
 func TestConfigServer(t *testing.T) {
-
 	configServerInstance := NewConfigServer()
-
 	configServer := ConfigServer{
 		Address:       "localhost:8080",
 		Restore:       true,
