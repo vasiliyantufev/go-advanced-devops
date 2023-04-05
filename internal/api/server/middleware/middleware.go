@@ -1,4 +1,4 @@
-// Module gzip
+// Package middleware - gzip module
 package middleware
 
 import (

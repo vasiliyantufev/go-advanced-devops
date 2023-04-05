@@ -1,4 +1,4 @@
-// Module config server
+// Package configserver - setting flags for the server
 package configserver
 
 import (
@@ -35,10 +35,8 @@ type ConfigServer struct {
 
 // NewConfigServer - creates a new instance with the configuration for the server
 func NewConfigServer() *ConfigServer {
-
 	cfgSrv := ConfigServer{}
-
-	// Установка флагов
+	// setting flags for the server
 	flag.StringVar(&cfgSrv.Address, "a", "localhost:8080", "Адрес сервера")
 	flag.BoolVar(&cfgSrv.Restore, "r", true, "Булево значение, определяющее, загружать или нет начальные значения из указанного файла при старте сервера")
 	flag.DurationVar(&cfgSrv.StoreInterval, "i", 300*time.Second, "Интервал времени в секундах, по истечении которого текущие показания сервера сбрасываются на диск")
@@ -51,9 +49,7 @@ func NewConfigServer() *ConfigServer {
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	log.Info(cfgSrv)
-
+	log.Debug(cfgSrv)
 	return &cfgSrv
 }
 

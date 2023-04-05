@@ -1,4 +1,4 @@
-// Module runtime
+// Package runtime
 package runtime
 
 import (

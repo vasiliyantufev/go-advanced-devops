@@ -1,4 +1,4 @@
-// Module convert types
+// Package converter - convert types
 package converter
 
 func Uint64ToFloat64Pointer(met uint64) *float64 {

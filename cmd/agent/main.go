@@ -1,4 +1,3 @@
-// module agent
 package main
 
 import (
@@ -14,9 +13,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// agent main
 func main() {
-
 	configAgent := configagent.NewConfigAgent()
 	memAgent := storage.NewMemStorage()
 	memAgentPsutil := storage.NewMemStorage()

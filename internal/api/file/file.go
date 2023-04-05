@@ -1,4 +1,4 @@
-// Module file
+// Package file
 package file
 
 import (

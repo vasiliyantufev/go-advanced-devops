@@ -1,4 +1,4 @@
-// Module database
+// Package database - database module
 package database
 
 import (

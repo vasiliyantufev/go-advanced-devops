@@ -1,4 +1,4 @@
-// Module server
+// Package server - server module
 package server
 
 import (

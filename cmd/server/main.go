@@ -1,4 +1,3 @@
-// module main
 package main
 
 import (
@@ -20,7 +19,6 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// main server
 func main() {
 	configServer := configserver.NewConfigServer()
 
@@ -31,16 +29,11 @@ func main() {
 		defer db.Close()
 		db.CreateTablesMigration(configServer)
 	}
-
 	mem := storage.NewMemStorage()
-
 	hashServer := hashservicer.NewHashServer(configServer.GetConfigKeyServer())
-
 	log.SetLevel(configServer.GetConfigDebugLevelServer())
-
 	srv := handlers.NewHandler(mem, configServer, db, hashServer)
 	router := routerdevops.Route(srv)
-
 	srv.RestoreMetricsFromFile()
 
 	r := chi.NewRouter()

@@ -1,4 +1,4 @@
-// Module agent
+// Package agent
 package agent
 
 import (

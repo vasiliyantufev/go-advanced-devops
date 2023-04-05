@@ -1,3 +1,4 @@
+// Package handlers - handler instance that all handlers use
 package handlers
 
 import (

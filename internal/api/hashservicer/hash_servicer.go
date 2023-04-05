@@ -1,4 +1,4 @@
-// Module hash server
+// Package hashservicer
 package hashservicer
 
 import (
