@@ -30,8 +30,8 @@ func main() {
 		db.CreateTablesMigration(configServer)
 	}
 	mem := storage.NewMemStorage()
-	hashServer := hashservicer.NewHashServer(configServer.GetConfigKeyServer())
-	log.SetLevel(configServer.GetConfigDebugLevelServer())
+	hashServer := hashservicer.NewHashServer(configServer.Key)
+	log.SetLevel(configServer.DebugLevel)
 	srv := handlers.NewHandler(mem, configServer, db, hashServer)
 	router := routerdevops.Route(srv)
 	srv.RestoreMetricsFromFile()
@@ -43,7 +43,7 @@ func main() {
 	defer cnl()
 
 	go server.StartServer(r, srv.GetConfig())
-	if configServer.GetConfigStoreIntervalServer() > 0 {
+	if configServer.StoreInterval > 0 {
 		go srv.StoreMetricsToFile()
 	}
 	<-ctx.Done()

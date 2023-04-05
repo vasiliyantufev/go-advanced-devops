@@ -65,7 +65,7 @@ func (s Handler) CreateMetricsJSONHandler(w http.ResponseWriter, r *http.Request
 	if s.database != nil {
 		s.database.InsertOrUpdateMetrics(s.mem)
 	}
-	if s.config.GetConfigStoreIntervalServer() == 0 {
+	if s.config.StoreInterval == 0 {
 		file.FileStore(s.mem, nil)
 	}
 

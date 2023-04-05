@@ -10,16 +10,6 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-type ConfigServicerServer interface {
-	GetConfigAddressServer() string
-	GetConfigStoreIntervalServer() time.Duration
-	GetConfigStoreFileServer() string
-	GetConfigDebugLevelServer() string
-	GetConfigKeyServer() string
-	GetConfigRestoreServer() bool
-	GetConfigDBServer() string
-}
-
 type ConfigServer struct {
 	Address       string        `env:"ADDRESS"`
 	StoreInterval time.Duration `env:"STORE_INTERVAL"`
@@ -51,32 +41,4 @@ func NewConfigServer() *ConfigServer {
 	}
 	log.Debug(cfgSrv)
 	return &cfgSrv
-}
-
-func (cfg ConfigServer) GetConfigAddressServer() string {
-	return cfg.Address
-}
-
-func (cfg ConfigServer) GetConfigStoreIntervalServer() time.Duration {
-	return cfg.StoreInterval
-}
-
-func (cfg ConfigServer) GetConfigStoreFileServer() string {
-	return cfg.StoreFile
-}
-
-func (cfg ConfigServer) GetConfigDebugLevelServer() log.Level {
-	return cfg.DebugLevel
-}
-
-func (cfg ConfigServer) GetConfigKeyServer() string {
-	return cfg.Key
-}
-
-func (cfg ConfigServer) GetConfigRestoreServer() bool {
-	return cfg.Restore
-}
-
-func (cfg ConfigServer) GetConfigDBServer() string {
-	return cfg.DSN
 }

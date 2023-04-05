@@ -11,8 +11,8 @@ import (
 
 // StartServer - starts the server
 func StartServer(r *chi.Mux, config *configserver.ConfigServer) {
-	log.Infof("Starting application %v\n", config.GetConfigAddressServer())
-	if con := http.ListenAndServe(config.GetConfigAddressServer(), r); con != nil {
+	log.Infof("Starting application %v\n", config.Address)
+	if con := http.ListenAndServe(config.Address, r); con != nil {
 		log.Fatal(con)
 	}
 }

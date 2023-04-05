@@ -9,14 +9,6 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-type ConfigServicerAgent interface {
-	GetConfigAddressAgent() string
-	GetConfigReportIntervalAgent() time.Duration
-	GetConfigPollIntervalAgent() time.Duration
-	GetConfigKeyAgent() string
-	GetConfigRateLimitAgent() int
-}
-
 type ConfigAgent struct {
 	Address        string        `env:"ADDRESS"`
 	ReportInterval time.Duration `env:"REPORT_INTERVAL"`
@@ -42,24 +34,4 @@ func NewConfigAgent() *ConfigAgent {
 	}
 	log.Debug(cfgAgt)
 	return &cfgAgt
-}
-
-func (cfg ConfigAgent) GetConfigAddressAgent() string {
-	return cfg.Address
-}
-
-func (cfg ConfigAgent) GetConfigReportIntervalAgent() time.Duration {
-	return cfg.ReportInterval
-}
-
-func (cfg ConfigAgent) GetConfigPollIntervalAgent() time.Duration {
-	return cfg.PollInterval
-}
-
-func (cfg ConfigAgent) GetConfigKeyAgent() string {
-	return cfg.Key
-}
-
-func (cfg ConfigAgent) GetConfigRateLimitAgent() int {
-	return cfg.RateLimit
 }

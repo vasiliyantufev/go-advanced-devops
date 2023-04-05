@@ -40,7 +40,7 @@ func NewAgent(jobs chan []storage.JSONMetrics, mem *storage.MemStorage, memPsuti
 
 func (a agent) StartWorkers(ctx context.Context, ai Agent) {
 
-	urlPath := "http://" + a.cfg.GetConfigAddressAgent() + "/updates/"
+	urlPath := "http://" + a.cfg.Address + "/updates/"
 
 	go ai.putMetricsWorker(ctx)
 	go ai.putMetricsUsePsutilWorker(ctx)
@@ -54,7 +54,7 @@ func (a agent) StartWorkers(ctx context.Context, ai Agent) {
 // Get metrics using runtime and write them to memory
 func (a agent) putMetricsWorker(ctx context.Context) {
 
-	ticker := time.NewTicker(a.cfg.GetConfigPollIntervalAgent())
+	ticker := time.NewTicker(a.cfg.PollInterval)
 	defer ticker.Stop()
 	for {
 		select {
@@ -73,7 +73,7 @@ func (a agent) putMetricsWorker(ctx context.Context) {
 // Gets metrics using psutil and write to memory
 func (a agent) putMetricsUsePsutilWorker(ctx context.Context) {
 
-	ticker := time.NewTicker(a.cfg.GetConfigPollIntervalAgent())
+	ticker := time.NewTicker(a.cfg.PollInterval)
 	defer ticker.Stop()
 	for {
 		select {
@@ -94,7 +94,7 @@ func (a agent) putMetricsUsePsutilWorker(ctx context.Context) {
 // Writes metrics to a channel
 func (a agent) writeMetricsToChanWorker(ctx context.Context) {
 
-	ticker := time.NewTicker(a.cfg.GetConfigReportIntervalAgent())
+	ticker := time.NewTicker(a.cfg.ReportInterval)
 	defer ticker.Stop()
 	for {
 		select {

@@ -26,7 +26,7 @@ func NewHandler(mem *storage.MemStorage, cfg *configserver.ConfigServer, db *dat
 
 // RestoreMetricsFromFile - restores metrics from a file
 func (s Handler) RestoreMetricsFromFile() {
-	if s.config.GetConfigRestoreServer() {
+	if s.config.Restore {
 		log.Info("Restore metrics")
 		file.FileRestore(s.mem, s.config)
 	}
@@ -34,8 +34,8 @@ func (s Handler) RestoreMetricsFromFile() {
 
 // StoreMetricsToFile - saves metrics to a file
 func (s Handler) StoreMetricsToFile() {
-	if s.config.GetConfigStoreFileServer() != "" && s.config.GetConfigDBServer() == "" {
-		ticker := time.NewTicker(s.config.GetConfigStoreIntervalServer())
+	if s.config.StoreFile != "" && s.config.DSN == "" {
+		ticker := time.NewTicker(s.config.StoreInterval)
 		for range ticker.C {
 			log.Info("Store metrics")
 			file.FileStore(s.mem, s.config)

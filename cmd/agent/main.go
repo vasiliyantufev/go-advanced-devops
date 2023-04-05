@@ -17,7 +17,7 @@ func main() {
 	configAgent := configagent.NewConfigAgent()
 	memAgent := storage.NewMemStorage()
 	memAgentPsutil := storage.NewMemStorage()
-	hashServer := hashservicer.NewHashServer(configAgent.GetConfigKeyAgent())
+	hashServer := hashservicer.NewHashServer(configAgent.Key)
 
 	ctx, cnl := signal.NotifyContext(context.Background(), syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
 	defer cnl()

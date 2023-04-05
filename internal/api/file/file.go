@@ -53,7 +53,7 @@ func (m *metric) Close() error {
 // Saves metrics from memory to a file
 func FileStore(mem *storage.MemStorage, config *configserver.ConfigServer) {
 
-	mWrite, err := NewMetricReadWriter(config.GetConfigStoreFileServer())
+	mWrite, err := NewMetricReadWriter(config.StoreFile)
 	if err != nil {
 		log.Error(err)
 	}
@@ -79,7 +79,7 @@ func FileStore(mem *storage.MemStorage, config *configserver.ConfigServer) {
 // Restores metrics from file to storage
 func FileRestore(mem *storage.MemStorage, config *configserver.ConfigServer) {
 
-	mRead, err := NewMetricReadWriter(config.GetConfigStoreFileServer())
+	mRead, err := NewMetricReadWriter(config.StoreFile)
 	if err != nil {
 		log.Error(err)
 	}
