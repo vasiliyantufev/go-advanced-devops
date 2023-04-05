@@ -9,6 +9,7 @@ import (
 	"github.com/vasiliyantufev/go-advanced-devops/internal/config/configserver"
 )
 
+// StartServer - starts the server
 func StartServer(r *chi.Mux, config *configserver.ConfigServer) {
 	log.Infof("Starting application %v\n", config.GetConfigAddressServer())
 	if con := http.ListenAndServe(config.GetConfigAddressServer(), r); con != nil {

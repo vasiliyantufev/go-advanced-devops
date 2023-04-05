@@ -13,7 +13,7 @@ type ViewData struct {
 	MapC map[string]int64
 }
 
-// The page that displays all the metrics with parameters
+// IndexHandler - the page that displays all the metrics with parameters
 func (s Handler) IndexHandler(w http.ResponseWriter, r *http.Request) {
 
 	tmpl, err := template.ParseFiles("./web/templates/index.html")

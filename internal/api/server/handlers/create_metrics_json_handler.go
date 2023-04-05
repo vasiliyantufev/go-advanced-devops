@@ -11,7 +11,7 @@ import (
 	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
 )
 
-// Create metrics using json
+// CreateMetricsJSONHandler - create metrics using json
 func (s Handler) CreateMetricsJSONHandler(w http.ResponseWriter, r *http.Request) {
 
 	resp, err := io.ReadAll(r.Body)

@@ -11,7 +11,7 @@ import (
 	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
 )
 
-// Create metric using url parameters
+// CreateMetricURLParamsHandler - create metric using url parameters
 func (s Handler) CreateMetricURLParamsHandler(w http.ResponseWriter, r *http.Request) {
 
 	typeMetrics := chi.URLParam(r, "type")

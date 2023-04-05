@@ -21,7 +21,7 @@ type DB struct {
 	pool *sql.DB
 }
 
-// Creates a new database instance
+// NewDB - creates a new database instance
 func NewDB(c *configserver.ConfigServer) (*DB, error) {
 	pool, err := sql.Open("postgres", c.DSN)
 	if err != nil {
@@ -37,6 +37,7 @@ func NewDB(c *configserver.ConfigServer) (*DB, error) {
 	return &DB{pool: pool}, nil
 }
 
+// Ping - checks the database connection
 func (db DB) Ping() error {
 	if err := db.pool.Ping(); err != nil {
 		log.Error(err)
@@ -45,11 +46,12 @@ func (db DB) Ping() error {
 	return nil
 }
 
+// Close - closes the database connection
 func (db DB) Close() error {
 	return db.pool.Close()
 }
 
-// Creates database tables using migrations
+// CreateTablesMigration - creates database tables using migrations
 func (db DB) CreateTablesMigration(cfg *configserver.ConfigServer) {
 
 	driver, err := postgres.WithInstance(db.pool, &postgres.Config{})
@@ -67,9 +69,8 @@ func (db DB) CreateTablesMigration(cfg *configserver.ConfigServer) {
 	}
 }
 
-// Adds new metrics to the database or updates if the entry is already present
+// InsertOrUpdateMetrics - adds new metrics to the database or updates if the entry is already present
 func (db DB) InsertOrUpdateMetrics(metrics *storage.MemStorage) error {
-
 	stmt, err := db.pool.Prepare(`
 			INSERT INTO metrics 
 			VALUES($1, $2, $3, $4, $5)
@@ -85,13 +86,11 @@ func (db DB) InsertOrUpdateMetrics(metrics *storage.MemStorage) error {
 	}
 
 	defer stmt.Close()
-
 	for _, metric := range metrics.GetAllMetrics() {
 		if _, err = stmt.Exec(metric.ID, metric.MType, metric.Value, metric.Delta, metric.Hash); err != nil {
 			log.Error(err)
 			return err
 		}
 	}
-
 	return nil
 }

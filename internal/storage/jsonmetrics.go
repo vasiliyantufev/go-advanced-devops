@@ -7,11 +7,11 @@ import (
 )
 
 type JSONMetrics struct {
-	ID    string   `json:"id"`              // имя метрики
-	MType string   `json:"type"`            // параметр, принимающий значение gauge или counter
-	Delta *int64   `json:"delta,omitempty"` // значение метрики в случае передачи counter
-	Value *float64 `json:"value,omitempty"` // значение метрики в случае передачи gauge
-	Hash  string   `json:"hash"`            // значение хеш-функции
+	ID    string   `json:"id"`              // metric name
+	MType string   `json:"type"`            // a parameter that takes the value gauge or counter
+	Delta *int64   `json:"delta,omitempty"` // metric value in case of passing counter
+	Value *float64 `json:"value,omitempty"` // metric value in case of passing gauge
+	Hash  string   `json:"hash"`            // hash value
 }
 
 func (J JSONMetrics) String() string {

@@ -6,7 +6,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// Checking if the database is available
+// PingHandler - checking if the database is available
 func (s Handler) PingHandler(w http.ResponseWriter, r *http.Request) {
 
 	if s.database != nil {

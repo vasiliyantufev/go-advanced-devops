@@ -9,7 +9,7 @@ import (
 	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
 )
 
-// Getting metric using url parameters
+// GetMetricURLParamsHandler - getting metric using url parameters
 func (s Handler) GetMetricURLParamsHandler(w http.ResponseWriter, r *http.Request) {
 
 	typeMetrics := chi.URLParam(r, "type")

@@ -9,7 +9,7 @@ import (
 	middlewaredevops "github.com/vasiliyantufev/go-advanced-devops/internal/api/server/middleware"
 )
 
-// Setting routes
+// Route - setting routes
 func Route(s *handlers.Handler) *chi.Mux {
 	r := chi.NewRouter()
 

@@ -10,7 +10,7 @@ type MemStorage struct {
 	data map[string]JSONMetrics
 }
 
-// Создаём map
+// NewMemStorage - creates a new store instance
 func NewMemStorage() *MemStorage {
 	return &MemStorage{
 		mx:   new(sync.RWMutex),
@@ -18,6 +18,7 @@ func NewMemStorage() *MemStorage {
 	}
 }
 
+// PutMetricsGauge - puts the metric in storage with type Gauge
 func (data *MemStorage) PutMetricsGauge(id string, o float64, h string) {
 	data.mx.Lock()
 	defer data.mx.Unlock()
@@ -30,6 +31,7 @@ func (data *MemStorage) PutMetricsGauge(id string, o float64, h string) {
 	}
 }
 
+// GetMetricsGauge - get metrics from storage of type Gauge
 func (data *MemStorage) GetMetricsGauge(id string) (o float64, h string, b bool) {
 	data.mx.RLock()
 	defer data.mx.RUnlock()
@@ -40,6 +42,7 @@ func (data *MemStorage) GetMetricsGauge(id string) (o float64, h string, b bool)
 	}
 }
 
+// PutMetricsCount - puts the metric in storage with type Count
 func (data *MemStorage) PutMetricsCount(id string, o int64, h string) {
 	data.mx.Lock()
 	defer data.mx.Unlock()
@@ -52,6 +55,7 @@ func (data *MemStorage) PutMetricsCount(id string, o int64, h string) {
 	}
 }
 
+// GetMetricsCount - gets metrics from storage of type Count
 func (data *MemStorage) GetMetricsCount(id string) (o int64, h string, b bool) {
 	data.mx.RLock()
 	defer data.mx.RUnlock()
@@ -62,6 +66,7 @@ func (data *MemStorage) GetMetricsCount(id string) (o int64, h string, b bool) {
 	}
 }
 
+// GetAllMetrics - gets all metrics from storage
 func (data *MemStorage) GetAllMetrics() []JSONMetrics {
 	data.mx.RLock()
 	defer data.mx.RUnlock()

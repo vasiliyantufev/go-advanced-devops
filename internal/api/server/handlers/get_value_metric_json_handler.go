@@ -9,7 +9,7 @@ import (
 	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
 )
 
-// Getting metric value using json
+// GetValueMetricJSONHandler - getting metric value using json
 func (s Handler) GetValueMetricJSONHandler(w http.ResponseWriter, r *http.Request) {
 
 	resp, err := io.ReadAll(r.Body)

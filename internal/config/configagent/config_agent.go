@@ -26,19 +26,8 @@ type ConfigAgent struct {
 	RateLimit      int           `env:"RATE_LIMIT"`
 }
 
-// Creates a new instance with the configuration for the agent
+// NewConfigAgent - creates a new instance with the configuration for the agent
 func NewConfigAgent() *ConfigAgent {
-
-	//f := flag.NewFlagSet(os.Args[0], flag.ExitOnError)
-	//
-	//var cfgAgt ConfigAgent
-	//
-	//f.StringVar(&cfgAgt.Address, "a", "localhost:8080", "Адрес сервера")
-	//f.DurationVar(&cfgAgt.ReportInterval, "r", 10*time.Second, "Интервал времени в секундах, по истечении которого текущие показания отправляются на сервера")
-	//f.DurationVar(&cfgAgt.PollInterval, "p", 2*time.Second, "Интервал времени в секундах, по истечении которого текущие показания мертрик обновляются на клиенте")
-	//f.StringVar(&cfgAgt.Key, "k", "", "Ключ для генерации хеша")
-	//f.IntVar(&cfgAgt.RateLimit, "l", 2, "Количество одновременно исходящих запросов на сервер")
-	//f.Parse(os.Args)
 
 	var cfgAgt ConfigAgent
 
