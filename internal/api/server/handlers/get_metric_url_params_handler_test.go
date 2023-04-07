@@ -10,8 +10,8 @@ import (
 
 func TestHandler_GetMetricURLParamsHandler(t *testing.T) {
 
+	contType := "text/plain; charset=utf-8"
 	value := "42"
-	var contType = "text/plain; charset=utf-8"
 
 	testTable := []struct {
 		name             string
