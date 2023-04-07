@@ -30,6 +30,7 @@ func (s Handler) CreateMetricJSONHandler(w http.ResponseWriter, r *http.Request)
 	rawValue := storage.JSONMetrics{
 		ID: value.ID,
 	}
+
 	if value.Value != nil {
 		// expect true id hashServer is disabled
 		if isValid := s.hashServer.ValidHashServer(value); isValid {
