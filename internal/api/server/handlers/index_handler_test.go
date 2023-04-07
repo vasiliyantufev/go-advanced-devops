@@ -26,7 +26,7 @@ import (
 //	assert.Equal(t, res.StatusCode, http.StatusOK)
 //}
 
-func TestIndexHandler(t *testing.T) {
+func TestHandler_IndexHandler(t *testing.T) {
 	testTable := []struct {
 		name   string
 		server *httptest.Server
@@ -42,7 +42,7 @@ func TestIndexHandler(t *testing.T) {
 	for _, tc := range testTable {
 		t.Run(tc.name, func(t *testing.T) {
 			defer tc.server.Close()
-			resp, _, _ := MakeHTTPGetCall(tc.server.URL)
+			resp, _ := MakeHTTPCall(tc.server.URL)
 
 			assert.Equal(t, resp.StatusCode, http.StatusOK)
 			assert.Equal(t, resp.Header.Get("Content-Type"), "text/html")

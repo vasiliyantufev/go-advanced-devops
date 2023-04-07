@@ -17,16 +17,16 @@ type HashServices interface {
 }
 
 type HashServer struct {
-	Key string
+	key string
 }
 
 func NewHashServer(key string) *HashServer {
-	return &HashServer{Key: key}
+	return &HashServer{key: key}
 }
 
 // Checks if the hash is available
 func (hs HashServer) IsEnabled() bool {
-	return hs.Key != ""
+	return hs.key != ""
 }
 
 // Compares the hash received from the client with the hash stored on the server
@@ -45,7 +45,7 @@ func (hs HashServer) GenerateHash(metric storage.JSONMetrics) string {
 	case "gauge":
 		data = fmt.Sprintf("%s:%s:%f", metric.ID, metric.MType, *metric.Value)
 	}
-	h := hmac.New(sha256.New, []byte(hs.Key))
+	h := hmac.New(sha256.New, []byte(hs.key))
 	h.Write([]byte(data))
 	return hex.EncodeToString(h.Sum(nil))
 }
