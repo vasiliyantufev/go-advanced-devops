@@ -28,8 +28,9 @@ import (
 
 func TestHandler_IndexHandler(t *testing.T) {
 	testTable := []struct {
-		name   string
-		server *httptest.Server
+		name        string
+		server      *httptest.Server
+		expectedErr error
 	}{
 		{
 			name: "test index handler",
@@ -37,13 +38,14 @@ func TestHandler_IndexHandler(t *testing.T) {
 				w.Header().Set("Content-Type", "text/html")
 				w.WriteHeader(http.StatusOK)
 			})),
+			expectedErr: nil,
 		},
 	}
 	for _, tc := range testTable {
 		t.Run(tc.name, func(t *testing.T) {
 			defer tc.server.Close()
 			resp, err := MakeHTTPCall(tc.server.URL)
-			if err != nil {
+			if err != tc.expectedErr {
 				t.Error(err)
 			}
 			defer resp.Body.Close()

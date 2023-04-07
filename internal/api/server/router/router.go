@@ -5,16 +5,15 @@ import (
 	"net/http/pprof"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/api/server/handlers"
-	middlewaredevops "github.com/vasiliyantufev/go-advanced-devops/internal/api/server/middleware"
+	middlewaredevops "github.com/vasiliyantufev/go-advanced-devops/internal/api/server/middlewares"
 )
 
 // Route - setting routes
 func Route(s *handlers.Handler) *chi.Mux {
 	r := chi.NewRouter()
 
-	r.Use(middleware.Compress(1, "application/json", "text/html"))
+	//r.Use(middleware.Compress(1, "application/json", "text/html"))
 	r.Use(middlewaredevops.GzipMiddleware)
 
 	r.Get("/", s.IndexHandler)

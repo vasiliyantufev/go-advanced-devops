@@ -38,12 +38,13 @@ func TestHandler_GetValueMetricJSONHandler(t *testing.T) {
 				w.Write([]byte(result))
 			})),
 			expectedResponse: metric,
+			expectedErr:      nil,
 		},
 	}
 	for _, tc := range testTable {
 		t.Run(tc.name, func(t *testing.T) {
 			defer tc.server.Close()
-			resp, respBody, err := MakeHTTPWithBodyCall(tc.server.URL)
+			resp, respBody, err := MakeHTTPWithBodyJSONCall(tc.server.URL)
 			if err != nil {
 				t.Error(err)
 			}

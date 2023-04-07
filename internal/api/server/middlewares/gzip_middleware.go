@@ -1,5 +1,5 @@
-// Package middleware - gzip module
-package middleware
+// Package middlewares - gzip module
+package middlewares
 
 import (
 	"compress/gzip"
