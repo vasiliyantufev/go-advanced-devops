@@ -31,7 +31,6 @@ func MakeHTTPWithBodyCall(url string) (*http.Response, *Response, error) {
 	if err != nil {
 		return nil, nil, err
 	}
-	defer resp.Body.Close()
 
 	respBody := &Response{}
 	if err := json.Unmarshal(body, respBody); err != nil {

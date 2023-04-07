@@ -43,10 +43,10 @@ func TestHandler_IndexHandler(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			defer tc.server.Close()
 			resp, err := MakeHTTPCall(tc.server.URL)
-
 			if err != nil {
 				t.Error(err)
 			}
+			defer resp.Body.Close()
 
 			assert.Equal(t, resp.StatusCode, http.StatusOK)
 			assert.Equal(t, resp.Header.Get("Content-Type"), "text/html")
