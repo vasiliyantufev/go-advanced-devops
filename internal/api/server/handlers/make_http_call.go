@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 )
 
@@ -27,10 +27,11 @@ func MakeHTTPWithBodyCall(url string) (*http.Response, *Response, error) {
 		return nil, nil, err
 	}
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, nil, err
 	}
+	defer resp.Body.Close()
 
 	respBody := &Response{}
 	if err := json.Unmarshal(body, respBody); err != nil {

@@ -42,7 +42,11 @@ func TestHandler_IndexHandler(t *testing.T) {
 	for _, tc := range testTable {
 		t.Run(tc.name, func(t *testing.T) {
 			defer tc.server.Close()
-			resp, _ := MakeHTTPCall(tc.server.URL)
+			resp, err := MakeHTTPCall(tc.server.URL)
+
+			if err != nil {
+				t.Error(err)
+			}
 
 			assert.Equal(t, resp.StatusCode, http.StatusOK)
 			assert.Equal(t, resp.Header.Get("Content-Type"), "text/html")
