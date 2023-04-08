@@ -9,10 +9,18 @@ import (
 	"github.com/vasiliyantufev/go-advanced-devops/internal/config/configserver"
 )
 
-// StartServer - starts the server
-func StartServer(r *chi.Mux, config *configserver.ConfigServer) {
+// StartService - starts the server
+func StartService(r *chi.Mux, config *configserver.ConfigServer) {
 	log.Infof("Starting application %v\n", config.Address)
 	if con := http.ListenAndServe(config.Address, r); con != nil {
+		log.Fatal(con)
+	}
+}
+
+// StartService - starts the server
+func StartPProfile(r *chi.Mux, config *configserver.ConfigServer) {
+	log.Infof("Starting pprofile %v\n", config.AddressPProfile)
+	if con := http.ListenAndServe(config.AddressPProfile, r); con != nil {
 		log.Fatal(con)
 	}
 }

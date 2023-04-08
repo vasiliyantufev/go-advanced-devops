@@ -1,15 +1,13 @@
-// Package routerdevops - setting routes
-package routerdevops
+// Package routers - setting routes
+package routers
 
 import (
-	"net/http/pprof"
-
 	"github.com/go-chi/chi/v5"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/api/server/handlers"
 	middlewaredevops "github.com/vasiliyantufev/go-advanced-devops/internal/api/server/middlewares"
 )
 
-// Route - setting routes
+// Route - setting service routes
 func Route(s *handlers.Handler) *chi.Mux {
 	r := chi.NewRouter()
 
@@ -25,14 +23,6 @@ func Route(s *handlers.Handler) *chi.Mux {
 	r.Route("/update", func(r chi.Router) {
 		r.Post("/{type}/{name}/{value}", s.CreateMetricURLParamsHandler)
 		r.Post("/", s.CreateMetricJSONHandler)
-	})
-	r.Route("/debug/pprof/", func(r chi.Router) {
-		r.Get("/", pprof.Index)
-		r.Get("/profile", pprof.Profile)
-		r.Get("/cmdline", pprof.Cmdline)
-		r.Get("/symbol", pprof.Symbol)
-		r.Get("/trace", pprof.Trace)
-		r.Get("/{cmd}", pprof.Index)
 	})
 	r.Post("/updates/", s.CreateMetricsJSONHandler)
 

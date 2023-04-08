@@ -10,7 +10,7 @@ import (
 	"github.com/vasiliyantufev/go-advanced-devops/internal/api/hashservicer"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/api/server"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/api/server/handlers"
-	routerdevops "github.com/vasiliyantufev/go-advanced-devops/internal/api/server/router"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/api/server/routers"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/config/configserver"
 	database "github.com/vasiliyantufev/go-advanced-devops/internal/db"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
@@ -33,16 +33,22 @@ func main() {
 	hashServer := hashservicer.NewHashServer(configServer.Key)
 	log.SetLevel(configServer.DebugLevel)
 	srv := handlers.NewHandler(mem, configServer, db, hashServer)
-	router := routerdevops.Route(srv)
 	srv.RestoreMetricsFromFile()
 
-	r := chi.NewRouter()
-	r.Mount("/", router)
+	routerService := routers.Route(srv)
+	rs := chi.NewRouter()
+	rs.Mount("/", routerService)
+
+	routerPProfile := routers.RoutePProf(srv)
+	rp := chi.NewRouter()
+	rp.Mount("/", routerPProfile)
 
 	ctx, cnl := signal.NotifyContext(context.Background(), syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
 	defer cnl()
 
-	go server.StartServer(r, srv.GetConfig())
+	go server.StartService(rs, srv.GetConfig())
+	go server.StartPProfile(rp, srv.GetConfig())
+
 	if configServer.StoreInterval > 0 {
 		go srv.StoreMetricsToFile()
 	}
