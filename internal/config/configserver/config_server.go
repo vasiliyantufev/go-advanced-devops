@@ -28,13 +28,13 @@ type ConfigServer struct {
 func NewConfigServer() *ConfigServer {
 	cfgSrv := ConfigServer{}
 	// setting flags for the server
-	flag.StringVar(&cfgSrv.Address, "a", "localhost:8080", "Адрес сервера")
-	flag.StringVar(&cfgSrv.AddressPProfile, "ap", "localhost:8088", "Адрес профайла")
-	flag.BoolVar(&cfgSrv.Restore, "r", true, "Булево значение, определяющее, загружать или нет начальные значения из указанного файла при старте сервера")
-	flag.DurationVar(&cfgSrv.StoreInterval, "i", 300*time.Second, "Интервал времени в секундах, по истечении которого текущие показания сервера сбрасываются на диск")
-	flag.StringVar(&cfgSrv.StoreFile, "f", "/tmp/devops-metrics-db.json", "Файл где хранятся значения")
-	flag.StringVar(&cfgSrv.Key, "k", "", "Ключ для генерации хеша")
-	flag.StringVar(&cfgSrv.DSN, "d", "", "База данных")
+	flag.StringVar(&cfgSrv.Address, "a", "localhost:8080", "Server address")
+	flag.StringVar(&cfgSrv.AddressPProfile, "ap", "localhost:8088", "Profile address")
+	flag.BoolVar(&cfgSrv.Restore, "r", true, "Boolean value specifying whether or not to load the initial values from the specified file when the server starts")
+	flag.DurationVar(&cfgSrv.StoreInterval, "i", 300*time.Second, "Time interval in seconds after which the current server readings are flushed to disk")
+	flag.StringVar(&cfgSrv.StoreFile, "f", "/tmp/devops-metrics-db.json", "The file where the values are stored")
+	flag.StringVar(&cfgSrv.Key, "k", "", "Key to generate hash")
+	flag.StringVar(&cfgSrv.DSN, "d", "", "Database configuration")
 	flag.Parse()
 
 	err := env.Parse(&cfgSrv)
