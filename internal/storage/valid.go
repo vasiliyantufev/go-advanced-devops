@@ -1,3 +1,4 @@
+// storage - valid
 package storage
 
 import (

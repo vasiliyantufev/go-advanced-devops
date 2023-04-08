@@ -1,10 +1,12 @@
-package app
+// Package hashservicer
+package hashservicer
 
 import (
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
+
 	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
 )
 
@@ -22,12 +24,13 @@ func NewHashServer(key string) *HashServer {
 	return &HashServer{key: key}
 }
 
+// Checks if the hash is available
 func (hs HashServer) IsEnabled() bool {
 	return hs.key != ""
 }
 
+// Compares the hash received from the client with the hash stored on the server
 func (hs HashServer) ValidHashServer(clientMetric storage.JSONMetrics) bool {
-
 	if hs.IsEnabled() {
 		return clientMetric.Hash == hs.GenerateHash(clientMetric)
 	}
@@ -35,7 +38,6 @@ func (hs HashServer) ValidHashServer(clientMetric storage.JSONMetrics) bool {
 }
 
 func (hs HashServer) GenerateHash(metric storage.JSONMetrics) string {
-
 	var data string
 	switch metric.MType {
 	case "counter":

@@ -2,11 +2,16 @@ package main
 
 import (
 	"context"
+	_ "net/http/pprof" // подключаем пакет pprof
 	"os/signal"
 	"syscall"
 
-	"github.com/vasiliyantufev/go-advanced-devops/internal/app"
-	"github.com/vasiliyantufev/go-advanced-devops/internal/config"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/api/file"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/api/hashservicer"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/api/server"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/api/server/handlers"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/api/server/routers"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/config/configserver"
 	database "github.com/vasiliyantufev/go-advanced-devops/internal/db"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
 
@@ -15,41 +20,39 @@ import (
 )
 
 func main() {
-
-	configServer := config.NewConfigServer()
+	configServer := configserver.NewConfigServer()
 
 	db, err := database.NewDB(configServer)
 	if err != nil {
 		log.Error(err)
 	} else {
 		defer db.Close()
-		db.CreateTablesMigration()
+		db.CreateTablesMigration(configServer)
 	}
-
 	mem := storage.NewMemStorage()
-	//hashServer := &app.HashServer{}
-
-	hashServer := app.NewHashServer(configServer.GetConfigKeyServer())
-
-	log.SetLevel(configServer.GetConfigDebugLevelServer())
-	srv := app.NewServer(mem, configServer, db, hashServer)
-
+	hashServer := hashservicer.NewHashServer(configServer.Key)
+	log.SetLevel(configServer.DebugLevel)
+	srv := handlers.NewHandler(mem, configServer, db, hashServer)
 	srv.RestoreMetricsFromFile()
 
-	r := chi.NewRouter()
-	//r.Use(middleware.Logger)
-	r.Use(app.GzipHandle)
+	routerService := routers.Route(srv)
+	rs := chi.NewRouter()
+	rs.Mount("/", routerService)
 
-	r.Mount("/", srv.Route())
+	routerPProfile := routers.RoutePProf(srv)
+	rp := chi.NewRouter()
+	rp.Mount("/", routerPProfile)
 
 	ctx, cnl := signal.NotifyContext(context.Background(), syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
 	defer cnl()
 
-	go app.StartServer(r, srv.GetConfig())
-	if configServer.GetConfigStoreIntervalServer() > 0 {
+	go server.StartService(rs, srv.GetConfig())
+	go server.StartPProfile(rp, srv.GetConfig())
+
+	if configServer.StoreInterval > 0 {
 		go srv.StoreMetricsToFile()
 	}
 	<-ctx.Done()
-	app.FileStore(srv.GetMem(), srv.GetConfig())
+	file.FileStore(srv.GetMem(), srv.GetConfig())
 	log.Info("server shutdown on signal with:", ctx.Err())
 }

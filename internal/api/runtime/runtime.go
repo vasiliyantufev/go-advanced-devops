@@ -1,16 +1,19 @@
-package app
+// Package runtime
+package runtime
 
 import (
-	"github.com/shirou/gopsutil/v3/mem"
-	"github.com/vasiliyantufev/go-advanced-devops/internal/converter"
 	"math/rand"
 	"runtime"
+
+	"github.com/shirou/gopsutil/v3/mem"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/api/hashservicer"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/converter"
 
 	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
 )
 
-func DataFromRuntime(memAgent *storage.MemStorage, stats *runtime.MemStats, hashServer *HashServer) {
-
+// Getting data using the runtime package
+func DataFromRuntime(memAgent *storage.MemStorage, stats *runtime.MemStats, hashServer *hashservicer.HashServer) {
 	memAgent.PutMetricsGauge("Alloc", float64(stats.Alloc), hashServer.GenerateHash(storage.JSONMetrics{ID: "Alloc", MType: "gauge", Delta: nil, Value: converter.Uint64ToFloat64Pointer(stats.Alloc)}))
 	memAgent.PutMetricsGauge("BuckHashSys", float64(stats.BuckHashSys), hashServer.GenerateHash(storage.JSONMetrics{ID: "BuckHashSys", MType: "gauge", Delta: nil, Value: converter.Uint64ToFloat64Pointer(stats.BuckHashSys)}))
 	memAgent.PutMetricsGauge("Frees", float64(stats.Frees), hashServer.GenerateHash(storage.JSONMetrics{ID: "Frees", MType: "gauge", Delta: nil, Value: converter.Uint64ToFloat64Pointer(stats.Frees)}))
@@ -47,8 +50,8 @@ func DataFromRuntime(memAgent *storage.MemStorage, stats *runtime.MemStats, hash
 	memAgent.PutMetricsCount("PollCount", pollCount, hashServer.GenerateHash(storage.JSONMetrics{ID: "PollCount", MType: "counter", Delta: converter.Int64ToInt64Pointer(pollCount), Value: nil}))
 }
 
-func DataFromRuntimeUsePsutil(memAgent *storage.MemStorage, v *mem.VirtualMemoryStat, hashServer *HashServer) {
-
+// Getting data using the psutil package
+func DataFromRuntimeUsePsutil(memAgent *storage.MemStorage, v *mem.VirtualMemoryStat, hashServer *hashservicer.HashServer) {
 	memAgent.PutMetricsGauge("TotalMemory", float64(v.Total), hashServer.GenerateHash(storage.JSONMetrics{ID: "TotalMemory", MType: "gauge", Delta: nil, Value: converter.Uint64ToFloat64Pointer(v.Total)}))
 	memAgent.PutMetricsGauge("FreeMemory", float64(v.Free), hashServer.GenerateHash(storage.JSONMetrics{ID: "FreeMemory", MType: "gauge", Delta: nil, Value: converter.Uint64ToFloat64Pointer(v.Free)}))
 	memAgent.PutMetricsGauge("CPUutilization1", float64(v.UsedPercent), hashServer.GenerateHash(storage.JSONMetrics{ID: "CPUutilization1", MType: "gauge", Delta: nil, Value: converter.Float64ToFloat64Pointer(v.UsedPercent)}))

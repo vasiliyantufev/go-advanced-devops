@@ -1,11 +1,12 @@
-package app
+// Package file
+package file
 
 import (
 	"encoding/json"
 	"io"
 	"os"
 
-	"github.com/vasiliyantufev/go-advanced-devops/internal/config"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/config/configserver"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
 
 	log "github.com/sirupsen/logrus"
@@ -17,6 +18,7 @@ type metric struct {
 	decoder *json.Decoder
 }
 
+// Creates a new file instance
 func NewMetricReadWriter(fileName string) (*metric, error) {
 	file, err := os.OpenFile(fileName, os.O_CREATE|os.O_RDWR, 0644)
 	if err != nil {
@@ -48,9 +50,10 @@ func (m *metric) Close() error {
 	return m.file.Close()
 }
 
-func FileStore(mem *storage.MemStorage, config *config.ConfigServer) {
+// Saves metrics from memory to a file
+func FileStore(mem *storage.MemStorage, config *configserver.ConfigServer) {
 
-	mWrite, err := NewMetricReadWriter(config.GetConfigStoreFileServer())
+	mWrite, err := NewMetricReadWriter(config.StoreFile)
 	if err != nil {
 		log.Error(err)
 	}
@@ -73,9 +76,10 @@ func FileStore(mem *storage.MemStorage, config *config.ConfigServer) {
 	}
 }
 
-func FileRestore(mem *storage.MemStorage, config *config.ConfigServer) {
+// Restores metrics from file to storage
+func FileRestore(mem *storage.MemStorage, config *configserver.ConfigServer) {
 
-	mRead, err := NewMetricReadWriter(config.GetConfigStoreFileServer())
+	mRead, err := NewMetricReadWriter(config.StoreFile)
 	if err != nil {
 		log.Error(err)
 	}

@@ -1,13 +1,16 @@
-package app
+// Package agent
+package agent
 
 import (
 	"context"
-	"github.com/go-resty/resty/v2"
-	"github.com/shirou/gopsutil/v3/mem"
 	"runtime"
 	"time"
 
-	"github.com/vasiliyantufev/go-advanced-devops/internal/config"
+	"github.com/go-resty/resty/v2"
+	"github.com/shirou/gopsutil/v3/mem"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/api/hashservicer"
+	runtime2 "github.com/vasiliyantufev/go-advanced-devops/internal/api/runtime"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/config/configagent"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
 
 	log "github.com/sirupsen/logrus"
@@ -26,17 +29,18 @@ type agent struct {
 	jobs       chan []storage.JSONMetrics
 	mem        *storage.MemStorage
 	psutil     *storage.MemStorage
-	cfg        *config.ConfigAgent
-	hashServer *HashServer
+	cfg        *configagent.ConfigAgent
+	hashServer *hashservicer.HashServer
 }
 
-func NewAgent(jobs chan []storage.JSONMetrics, mem *storage.MemStorage, memPsutil *storage.MemStorage, cfg *config.ConfigAgent, hashServer *HashServer) *agent {
+// Creates a new agent instance
+func NewAgent(jobs chan []storage.JSONMetrics, mem *storage.MemStorage, memPsutil *storage.MemStorage, cfg *configagent.ConfigAgent, hashServer *hashservicer.HashServer) *agent {
 	return &agent{jobs: jobs, mem: mem, psutil: memPsutil, cfg: cfg, hashServer: hashServer}
 }
 
 func (a agent) StartWorkers(ctx context.Context, ai Agent) {
 
-	urlPath := "http://" + a.cfg.GetConfigAddressAgent() + "/updates/"
+	urlPath := "http://" + a.cfg.Address + "/updates/"
 
 	go ai.putMetricsWorker(ctx)
 	go ai.putMetricsUsePsutilWorker(ctx)
@@ -47,9 +51,10 @@ func (a agent) StartWorkers(ctx context.Context, ai Agent) {
 	}
 }
 
+// Get metrics using runtime and write them to memory
 func (a agent) putMetricsWorker(ctx context.Context) {
 
-	ticker := time.NewTicker(a.cfg.GetConfigPollIntervalAgent())
+	ticker := time.NewTicker(a.cfg.PollInterval)
 	defer ticker.Stop()
 	for {
 		select {
@@ -60,14 +65,15 @@ func (a agent) putMetricsWorker(ctx context.Context) {
 			log.Info("Put metrics")
 			stats := new(runtime.MemStats)
 			runtime.ReadMemStats(stats)
-			DataFromRuntime(a.mem, stats, a.hashServer)
+			runtime2.DataFromRuntime(a.mem, stats, a.hashServer)
 		}
 	}
 }
 
+// Gets metrics using psutil and write to memory
 func (a agent) putMetricsUsePsutilWorker(ctx context.Context) {
 
-	ticker := time.NewTicker(a.cfg.GetConfigPollIntervalAgent())
+	ticker := time.NewTicker(a.cfg.PollInterval)
 	defer ticker.Stop()
 	for {
 		select {
@@ -80,21 +86,22 @@ func (a agent) putMetricsUsePsutilWorker(ctx context.Context) {
 			if err != nil {
 				log.Error(err)
 			}
-			DataFromRuntimeUsePsutil(a.psutil, v, a.hashServer)
+			runtime2.DataFromRuntimeUsePsutil(a.psutil, v, a.hashServer)
 		}
 	}
 }
 
+// Writes metrics to a channel
 func (a agent) writeMetricsToChanWorker(ctx context.Context) {
 
-	ticker := time.NewTicker(a.cfg.GetConfigReportIntervalAgent())
+	ticker := time.NewTicker(a.cfg.ReportInterval)
 	defer ticker.Stop()
 	for {
 		select {
 		case <-ctx.Done():
 			log.Println("Read ticker stopped by ctx")
 			return
-		case <-ticker.C: // Запись в канал
+		case <-ticker.C: // Writes
 			log.Info("Write metrics to chan")
 			a.jobs <- a.mem.GetAllMetrics()
 			a.jobs <- a.psutil.GetAllMetrics()
@@ -102,6 +109,7 @@ func (a agent) writeMetricsToChanWorker(ctx context.Context) {
 	}
 }
 
+// Listens to the channel, if the metrics have arrived, forms a request and sends it to the server
 func (a agent) sentMetricsWorker(ctx context.Context, url string) {
 
 	client := resty.New()
