@@ -4,7 +4,7 @@ package routers
 import (
 	"github.com/go-chi/chi/v5"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/api/server/handlers"
-	middlewaredevops "github.com/vasiliyantufev/go-advanced-devops/internal/api/server/middlewares"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/api/server/middlewares"
 )
 
 // Route - setting service routes
@@ -12,7 +12,7 @@ func Route(s *handlers.Handler) *chi.Mux {
 	r := chi.NewRouter()
 
 	//r.Use(middleware.Compress(1, "application/json", "text/html"))
-	r.Use(middlewaredevops.GzipMiddleware)
+	r.Use(middlewares.GzipMiddleware)
 
 	r.Get("/", s.IndexHandler)
 	r.Get("/ping", s.PingHandler)

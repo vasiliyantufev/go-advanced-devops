@@ -5,14 +5,14 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/api/server/handlers"
-	middlewaredevops "github.com/vasiliyantufev/go-advanced-devops/internal/api/server/middlewares"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/api/server/middlewares"
 )
 
 // RoutePProf pprof - setting pprof routes
 func RoutePProf(s *handlers.Handler) *chi.Mux {
 	r := chi.NewRouter()
 
-	r.Use(middlewaredevops.GzipMiddleware)
+	r.Use(middlewares.GzipMiddleware)
 	r.Route("/debug/pprof/", func(r chi.Router) {
 		r.Get("/", pprof.Index)
 		r.Get("/profile", pprof.Profile)
