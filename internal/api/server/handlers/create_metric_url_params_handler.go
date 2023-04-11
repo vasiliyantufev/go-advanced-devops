@@ -17,13 +17,13 @@ func (s Handler) CreateMetricURLParamsHandler(w http.ResponseWriter, r *http.Req
 	typeMetrics := chi.URLParam(r, "type")
 	nameMetrics := chi.URLParam(r, "name")
 	valueMetrics := chi.URLParam(r, "value")
-
-	status, err := storage.ValidURLParamMetrics(typeMetrics, nameMetrics, valueMetrics)
-	if err != nil {
-		log.Error(err)
-		http.Error(w, err.Error(), status)
-		return
-	}
+	//
+	//status, err := storage.ValidURLParamMetrics(typeMetrics, nameMetrics, valueMetrics)
+	//if err != nil {
+	//	log.Error(err)
+	//	http.Error(w, err.Error(), status)
+	//	return
+	//}
 
 	var resp string
 	if typeMetrics == "gauge" {
@@ -54,7 +54,6 @@ func (s Handler) CreateMetricURLParamsHandler(w http.ResponseWriter, r *http.Req
 		s.mem.PutMetricsCount(nameMetrics, sum, hashServer)
 		resp = "Request completed successfully " + nameMetrics + "=" + fmt.Sprint(sum)
 	}
-
 	log.Debug(resp)
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(resp))

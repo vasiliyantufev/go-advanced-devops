@@ -6,7 +6,6 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	log "github.com/sirupsen/logrus"
-	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
 )
 
 // GetMetricURLParamsHandler - getting metric using url parameters
@@ -14,13 +13,6 @@ func (s Handler) GetMetricURLParamsHandler(w http.ResponseWriter, r *http.Reques
 
 	typeMetrics := chi.URLParam(r, "type")
 	nameMetrics := chi.URLParam(r, "name")
-
-	status, err := storage.ValidURLParamGetMetrics(typeMetrics, nameMetrics)
-	if err != nil {
-		log.Error(err)
-		http.Error(w, err.Error(), status)
-		return
-	}
 
 	var param string
 	if typeMetrics == "gauge" {
