@@ -17,11 +17,17 @@ func Route(s *handlers.Handler) *chi.Mux {
 	r.Get("/", s.IndexHandler)
 	r.Get("/ping", s.PingHandler)
 	r.Route("/value", func(r chi.Router) {
-		r.Get("/{type}/{name}", s.GetMetricURLParamsHandler)
+		r.Group(func(r chi.Router) {
+			r.Use(middlewares.ValidURLParamsMetricMiddleware)
+			r.Get("/{type}/{name}", s.GetMetricURLParamsHandler)
+		})
 		r.Post("/", s.GetValueMetricJSONHandler)
 	})
 	r.Route("/update", func(r chi.Router) {
-		r.Post("/{type}/{name}/{value}", s.CreateMetricURLParamsHandler)
+		r.Group(func(r chi.Router) {
+			r.Use(middlewares.ValidURLParamsWithValueMetric)
+			r.Post("/{type}/{name}/{value}", s.CreateMetricURLParamsHandler)
+		})
 		r.Post("/", s.CreateMetricJSONHandler)
 	})
 	r.Post("/updates/", s.CreateMetricsJSONHandler)

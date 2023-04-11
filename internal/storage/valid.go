@@ -18,7 +18,7 @@ func ValidURLParamMetrics(typeMetrics, nameMetrics, valueMetrics string) (int, e
 		return http.StatusBadRequest, fmt.Errorf("the query parameter name is missing")
 	}
 	if valueMetrics == "" {
-		return http.StatusBadRequest, fmt.Errorf("the query parameter name is missing")
+		return http.StatusBadRequest, fmt.Errorf("the query parameter value is missing")
 	}
 	return 0, nil
 }
