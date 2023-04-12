@@ -1,5 +1,5 @@
-// Package file
-package file
+// Package filestorage
+package filestorage
 
 import (
 	"encoding/json"
@@ -13,30 +13,30 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-type metric struct {
+type FileStorage struct {
 	file    *os.File
 	encoder *json.Encoder
 	decoder *json.Decoder
 }
 
 // Creates a new file instance
-func NewMetricReadWriter(fileName string) (*metric, error) {
+func NewMetricReadWriter(fileName string) (*FileStorage, error) {
 	file, err := os.OpenFile(fileName, os.O_CREATE|os.O_RDWR, 0644)
 	if err != nil {
 		return nil, err
 	}
-	return &metric{
+	return &FileStorage{
 		file:    file,
 		encoder: json.NewEncoder(file),
 		decoder: json.NewDecoder(file),
 	}, nil
 }
 
-func (m *metric) WriteMetric(event *models.Metric) error {
+func (m *FileStorage) WriteMetric(event *models.Metric) error {
 	return m.encoder.Encode(event)
 }
 
-func (m *metric) ReadMetric() (*models.Metric, error) {
+func (m *FileStorage) ReadMetric() (*models.Metric, error) {
 
 	mr := new(models.Metric)
 	if err := m.decoder.Decode(mr); err == io.EOF {
@@ -47,46 +47,47 @@ func (m *metric) ReadMetric() (*models.Metric, error) {
 	return mr, nil
 }
 
-func (m *metric) Close() error {
+func (m *FileStorage) Close() error {
 	return m.file.Close()
 }
 
 // Saves metrics from memory to a file
-func FileStore(mem *memstorage.MemStorage, config *configserver.ConfigServer) {
+func (m *FileStorage) FileStore(mem *memstorage.MemStorage, config *configserver.ConfigServer) {
 
-	mWrite, err := NewMetricReadWriter(config.StoreFile)
-	if err != nil {
-		log.Error(err)
-	}
-	defer mWrite.Close()
+	//mWrite, err := NewMetricReadWriter(config.StoreFile)
+	//if err != nil {
+	//	log.Error(err)
+	//}
+	//defer mWrite.Close()
 
 	metrics := mem.GetAllMetrics()
 	if len(metrics) == 0 {
 		return
 	}
-	if err := mWrite.file.Truncate(0); err != nil {
+	if err := m.file.Truncate(0); err != nil {
 		log.Errorln("can't truncate file, cause:", err)
 	}
-	if _, err := mWrite.file.Seek(0, 0); err != nil {
+	if _, err := m.file.Seek(0, 0); err != nil {
 		log.Error("failed to seek:", err)
 	}
 	for _, val := range mem.GetAllMetrics() {
-		if err := mWrite.WriteMetric(&val); err != nil {
+		if err := m.WriteMetric(&val); err != nil {
 			log.Error("write to file failed with", err)
 		}
 	}
 }
 
 // Restores metrics from file to storage
-func FileRestore(mem *memstorage.MemStorage, config *configserver.ConfigServer) {
+func (m *FileStorage) FileRestore(mem *memstorage.MemStorage, config *configserver.ConfigServer) {
 
-	mRead, err := NewMetricReadWriter(config.StoreFile)
-	if err != nil {
-		log.Error(err)
-	}
-	defer mRead.Close()
+	//mRead, err := NewMetricReadWriter(config.StoreFile)
+	//if err != nil {
+	//	log.Error(err)
+	//}
+	//defer mRead.Close()
+
 	for {
-		mr, err := mRead.ReadMetric()
+		mr, err := m.ReadMetric()
 
 		if err == io.EOF {
 			log.Info("File end")

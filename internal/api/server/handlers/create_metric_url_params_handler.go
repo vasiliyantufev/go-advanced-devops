@@ -27,7 +27,7 @@ func (s Handler) CreateMetricURLParamsHandler(w http.ResponseWriter, r *http.Req
 			return
 		}
 		hashServer := s.hashServer.GenerateHash(models.Metric{ID: nameMetrics, MType: "gauge", Delta: nil, Value: converter.Float64ToFloat64Pointer(val)})
-		s.mem.PutMetricsGauge(nameMetrics, val, hashServer)
+		s.memStorage.PutMetricsGauge(nameMetrics, val, hashServer)
 		resp = "Request completed successfully " + nameMetrics + "=" + fmt.Sprint(val)
 	}
 	if typeMetrics == "counter" {
@@ -38,13 +38,13 @@ func (s Handler) CreateMetricURLParamsHandler(w http.ResponseWriter, r *http.Req
 			return
 		}
 		var sum int64
-		if oldVal, _, exists := s.mem.GetMetricsCount(nameMetrics); exists {
+		if oldVal, _, exists := s.memStorage.GetMetricsCount(nameMetrics); exists {
 			sum = oldVal + val
 		} else {
 			sum = val
 		}
 		hashServer := s.hashServer.GenerateHash(models.Metric{ID: nameMetrics, MType: "counter", Delta: converter.Int64ToInt64Pointer(val), Value: nil})
-		s.mem.PutMetricsCount(nameMetrics, sum, hashServer)
+		s.memStorage.PutMetricsCount(nameMetrics, sum, hashServer)
 		resp = "Request completed successfully " + nameMetrics + "=" + fmt.Sprint(sum)
 	}
 	log.Debug(resp)

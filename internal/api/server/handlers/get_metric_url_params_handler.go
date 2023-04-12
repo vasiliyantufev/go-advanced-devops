@@ -16,7 +16,7 @@ func (s Handler) GetMetricURLParamsHandler(w http.ResponseWriter, r *http.Reques
 
 	var param string
 	if typeMetrics == "gauge" {
-		val, _, exists := s.mem.GetMetricsGauge(nameMetrics)
+		val, _, exists := s.memStorage.GetMetricsGauge(nameMetrics)
 		if !exists {
 			log.Error("The name " + nameMetrics + " incorrect")
 			http.Error(w, "The name "+nameMetrics+" incorrect", http.StatusNotFound)
@@ -25,7 +25,7 @@ func (s Handler) GetMetricURLParamsHandler(w http.ResponseWriter, r *http.Reques
 		param = fmt.Sprintf("%.3f", val)
 	}
 	if typeMetrics == "counter" {
-		val, _, exists := s.mem.GetMetricsCount(nameMetrics)
+		val, _, exists := s.memStorage.GetMetricsCount(nameMetrics)
 		if !exists {
 			log.Error("The name " + nameMetrics + " incorrect")
 			http.Error(w, "The name "+nameMetrics+" incorrect", http.StatusNotFound)

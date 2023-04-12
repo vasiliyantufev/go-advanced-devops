@@ -32,7 +32,7 @@ func (s Handler) GetValueMetricJSONHandler(w http.ResponseWriter, r *http.Reques
 	}
 	log.Infoln("VALUE METRIC RECV", rawValue)
 	if value.MType == "gauge" {
-		val, hash, exists := s.mem.GetMetricsGauge(value.ID)
+		val, hash, exists := s.memStorage.GetMetricsGauge(value.ID)
 		if !exists {
 			log.Error("Element " + value.ID + " not exists")
 			http.Error(w, "Element "+value.ID+" not exists", http.StatusNotFound)
@@ -42,7 +42,7 @@ func (s Handler) GetValueMetricJSONHandler(w http.ResponseWriter, r *http.Reques
 		rawValue.Hash = hash
 	}
 	if value.MType == "counter" {
-		val, hash, exists := s.mem.GetMetricsCount(value.ID)
+		val, hash, exists := s.memStorage.GetMetricsCount(value.ID)
 		if !exists {
 			log.Error("Element " + value.ID + " not exists")
 			http.Error(w, "Element "+value.ID+" not exists", http.StatusNotFound)

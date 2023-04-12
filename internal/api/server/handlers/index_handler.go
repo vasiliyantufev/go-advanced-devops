@@ -26,7 +26,7 @@ func (s Handler) IndexHandler(w http.ResponseWriter, r *http.Request) {
 	gauges := make(map[string]float64)
 	counters := make(map[string]int64)
 
-	metrics := s.mem.GetAllMetrics()
+	metrics := s.memStorage.GetAllMetrics()
 
 	for _, metric := range metrics {
 		if metric.MType == "gauge" {
