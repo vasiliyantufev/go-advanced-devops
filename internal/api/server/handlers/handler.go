@@ -42,13 +42,3 @@ func (s Handler) StoreMetricsToFile() {
 		}
 	}
 }
-
-// GetMem - get metrics from memory
-func (s Handler) GetMem() *memstorage.MemStorage {
-	return s.mem
-}
-
-// GetConfig - get the application configuration
-func (s Handler) GetConfig() *configserver.ConfigServer {
-	return s.config
-}

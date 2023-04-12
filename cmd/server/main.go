@@ -46,13 +46,13 @@ func main() {
 	ctx, cnl := signal.NotifyContext(context.Background(), syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
 	defer cnl()
 
-	go server.StartService(rs, srv.GetConfig())
-	go server.StartPProfile(rp, srv.GetConfig())
+	go server.StartService(rs, configServer)
+	go server.StartPProfile(rp, configServer)
 
 	if configServer.StoreInterval > 0 {
 		go srv.StoreMetricsToFile()
 	}
 	<-ctx.Done()
-	file.FileStore(srv.GetMem(), srv.GetConfig())
+	file.FileStore(mem, configServer)
 	log.Info("server shutdown on signal with:", ctx.Err())
 }
