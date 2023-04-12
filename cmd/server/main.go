@@ -12,7 +12,6 @@ import (
 	"github.com/vasiliyantufev/go-advanced-devops/internal/api/server/routers"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/config/configserver"
 	database "github.com/vasiliyantufev/go-advanced-devops/internal/db"
-	//"github.com/vasiliyantufev/go-advanced-devops/internal/storage/file"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/storage/filestorage"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/storage/memstorage"
 
@@ -35,7 +34,7 @@ func main() {
 	memStorage := memstorage.NewMemStorage()
 	hashServer := hashservicer.NewHashServer(configServer.Key)
 
-	fileStorage, err := filestorage.NewMetricReadWriter(configServer.StoreFile)
+	fileStorage, err := filestorage.NewMetricReadWriter(configServer)
 	if err != nil {
 		log.Error(err)
 	}
@@ -43,7 +42,7 @@ func main() {
 
 	srv := handlers.NewHandler(memStorage, fileStorage, configServer, db, hashServer)
 
-	srv.RestoreMetricsFromFile()
+	fileStorage.RestoreMetricsFromFile(memStorage)
 
 	routerService := routers.Route(srv)
 	rs := chi.NewRouter()
@@ -60,9 +59,9 @@ func main() {
 	go server.StartPProfile(rp, configServer)
 
 	if configServer.StoreInterval > 0 {
-		go srv.StoreMetricsToFile()
+		go fileStorage.StoreMetricsToFile(memStorage)
 	}
 	<-ctx.Done()
-	fileStorage.FileStore(memStorage, configServer)
+	fileStorage.FileStore(memStorage)
 	log.Info("server shutdown on signal with:", ctx.Err())
 }
