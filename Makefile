@@ -8,8 +8,8 @@ cover:
 gen:
 	mockgen -source=internal/storage/memstorage/mem_storage.go \
 	-destination=internal/storage/memstorage/mock/mem_storage_mock.go
-#	mockgen -source=internal/db/database.go \
-#	-destination=internal/db/mock/database.go
+	mockgen -source=internal/db/database.go \
+	-destination=internal/db/mock/database.go
 #	mockgen -source=internal/config/configagent/config_agent.go \
 #	-destination=internal/config/configagent/mock/config_agent.go
 #	mockgen -source=internal/config/configserver/config_server.go \
@@ -18,8 +18,8 @@ gen:
 	-destination=internal/api/hashservicer/mock/hash_servicer_mock.go
 #	mockgen -source=internal/api/server/handlers/handler.go \
 #	-destination=internal/api/server/handlers/mock/handler_mock.go
-#	mockgen -source=internal/api/file/file.go \
-#	-destination=internal/api/file/mock/file.go
+	mockgen -source=internal/storage/filestorage/file_storage.go \
+	-destination=internal/storage/filestorage/mock/file_storage_mock.go
 
 test:
 	go test -v -count=1 ./...

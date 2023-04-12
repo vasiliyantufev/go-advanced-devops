@@ -14,6 +14,16 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+type FileStorages interface {
+	WriteMetric(event *models.Metric) error
+	ReadMetric() (*models.Metric, error)
+	Close() error
+	FileStore(mem *memstorage.MemStorage)
+	FileRestore(mem *memstorage.MemStorage)
+	RestoreMetricsFromFile(mem *memstorage.MemStorage)
+	StoreMetricsToFile(mem *memstorage.MemStorage)
+}
+
 type FileStorage struct {
 	file    *os.File
 	config  *configserver.ConfigServer
