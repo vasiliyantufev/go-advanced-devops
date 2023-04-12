@@ -48,28 +48,30 @@ func (mr *MockHashServicesMockRecorder) GenerateHash(metric interface{}) *gomock
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GenerateHash", reflect.TypeOf((*MockHashServices)(nil).GenerateHash), metric)
 }
 
-// ValidHashServer mocks base method.
-func (m *MockHashServices) ValidHashServer(metric storage.JSONMetrics, clientHash string) bool {
+// IsEnabled mocks base method.
+func (m *MockHashServices) IsEnabled() bool {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ValidHashServer", metric, clientHash)
+	ret := m.ctrl.Call(m, "IsEnabled")
+	ret0, _ := ret[0].(bool)
+	return ret0
+}
+
+// IsEnabled indicates an expected call of IsEnabled.
+func (mr *MockHashServicesMockRecorder) IsEnabled() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsEnabled", reflect.TypeOf((*MockHashServices)(nil).IsEnabled))
+}
+
+// ValidHashServer mocks base method.
+func (m *MockHashServices) ValidHashServer(clientMetric storage.JSONMetrics) bool {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ValidHashServer", clientMetric)
 	ret0, _ := ret[0].(bool)
 	return ret0
 }
 
 // ValidHashServer indicates an expected call of ValidHashServer.
-func (mr *MockHashServicesMockRecorder) ValidHashServer(metric, clientHash interface{}) *gomock.Call {
+func (mr *MockHashServicesMockRecorder) ValidHashServer(clientMetric interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ValidHashServer", reflect.TypeOf((*MockHashServices)(nil).ValidHashServer), metric, clientHash)
-}
-
-// isEnabled mocks base method.
-func (m *MockHashServices) isEnabled() {
-	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "isEnabled")
-}
-
-// isEnabled indicates an expected call of isEnabled.
-func (mr *MockHashServicesMockRecorder) isEnabled() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "isEnabled", reflect.TypeOf((*MockHashServices)(nil).isEnabled))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ValidHashServer", reflect.TypeOf((*MockHashServices)(nil).ValidHashServer), clientMetric)
 }

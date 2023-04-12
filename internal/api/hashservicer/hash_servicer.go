@@ -11,9 +11,9 @@ import (
 )
 
 type HashServices interface {
-	ValidHashServer(metric storage.JSONMetrics, clientHash string) bool
+	ValidHashServer(clientMetric storage.JSONMetrics) bool
 	GenerateHash(metric storage.JSONMetrics) string
-	isEnabled()
+	IsEnabled() bool
 }
 
 type HashServer struct {
