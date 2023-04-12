@@ -9,18 +9,18 @@ import (
 	"github.com/vasiliyantufev/go-advanced-devops/internal/api/hashservicer"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/config/configserver"
 	database "github.com/vasiliyantufev/go-advanced-devops/internal/db"
-	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/storage/memstorage"
 )
 
 type Handler struct {
-	mem        *storage.MemStorage
+	mem        *memstorage.MemStorage
 	config     *configserver.ConfigServer
 	database   *database.DB
 	hashServer *hashservicer.HashServer
 }
 
 // NewHandler - creates a new server instance
-func NewHandler(mem *storage.MemStorage, cfg *configserver.ConfigServer, db *database.DB, hash *hashservicer.HashServer) *Handler {
+func NewHandler(mem *memstorage.MemStorage, cfg *configserver.ConfigServer, db *database.DB, hash *hashservicer.HashServer) *Handler {
 	return &Handler{mem: mem, config: cfg, database: db, hashServer: hash}
 }
 
@@ -44,7 +44,7 @@ func (s Handler) StoreMetricsToFile() {
 }
 
 // GetMem - get metrics from memory
-func (s Handler) GetMem() *storage.MemStorage {
+func (s Handler) GetMem() *memstorage.MemStorage {
 	return s.mem
 }
 

@@ -8,7 +8,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/api/file"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/converter"
-	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/models"
 )
 
 // CreateMetricJSONHandler - create metric using json
@@ -21,13 +21,13 @@ func (s Handler) CreateMetricJSONHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	value := storage.JSONMetrics{}
+	value := models.JSONMetrics{}
 	if err := json.Unmarshal([]byte(string(resp)), &value); err != nil {
 		log.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	rawValue := storage.JSONMetrics{
+	rawValue := models.JSONMetrics{
 		ID: value.ID,
 	}
 
@@ -68,7 +68,7 @@ func (s Handler) CreateMetricJSONHandler(w http.ResponseWriter, r *http.Request)
 			sum = *value.Delta
 		}
 		// calculate new hash
-		hashSumServer := s.hashServer.GenerateHash(storage.JSONMetrics{ID: value.ID, MType: value.MType, Delta: converter.Int64ToInt64Pointer(sum), Value: value.Value})
+		hashSumServer := s.hashServer.GenerateHash(models.JSONMetrics{ID: value.ID, MType: value.MType, Delta: converter.Int64ToInt64Pointer(sum), Value: value.Value})
 		// store new metric
 		s.mem.PutMetricsCount(value.ID, sum, hashSumServer)
 

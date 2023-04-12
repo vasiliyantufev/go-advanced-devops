@@ -9,7 +9,7 @@ import (
 	"github.com/vasiliyantufev/go-advanced-devops/internal/api/hashservicer"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/config/configserver"
 	database "github.com/vasiliyantufev/go-advanced-devops/internal/db"
-	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/storage/memstorage"
 )
 
 /**/
@@ -69,7 +69,7 @@ func TestHandler_CreateMetricURLParamsHandler(t *testing.T) {
 func TestHandler_CreateMetricURLParamsHandler1(t *testing.T) {
 
 	type fields struct {
-		mem        *storage.MemStorage
+		mem        *memstorage.MemStorage
 		config     *configserver.ConfigServer
 		database   *database.DB
 		hashServer *hashservicer.HashServer
@@ -123,7 +123,7 @@ func TestHandler_CreateMetricURLParamsHandler1(t *testing.T) {
 
 func TestHandler_CreateMetricURLParamsHandler2(t *testing.T) {
 	type fields struct {
-		mem        *storage.MemStorage
+		mem        *memstorage.MemStorage
 		config     *configserver.ConfigServer
 		database   *database.DB
 		hashServer *hashservicer.HashServer

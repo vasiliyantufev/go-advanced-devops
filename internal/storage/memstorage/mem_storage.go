@@ -1,20 +1,30 @@
 // storage - repositories
-package storage
+package memstorage
 
 import (
 	"sync"
+
+	"github.com/vasiliyantufev/go-advanced-devops/internal/models"
 )
+
+type MemStorages interface {
+	PutMetricsGauge(id string, o float64, h string)
+	GetMetricsGauge(id string) (o float64, h string, b bool)
+	PutMetricsCount(id string, o int64, h string)
+	GetMetricsCount(id string) (o int64, h string, b bool)
+	GetAllMetrics() []models.JSONMetrics
+}
 
 type MemStorage struct {
 	mx   *sync.RWMutex
-	data map[string]JSONMetrics
+	data map[string]models.JSONMetrics
 }
 
 // NewMemStorage - creates a new store instance
 func NewMemStorage() *MemStorage {
 	return &MemStorage{
 		mx:   new(sync.RWMutex),
-		data: make(map[string]JSONMetrics),
+		data: make(map[string]models.JSONMetrics),
 	}
 }
 
@@ -22,7 +32,7 @@ func NewMemStorage() *MemStorage {
 func (data *MemStorage) PutMetricsGauge(id string, o float64, h string) {
 	data.mx.Lock()
 	defer data.mx.Unlock()
-	data.data[id] = JSONMetrics{
+	data.data[id] = models.JSONMetrics{
 		ID:    id,
 		MType: "gauge",
 		Delta: nil,
@@ -46,7 +56,7 @@ func (data *MemStorage) GetMetricsGauge(id string) (o float64, h string, b bool)
 func (data *MemStorage) PutMetricsCount(id string, o int64, h string) {
 	data.mx.Lock()
 	defer data.mx.Unlock()
-	data.data[id] = JSONMetrics{
+	data.data[id] = models.JSONMetrics{
 		ID:    id,
 		MType: "counter",
 		Delta: &o,
@@ -67,10 +77,10 @@ func (data *MemStorage) GetMetricsCount(id string) (o int64, h string, b bool) {
 }
 
 // GetAllMetrics - gets all metrics from storage
-func (data *MemStorage) GetAllMetrics() []JSONMetrics {
+func (data *MemStorage) GetAllMetrics() []models.JSONMetrics {
 	data.mx.RLock()
 	defer data.mx.RUnlock()
-	result := make([]JSONMetrics, 0)
+	result := make([]models.JSONMetrics, 0)
 	for _, metric := range data.data {
 		result = append(result, metric)
 	}

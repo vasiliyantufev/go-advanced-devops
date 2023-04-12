@@ -8,7 +8,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	log "github.com/sirupsen/logrus"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/converter"
-	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/models"
 )
 
 // CreateMetricURLParamsHandler - create metric using url parameters
@@ -26,7 +26,7 @@ func (s Handler) CreateMetricURLParamsHandler(w http.ResponseWriter, r *http.Req
 			http.Error(w, "The query parameter value "+valueMetrics+" is incorrect", http.StatusBadRequest)
 			return
 		}
-		hashServer := s.hashServer.GenerateHash(storage.JSONMetrics{ID: nameMetrics, MType: "gauge", Delta: nil, Value: converter.Float64ToFloat64Pointer(val)})
+		hashServer := s.hashServer.GenerateHash(models.JSONMetrics{ID: nameMetrics, MType: "gauge", Delta: nil, Value: converter.Float64ToFloat64Pointer(val)})
 		s.mem.PutMetricsGauge(nameMetrics, val, hashServer)
 		resp = "Request completed successfully " + nameMetrics + "=" + fmt.Sprint(val)
 	}
@@ -43,7 +43,7 @@ func (s Handler) CreateMetricURLParamsHandler(w http.ResponseWriter, r *http.Req
 		} else {
 			sum = val
 		}
-		hashServer := s.hashServer.GenerateHash(storage.JSONMetrics{ID: nameMetrics, MType: "counter", Delta: converter.Int64ToInt64Pointer(val), Value: nil})
+		hashServer := s.hashServer.GenerateHash(models.JSONMetrics{ID: nameMetrics, MType: "counter", Delta: converter.Int64ToInt64Pointer(val), Value: nil})
 		s.mem.PutMetricsCount(nameMetrics, sum, hashServer)
 		resp = "Request completed successfully " + nameMetrics + "=" + fmt.Sprint(sum)
 	}

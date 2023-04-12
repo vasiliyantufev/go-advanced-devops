@@ -8,7 +8,7 @@ import (
 	"github.com/vasiliyantufev/go-advanced-devops/internal/api"
 	mock_hs "github.com/vasiliyantufev/go-advanced-devops/internal/api/hashservicer/mock"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/converter"
-	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/models"
 )
 
 func TestIsEnabledMock(t *testing.T) {
@@ -26,7 +26,7 @@ func TestGenerateHashMock(t *testing.T) {
 
 	hash := api.RandStr(10)
 
-	clientMetric := storage.JSONMetrics{
+	clientMetric := models.JSONMetrics{
 		ID:    "Alloc",
 		MType: "gauge",
 		Delta: nil,
@@ -41,7 +41,7 @@ func TestValidHashMock(t *testing.T) {
 	ctl := gomock.NewController(t)
 	ctl.Finish()
 
-	clientMetric := storage.JSONMetrics{
+	clientMetric := models.JSONMetrics{
 		ID:    "Alloc",
 		MType: "gauge",
 		Delta: nil,

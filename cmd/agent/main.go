@@ -8,21 +8,22 @@ import (
 	"github.com/vasiliyantufev/go-advanced-devops/internal/api/agent"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/api/hashservicer"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/config/configagent"
-	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/models"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/storage/memstorage"
 
 	log "github.com/sirupsen/logrus"
 )
 
 func main() {
 	configAgent := configagent.NewConfigAgent()
-	memAgent := storage.NewMemStorage()
-	memAgentPsutil := storage.NewMemStorage()
+	memAgent := memstorage.NewMemStorage()
+	memAgentPsutil := memstorage.NewMemStorage()
 	hashServer := hashservicer.NewHashServer(configAgent.Key)
 
 	ctx, cnl := signal.NotifyContext(context.Background(), syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
 	defer cnl()
 
-	jobs := make(chan []storage.JSONMetrics, configAgent.RateLimit)
+	jobs := make(chan []models.JSONMetrics, configAgent.RateLimit)
 	defer close(jobs)
 
 	agent := agent.NewAgent(jobs, memAgent, memAgentPsutil, configAgent, hashServer)

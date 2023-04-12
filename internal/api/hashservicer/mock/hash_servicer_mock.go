@@ -8,7 +8,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	storage "github.com/vasiliyantufev/go-advanced-devops/internal/storage"
+	models "github.com/vasiliyantufev/go-advanced-devops/internal/models"
 )
 
 // MockHashServices is a mock of HashServices interface.
@@ -35,7 +35,7 @@ func (m *MockHashServices) EXPECT() *MockHashServicesMockRecorder {
 }
 
 // GenerateHash mocks base method.
-func (m *MockHashServices) GenerateHash(metric storage.JSONMetrics) string {
+func (m *MockHashServices) GenerateHash(metric models.JSONMetrics) string {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GenerateHash", metric)
 	ret0, _ := ret[0].(string)
@@ -63,7 +63,7 @@ func (mr *MockHashServicesMockRecorder) IsEnabled() *gomock.Call {
 }
 
 // ValidHashServer mocks base method.
-func (m *MockHashServices) ValidHashServer(clientMetric storage.JSONMetrics) bool {
+func (m *MockHashServices) ValidHashServer(clientMetric models.JSONMetrics) bool {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ValidHashServer", clientMetric)
 	ret0, _ := ret[0].(bool)

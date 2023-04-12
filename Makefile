@@ -6,8 +6,8 @@ cover:
 
 .PHONY: gen
 gen:
-#	mockgen -source=internal/storage/repositories.go \
-#	-destination=internal/storage/mock/repositories.go
+	mockgen -source=internal/storage/memstorage/mem_storage.go \
+	-destination=internal/storage/memstorage/mock/mem_storage_mock.go
 #	mockgen -source=internal/db/database.go \
 #	-destination=internal/db/mock/database.go
 #	mockgen -source=internal/config/configagent/config_agent.go \

@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/vasiliyantufev/go-advanced-devops/internal/config/configserver"
-	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/storage/memstorage"
 
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
@@ -70,7 +70,7 @@ func (db DB) CreateTablesMigration(cfg *configserver.ConfigServer) {
 }
 
 // InsertOrUpdateMetrics - adds new metrics to the database or updates if the entry is already present
-func (db DB) InsertOrUpdateMetrics(metrics *storage.MemStorage) error {
+func (db DB) InsertOrUpdateMetrics(metrics *memstorage.MemStorage) error {
 	stmt, err := db.pool.Prepare(`
 			INSERT INTO metrics 
 			VALUES($1, $2, $3, $4, $5)

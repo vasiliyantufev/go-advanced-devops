@@ -1,5 +1,5 @@
-// storage - jsonmetrics
-package storage
+// model - jsonmetrics
+package models
 
 import (
 	"fmt"

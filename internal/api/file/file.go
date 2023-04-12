@@ -7,7 +7,8 @@ import (
 	"os"
 
 	"github.com/vasiliyantufev/go-advanced-devops/internal/config/configserver"
-	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/models"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/storage/memstorage"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -31,13 +32,13 @@ func NewMetricReadWriter(fileName string) (*metric, error) {
 	}, nil
 }
 
-func (m *metric) WriteMetric(event *storage.JSONMetrics) error {
+func (m *metric) WriteMetric(event *models.JSONMetrics) error {
 	return m.encoder.Encode(event)
 }
 
-func (m *metric) ReadMetric() (*storage.JSONMetrics, error) {
+func (m *metric) ReadMetric() (*models.JSONMetrics, error) {
 
-	mr := new(storage.JSONMetrics)
+	mr := new(models.JSONMetrics)
 	if err := m.decoder.Decode(mr); err == io.EOF {
 		return nil, err
 	} else if err != nil {
@@ -51,7 +52,7 @@ func (m *metric) Close() error {
 }
 
 // Saves metrics from memory to a file
-func FileStore(mem *storage.MemStorage, config *configserver.ConfigServer) {
+func FileStore(mem *memstorage.MemStorage, config *configserver.ConfigServer) {
 
 	mWrite, err := NewMetricReadWriter(config.StoreFile)
 	if err != nil {
@@ -77,7 +78,7 @@ func FileStore(mem *storage.MemStorage, config *configserver.ConfigServer) {
 }
 
 // Restores metrics from file to storage
-func FileRestore(mem *storage.MemStorage, config *configserver.ConfigServer) {
+func FileRestore(mem *memstorage.MemStorage, config *configserver.ConfigServer) {
 
 	mRead, err := NewMetricReadWriter(config.StoreFile)
 	if err != nil {
