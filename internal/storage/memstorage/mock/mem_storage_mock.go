@@ -35,10 +35,10 @@ func (m *MockMemStorages) EXPECT() *MockMemStoragesMockRecorder {
 }
 
 // GetAllMetrics mocks base method.
-func (m *MockMemStorages) GetAllMetrics() []models.JSONMetrics {
+func (m *MockMemStorages) GetAllMetrics() []models.Metric {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAllMetrics")
-	ret0, _ := ret[0].([]models.JSONMetrics)
+	ret0, _ := ret[0].([]models.Metric)
 	return ret0
 }
 

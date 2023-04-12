@@ -23,11 +23,11 @@ type Agent interface {
 	putMetricsUsePsutilWorker(ctx context.Context)
 	writeMetricsToChanWorker(ctx context.Context)
 	sentMetricsWorker(ctx context.Context, url string)
-	makePostRequest(client *resty.Client, j []models.JSONMetrics, url string)
+	makePostRequest(client *resty.Client, j []models.Metric, url string)
 }
 
 type agent struct {
-	jobs       chan []models.JSONMetrics
+	jobs       chan []models.Metric
 	mem        *memstorage.MemStorage
 	psutil     *memstorage.MemStorage
 	cfg        *configagent.ConfigAgent
@@ -35,7 +35,7 @@ type agent struct {
 }
 
 // Creates a new agent instance
-func NewAgent(jobs chan []models.JSONMetrics, mem *memstorage.MemStorage, memPsutil *memstorage.MemStorage, cfg *configagent.ConfigAgent, hashServer *hashservicer.HashServer) *agent {
+func NewAgent(jobs chan []models.Metric, mem *memstorage.MemStorage, memPsutil *memstorage.MemStorage, cfg *configagent.ConfigAgent, hashServer *hashservicer.HashServer) *agent {
 	return &agent{jobs: jobs, mem: mem, psutil: memPsutil, cfg: cfg, hashServer: hashServer}
 }
 
@@ -125,7 +125,7 @@ func (a agent) sentMetricsWorker(ctx context.Context, url string) {
 	}
 }
 
-func (a agent) makePostRequest(client *resty.Client, j []models.JSONMetrics, url string) {
+func (a agent) makePostRequest(client *resty.Client, j []models.Metric, url string) {
 
 	_, err := client.R().
 		SetHeader("Content-Type", "application/json").

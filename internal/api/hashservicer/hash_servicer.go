@@ -11,8 +11,8 @@ import (
 )
 
 type HashServices interface {
-	ValidHashServer(clientMetric models.JSONMetrics) bool
-	GenerateHash(metric models.JSONMetrics) string
+	ValidHashServer(clientMetric models.Metric) bool
+	GenerateHash(metric models.Metric) string
 	IsEnabled() bool
 }
 
@@ -30,14 +30,14 @@ func (hs HashServer) IsEnabled() bool {
 }
 
 // Compares the hash received from the client with the hash stored on the server
-func (hs HashServer) ValidHashServer(clientMetric models.JSONMetrics) bool {
+func (hs HashServer) ValidHashServer(clientMetric models.Metric) bool {
 	if hs.IsEnabled() {
 		return clientMetric.Hash == hs.GenerateHash(clientMetric)
 	}
 	return true
 }
 
-func (hs HashServer) GenerateHash(metric models.JSONMetrics) string {
+func (hs HashServer) GenerateHash(metric models.Metric) string {
 	var data string
 	switch metric.MType {
 	case "counter":

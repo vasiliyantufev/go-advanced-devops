@@ -1,4 +1,4 @@
-// model - jsonmetrics
+// model - jsonmetric
 package models
 
 import (
@@ -6,7 +6,7 @@ import (
 	"strconv"
 )
 
-type JSONMetrics struct {
+type Metric struct {
 	ID    string   `json:"id"`              // metric name
 	MType string   `json:"type"`            // a parameter that takes the value gauge or counter
 	Delta *int64   `json:"delta,omitempty"` // metric value in case of passing counter
@@ -14,7 +14,7 @@ type JSONMetrics struct {
 	Hash  string   `json:"hash"`            // hash value
 }
 
-func (J JSONMetrics) String() string {
+func (J Metric) String() string {
 	switch J.MType {
 	case "gauge":
 		var value string

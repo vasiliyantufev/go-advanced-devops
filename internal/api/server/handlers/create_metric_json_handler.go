@@ -21,13 +21,13 @@ func (s Handler) CreateMetricJSONHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	value := models.JSONMetrics{}
+	value := models.Metric{}
 	if err := json.Unmarshal([]byte(string(resp)), &value); err != nil {
 		log.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	rawValue := models.JSONMetrics{
+	rawValue := models.Metric{
 		ID: value.ID,
 	}
 
@@ -68,7 +68,7 @@ func (s Handler) CreateMetricJSONHandler(w http.ResponseWriter, r *http.Request)
 			sum = *value.Delta
 		}
 		// calculate new hash
-		hashSumServer := s.hashServer.GenerateHash(models.JSONMetrics{ID: value.ID, MType: value.MType, Delta: converter.Int64ToInt64Pointer(sum), Value: value.Value})
+		hashSumServer := s.hashServer.GenerateHash(models.Metric{ID: value.ID, MType: value.MType, Delta: converter.Int64ToInt64Pointer(sum), Value: value.Value})
 		// store new metric
 		s.mem.PutMetricsCount(value.ID, sum, hashSumServer)
 

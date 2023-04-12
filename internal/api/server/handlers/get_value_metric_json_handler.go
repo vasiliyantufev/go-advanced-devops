@@ -19,14 +19,14 @@ func (s Handler) GetValueMetricJSONHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	value := models.JSONMetrics{}
+	value := models.Metric{}
 	if err := json.Unmarshal([]byte(string(resp)), &value); err != nil {
 		log.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	rawValue := models.JSONMetrics{
+	rawValue := models.Metric{
 		ID:    value.ID,
 		MType: value.MType,
 	}

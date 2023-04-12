@@ -26,7 +26,7 @@ func TestGenerateHashMock(t *testing.T) {
 
 	hash := api.RandStr(10)
 
-	clientMetric := models.JSONMetrics{
+	clientMetric := models.Metric{
 		ID:    "Alloc",
 		MType: "gauge",
 		Delta: nil,
@@ -41,7 +41,7 @@ func TestValidHashMock(t *testing.T) {
 	ctl := gomock.NewController(t)
 	ctl.Finish()
 
-	clientMetric := models.JSONMetrics{
+	clientMetric := models.Metric{
 		ID:    "Alloc",
 		MType: "gauge",
 		Delta: nil,

@@ -32,13 +32,13 @@ func NewMetricReadWriter(fileName string) (*metric, error) {
 	}, nil
 }
 
-func (m *metric) WriteMetric(event *models.JSONMetrics) error {
+func (m *metric) WriteMetric(event *models.Metric) error {
 	return m.encoder.Encode(event)
 }
 
-func (m *metric) ReadMetric() (*models.JSONMetrics, error) {
+func (m *metric) ReadMetric() (*models.Metric, error) {
 
-	mr := new(models.JSONMetrics)
+	mr := new(models.Metric)
 	if err := m.decoder.Decode(mr); err == io.EOF {
 		return nil, err
 	} else if err != nil {

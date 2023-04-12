@@ -35,7 +35,7 @@ func (m *MockHashServices) EXPECT() *MockHashServicesMockRecorder {
 }
 
 // GenerateHash mocks base method.
-func (m *MockHashServices) GenerateHash(metric models.JSONMetrics) string {
+func (m *MockHashServices) GenerateHash(metric models.Metric) string {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GenerateHash", metric)
 	ret0, _ := ret[0].(string)
@@ -63,7 +63,7 @@ func (mr *MockHashServicesMockRecorder) IsEnabled() *gomock.Call {
 }
 
 // ValidHashServer mocks base method.
-func (m *MockHashServices) ValidHashServer(clientMetric models.JSONMetrics) bool {
+func (m *MockHashServices) ValidHashServer(clientMetric models.Metric) bool {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ValidHashServer", clientMetric)
 	ret0, _ := ret[0].(bool)

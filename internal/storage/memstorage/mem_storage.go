@@ -12,19 +12,19 @@ type MemStorages interface {
 	GetMetricsGauge(id string) (o float64, h string, b bool)
 	PutMetricsCount(id string, o int64, h string)
 	GetMetricsCount(id string) (o int64, h string, b bool)
-	GetAllMetrics() []models.JSONMetrics
+	GetAllMetrics() []models.Metric
 }
 
 type MemStorage struct {
 	mx   *sync.RWMutex
-	data map[string]models.JSONMetrics
+	data map[string]models.Metric
 }
 
 // NewMemStorage - creates a new store instance
 func NewMemStorage() *MemStorage {
 	return &MemStorage{
 		mx:   new(sync.RWMutex),
-		data: make(map[string]models.JSONMetrics),
+		data: make(map[string]models.Metric),
 	}
 }
 
@@ -32,7 +32,7 @@ func NewMemStorage() *MemStorage {
 func (data *MemStorage) PutMetricsGauge(id string, o float64, h string) {
 	data.mx.Lock()
 	defer data.mx.Unlock()
-	data.data[id] = models.JSONMetrics{
+	data.data[id] = models.Metric{
 		ID:    id,
 		MType: "gauge",
 		Delta: nil,
@@ -56,7 +56,7 @@ func (data *MemStorage) GetMetricsGauge(id string) (o float64, h string, b bool)
 func (data *MemStorage) PutMetricsCount(id string, o int64, h string) {
 	data.mx.Lock()
 	defer data.mx.Unlock()
-	data.data[id] = models.JSONMetrics{
+	data.data[id] = models.Metric{
 		ID:    id,
 		MType: "counter",
 		Delta: &o,
@@ -77,10 +77,10 @@ func (data *MemStorage) GetMetricsCount(id string) (o int64, h string, b bool) {
 }
 
 // GetAllMetrics - gets all metrics from storage
-func (data *MemStorage) GetAllMetrics() []models.JSONMetrics {
+func (data *MemStorage) GetAllMetrics() []models.Metric {
 	data.mx.RLock()
 	defer data.mx.RUnlock()
-	result := make([]models.JSONMetrics, 0)
+	result := make([]models.Metric, 0)
 	for _, metric := range data.data {
 		result = append(result, metric)
 	}

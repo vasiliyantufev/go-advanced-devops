@@ -23,7 +23,7 @@ func main() {
 	ctx, cnl := signal.NotifyContext(context.Background(), syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
 	defer cnl()
 
-	jobs := make(chan []models.JSONMetrics, configAgent.RateLimit)
+	jobs := make(chan []models.Metric, configAgent.RateLimit)
 	defer close(jobs)
 
 	agent := agent.NewAgent(jobs, memAgent, memAgentPsutil, configAgent, hashServer)
