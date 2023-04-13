@@ -159,7 +159,7 @@ func TestHandler_GetMetricURLParamsNotExistCounterHandler(t *testing.T) {
 	var statusExpect = http.StatusNotFound
 	var contentTypeExpect = "text/plain; charset=utf-8"
 
-	router.ServeHTTP(responseRecorderGet, httptest.NewRequest("GET", "/value/gauge/testMetric", nil))
+	router.ServeHTTP(responseRecorderGet, httptest.NewRequest("GET", "/value/counter/testMetric", nil))
 	statusGet := responseRecorderGet.Code
 	contentTypeGet := responseRecorderGet.Header().Get("Content-Type")
 
