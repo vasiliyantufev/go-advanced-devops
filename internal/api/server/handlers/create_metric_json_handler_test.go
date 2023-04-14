@@ -273,7 +273,7 @@ func TestHandler_CreateMetricJSONCountSumHandler(t *testing.T) {
 	metricGet := models.Metric{}
 	json.Unmarshal([]byte(responseRecorderPostSecond.Body.Bytes()), &metricGet)
 
-	var valueExpect int64 = value + value
+	var valueExpect = value + value
 
 	assert.Equal(t, valueExpect, *metricGet.Delta, fmt.Sprintf("Incorrect Delta. Expect %d, got %d", valueExpect, *metricGet.Delta))
 	assert.Equal(t, statusExpect, statusGet, fmt.Sprintf("Incorrect status code. Expect %d, got %d", statusExpect, statusGet))

@@ -11,10 +11,8 @@ import (
 	"testing"
 	"time"
 
-	log "github.com/sirupsen/logrus"
-
 	"github.com/go-chi/chi/v5"
-	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/api/hashservicer"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/config/configserver"
@@ -44,7 +42,7 @@ func TestHandler_IndexHandler(t *testing.T) {
 		AddressPProfile: "localhost:8088",
 		Restore:         true,
 		StoreInterval:   300 * time.Second,
-		DebugLevel:      logrus.DebugLevel,
+		DebugLevel:      log.DebugLevel,
 		StoreFile:       "/tmp/devops-metrics-db.json",
 		Key:             "",
 		DSN:             "",
