@@ -1,5 +1,24 @@
 package handlers
 
+import (
+	"fmt"
+	"net/http"
+	"net/http/httptest"
+	"os"
+	"path"
+	"testing"
+	"time"
+
+	log "github.com/sirupsen/logrus"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/sirupsen/logrus"
+	"github.com/stretchr/testify/assert"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/api/hashservicer"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/config/configserver"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/storage/memstorage"
+)
+
 //func TestIndexHandler(t *testing.T) {
 //
 //	r := chi.NewRouter()
@@ -50,12 +69,22 @@ func TestHandler_IndexHandler(t *testing.T) {
 }
 */
 
-/*func TestHandler_IndexHandler(t *testing.T) {
+func TestHandler_IndexHandler(t *testing.T) {
 
 	responseRecorder := httptest.NewRecorder()
 
 	memStorage := memstorage.NewMemStorage()
-	hashServer := hashservicer.NewHashServer("secretKey")
+	hashServer := hashservicer.NewHashServer("")
+
+	dirname, err := os.Getwd()
+	if err != nil {
+		log.Error(err)
+	}
+	dir, err := os.Open(path.Join(dirname, "../../../../"))
+	if err != nil {
+		log.Error(err)
+	}
+	tmplFile := dir.Name() + "/web/templates/index.html"
 
 	configServer := configserver.ConfigServer{
 		Address:         "localhost:8080",
@@ -67,7 +96,7 @@ func TestHandler_IndexHandler(t *testing.T) {
 		Key:             "",
 		DSN:             "",
 		RootPath:        "file://./migrations",
-		//TemplatePath:    "file://./web/templates/index.html",
+		TemplatePath:    tmplFile,
 	}
 
 	srv := NewHandler(memStorage, nil, &configServer, nil, hashServer)
@@ -84,6 +113,8 @@ func TestHandler_IndexHandler(t *testing.T) {
 
 	assert.Equal(t, statusExpect, statusGet, fmt.Sprintf("Incorrect status code. Expect %d, got %d", statusExpect, statusGet))
 	assert.Equal(t, contentTypeExpect, contentTypeGet, fmt.Sprintf("Incorrect Content-Type. Expect %s, got %s", contentTypeExpect, contentTypeGet))
+	//assert.Contains(t)
 
 }
-*/
+
+/**/
