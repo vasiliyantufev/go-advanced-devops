@@ -143,3 +143,138 @@ func TestHandler_CreateMetricJSONCountHandler(t *testing.T) {
 	assert.Equal(t, metricExt.Value, metricGet.Value, fmt.Sprintf("Incorrect value metric. Expect %d, got %d", metricExt.Value, metricGet.Value))
 	assert.True(t, len(metricGet.Hash) > 0, "Empty hash metric")
 }
+
+func TestHandler_CreateMetricJSONGaugeKeyIncorrectHandler(t *testing.T) {
+	responseRecorder := httptest.NewRecorder()
+
+	memStorage := memstorage.NewMemStorage()
+	hashServer := hashservicer.NewHashServer("bugagaKey")
+
+	configServer := configserver.ConfigServer{
+		Address:         "localhost:8080",
+		AddressPProfile: "localhost:8088",
+		Restore:         true,
+		StoreInterval:   300 * time.Second,
+		DebugLevel:      logrus.DebugLevel,
+		StoreFile:       "/tmp/devops-metrics-db.json",
+		Key:             "",
+		DSN:             "",
+		RootPath:        "file://./migrations",
+	}
+
+	srv := NewHandler(memStorage, nil, &configServer, nil, hashServer)
+
+	router := chi.NewRouter()
+	router.Post("/update", srv.CreateMetricJSONHandler)
+
+	rand.Seed(time.Now().UnixNano())
+	var value = rand.Float64()
+
+	var statusExpect = http.StatusBadRequest
+	var metricExt = models.Metric{
+		ID:    "alloc",
+		MType: "gauge",
+		Value: &value,
+	}
+	reqBody, err := json.Marshal(metricExt)
+	if err != nil {
+		logrus.Fatal(err)
+	}
+
+	router.ServeHTTP(responseRecorder, httptest.NewRequest(http.MethodPost, "/update", bytes.NewBuffer(reqBody)))
+	statusGet := responseRecorder.Code
+
+	assert.Equal(t, statusExpect, statusGet, fmt.Sprintf("Incorrect status code. Expect %d, got %d", statusExpect, statusGet))
+
+}
+
+func TestHandler_CreateMetricJSONCountKeyIncorrectHandler(t *testing.T) {
+	responseRecorder := httptest.NewRecorder()
+
+	memStorage := memstorage.NewMemStorage()
+	hashServer := hashservicer.NewHashServer("bugagaKey")
+
+	configServer := configserver.ConfigServer{
+		Address:         "localhost:8080",
+		AddressPProfile: "localhost:8088",
+		Restore:         true,
+		StoreInterval:   300 * time.Second,
+		DebugLevel:      logrus.DebugLevel,
+		StoreFile:       "/tmp/devops-metrics-db.json",
+		Key:             "",
+		DSN:             "",
+		RootPath:        "file://./migrations",
+	}
+
+	srv := NewHandler(memStorage, nil, &configServer, nil, hashServer)
+
+	router := chi.NewRouter()
+	router.Post("/update", srv.CreateMetricJSONHandler)
+
+	rand.Seed(time.Now().UnixNano())
+	var value = rand.Int63()
+	var statusExpect = http.StatusBadRequest
+	var metricExt = models.Metric{
+		ID:    "alloc",
+		MType: "count",
+		Delta: &value,
+	}
+	reqBody, err := json.Marshal(metricExt)
+	if err != nil {
+		logrus.Fatal(err)
+	}
+
+	router.ServeHTTP(responseRecorder, httptest.NewRequest(http.MethodPost, "/update", bytes.NewBuffer(reqBody)))
+	statusGet := responseRecorder.Code
+
+	assert.Equal(t, statusExpect, statusGet, fmt.Sprintf("Incorrect status code. Expect %d, got %d", statusExpect, statusGet))
+}
+
+func TestHandler_CreateMetricJSONCountSumHandler(t *testing.T) {
+	responseRecorderPostFirst := httptest.NewRecorder()
+	responseRecorderPostSecond := httptest.NewRecorder()
+
+	memStorage := memstorage.NewMemStorage()
+	hashServer := hashservicer.NewHashServer("")
+
+	configServer := configserver.ConfigServer{
+		Address:         "localhost:8080",
+		AddressPProfile: "localhost:8088",
+		Restore:         true,
+		StoreInterval:   300 * time.Second,
+		DebugLevel:      logrus.DebugLevel,
+		StoreFile:       "/tmp/devops-metrics-db.json",
+		Key:             "",
+		DSN:             "",
+		RootPath:        "file://./migrations",
+	}
+
+	srv := NewHandler(memStorage, nil, &configServer, nil, hashServer)
+
+	router := chi.NewRouter()
+	router.Post("/update", srv.CreateMetricJSONHandler)
+
+	rand.Seed(time.Now().UnixNano())
+	var value int64 = 1234567890
+	var statusExpect = http.StatusOK
+	var metricExt = models.Metric{
+		ID:    "alloc",
+		MType: "count",
+		Delta: &value,
+	}
+	reqBody, err := json.Marshal(metricExt)
+	if err != nil {
+		logrus.Fatal(err)
+	}
+
+	router.ServeHTTP(responseRecorderPostFirst, httptest.NewRequest(http.MethodPost, "/update", bytes.NewBuffer(reqBody)))
+	router.ServeHTTP(responseRecorderPostSecond, httptest.NewRequest(http.MethodPost, "/update", bytes.NewBuffer(reqBody)))
+	statusGet := responseRecorderPostSecond.Code
+	metricGet := models.Metric{}
+	json.Unmarshal([]byte(responseRecorderPostSecond.Body.Bytes()), &metricGet)
+
+	var valueExpect int64 = value + value
+
+	assert.Equal(t, valueExpect, *metricGet.Delta, fmt.Sprintf("Incorrect Delta. Expect %d, got %d", valueExpect, *metricGet.Delta))
+	assert.Equal(t, statusExpect, statusGet, fmt.Sprintf("Incorrect status code. Expect %d, got %d", statusExpect, statusGet))
+}
