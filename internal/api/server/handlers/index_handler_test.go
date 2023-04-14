@@ -61,11 +61,13 @@ func TestHandler_IndexHandler(t *testing.T) {
 	var statusExpect = http.StatusOK
 	var contentTypeExpect = "text/html"
 
-	var nameMetric = "testMetric"
+	var nameMetricGauge = "testMetricGauge"
+	var nameMetricCounter = "testMetricCounter"
 
 	rand.Seed(time.Now().UnixNano())
 	var valueExpect = fmt.Sprint(rand.Int())
-	router.ServeHTTP(responseRecorderPost, httptest.NewRequest("POST", "/update/counter/"+nameMetric+"/"+fmt.Sprint(valueExpect), nil))
+	router.ServeHTTP(responseRecorderPost, httptest.NewRequest("POST", "/update/gauge/"+nameMetricGauge+"/"+fmt.Sprint(valueExpect), nil))
+	router.ServeHTTP(responseRecorderPost, httptest.NewRequest("POST", "/update/counter/"+nameMetricCounter+"/"+fmt.Sprint(valueExpect), nil))
 
 	router.ServeHTTP(responseRecorder, httptest.NewRequest("GET", "/", nil))
 	statusGet := responseRecorder.Code
@@ -74,5 +76,6 @@ func TestHandler_IndexHandler(t *testing.T) {
 
 	assert.Equal(t, statusExpect, statusGet, fmt.Sprintf("Incorrect status code. Expect %d, got %d", statusExpect, statusGet))
 	assert.Equal(t, contentTypeExpect, contentTypeGet, fmt.Sprintf("Incorrect Content-Type. Expect %s, got %s", contentTypeExpect, contentTypeGet))
-	assert.True(t, strings.Contains(body, nameMetric))
+	assert.True(t, strings.Contains(body, nameMetricGauge))
+	assert.True(t, strings.Contains(body, nameMetricCounter))
 }
