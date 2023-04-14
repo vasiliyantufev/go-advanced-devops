@@ -20,6 +20,7 @@ func TestConfigServer(t *testing.T) {
 		Key:             "",
 		DSN:             "",
 		RootPath:        "file://./migrations",
+		TemplatePath:    "file://./web/templates/index.html",
 	}
 	assert.Equal(t, configServerInstance, &configServer)
 }
