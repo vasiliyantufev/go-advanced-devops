@@ -2,10 +2,12 @@ package handlers
 
 import (
 	"fmt"
+	"math/rand"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"path"
+	"strings"
 	"testing"
 	"time"
 
@@ -19,59 +21,10 @@ import (
 	"github.com/vasiliyantufev/go-advanced-devops/internal/storage/memstorage"
 )
 
-//func TestIndexHandler(t *testing.T) {
-//
-//	r := chi.NewRouter()
-//	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-//		defer r.Body.Close()
-//		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-//		w.WriteHeader(http.StatusOK)
-//	})
-//
-//	ts := httptest.NewServer(r)
-//	defer ts.Close()
-//
-//	res, _ := TestRequest(t, ts, "GET", "/", nil)
-//	defer res.Body.Close()
-//
-//	assert.Equal(t, res.StatusCode, http.StatusOK)
-//}
-
-/*
-func TestHandler_IndexHandler(t *testing.T) {
-	testTable := []struct {
-		name        string
-		server      *httptest.Server
-		expectedErr error
-	}{
-		{
-			name: "test index handler",
-			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				w.Header().Set("Content-Type", "text/html")
-				w.WriteHeader(http.StatusOK)
-			})),
-			expectedErr: nil,
-		},
-	}
-	for _, tc := range testTable {
-		t.Run(tc.name, func(t *testing.T) {
-			defer tc.server.Close()
-			resp, err := MakeHTTPCall(tc.server.URL)
-			if err != tc.expectedErr {
-				t.Error(err)
-			}
-			defer resp.Body.Close()
-
-			assert.Equal(t, resp.StatusCode, http.StatusOK)
-			assert.Equal(t, resp.Header.Get("Content-Type"), "text/html")
-		})
-	}
-}
-*/
-
 func TestHandler_IndexHandler(t *testing.T) {
 
 	responseRecorder := httptest.NewRecorder()
+	responseRecorderPost := httptest.NewRecorder()
 
 	memStorage := memstorage.NewMemStorage()
 	hashServer := hashservicer.NewHashServer("")
@@ -102,19 +55,24 @@ func TestHandler_IndexHandler(t *testing.T) {
 	srv := NewHandler(memStorage, nil, &configServer, nil, hashServer)
 
 	router := chi.NewRouter()
+	router.Post("/update/{type}/{name}/{value}", srv.CreateMetricURLParamsHandler)
 	router.Get("/", srv.IndexHandler)
 
 	var statusExpect = http.StatusOK
 	var contentTypeExpect = "text/html"
 
+	var nameMetric = "testMetric"
+
+	rand.Seed(time.Now().UnixNano())
+	var valueExpect = fmt.Sprint(rand.Int())
+	router.ServeHTTP(responseRecorderPost, httptest.NewRequest("POST", "/update/counter/"+nameMetric+"/"+fmt.Sprint(valueExpect), nil))
+
 	router.ServeHTTP(responseRecorder, httptest.NewRequest("GET", "/", nil))
 	statusGet := responseRecorder.Code
 	contentTypeGet := responseRecorder.Header().Get("Content-Type")
+	body := responseRecorder.Body.String()
 
 	assert.Equal(t, statusExpect, statusGet, fmt.Sprintf("Incorrect status code. Expect %d, got %d", statusExpect, statusGet))
 	assert.Equal(t, contentTypeExpect, contentTypeGet, fmt.Sprintf("Incorrect Content-Type. Expect %s, got %s", contentTypeExpect, contentTypeGet))
-	//assert.True(t)
-
+	assert.True(t, strings.Contains(body, nameMetric))
 }
-
-/**/
