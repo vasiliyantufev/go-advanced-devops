@@ -48,7 +48,7 @@ import (
 //}
 
 func TestHandler_CreateMetricURLParamsGaugeHandler(t *testing.T) {
-	responseRecorderPost := httptest.NewRecorder()
+	responseRecorder := httptest.NewRecorder()
 
 	memStorage := memstorage.NewMemStorage()
 	hashServer := hashservicer.NewHashServer("secretKey")
@@ -74,14 +74,14 @@ func TestHandler_CreateMetricURLParamsGaugeHandler(t *testing.T) {
 	var valueExpect = fmt.Sprint(rand.Int())
 	var statusExpect = http.StatusOK
 
-	router.ServeHTTP(responseRecorderPost, httptest.NewRequest("POST", "/update/gauge/testMetric/"+fmt.Sprint(valueExpect), nil))
-	statusGet := responseRecorderPost.Code
+	router.ServeHTTP(responseRecorder, httptest.NewRequest("POST", "/update/gauge/testMetric/"+fmt.Sprint(valueExpect), nil))
+	statusGet := responseRecorder.Code
 
 	assert.Equal(t, statusExpect, statusGet, fmt.Sprintf("Incorrect status code. Expect %d, got %d", statusExpect, statusGet))
 }
 
 func TestHandler_CreateMetricURLParamsCountHandler(t *testing.T) {
-	responseRecorderPost := httptest.NewRecorder()
+	responseRecorder := httptest.NewRecorder()
 
 	memStorage := memstorage.NewMemStorage()
 	hashServer := hashservicer.NewHashServer("secretKey")
@@ -107,14 +107,14 @@ func TestHandler_CreateMetricURLParamsCountHandler(t *testing.T) {
 	var valueExpect = fmt.Sprintf("%.3f", rand.Float64())
 	var statusExpect = http.StatusOK
 
-	router.ServeHTTP(responseRecorderPost, httptest.NewRequest("POST", "/update/count/testMetric/"+fmt.Sprint(valueExpect), nil))
-	statusGet := responseRecorderPost.Code
+	router.ServeHTTP(responseRecorder, httptest.NewRequest("POST", "/update/count/testMetric/"+fmt.Sprint(valueExpect), nil))
+	statusGet := responseRecorder.Code
 
 	assert.Equal(t, statusExpect, statusGet, fmt.Sprintf("Incorrect status code. Expect %d, got %d", statusExpect, statusGet))
 }
 
 func TestHandler_CreateMetricURLParamsGaugeValueIncorrectHandler(t *testing.T) {
-	responseRecorderPost := httptest.NewRecorder()
+	responseRecorder := httptest.NewRecorder()
 
 	memStorage := memstorage.NewMemStorage()
 	hashServer := hashservicer.NewHashServer("secretKey")
@@ -139,14 +139,14 @@ func TestHandler_CreateMetricURLParamsGaugeValueIncorrectHandler(t *testing.T) {
 	var valueIncorrect = "bugaga"
 	var statusExpect = http.StatusBadRequest
 
-	router.ServeHTTP(responseRecorderPost, httptest.NewRequest("POST", "/update/gauge/testMetric/"+valueIncorrect, nil))
-	statusGet := responseRecorderPost.Code
+	router.ServeHTTP(responseRecorder, httptest.NewRequest("POST", "/update/gauge/testMetric/"+valueIncorrect, nil))
+	statusGet := responseRecorder.Code
 
 	assert.Equal(t, statusExpect, statusGet, fmt.Sprintf("Incorrect status code. Expect %d, got %d", statusExpect, statusGet))
 }
 
 func TestHandler_CreateMetricURLParamsCountValueIncorrectHandler(t *testing.T) {
-	responseRecorderPost := httptest.NewRecorder()
+	responseRecorder := httptest.NewRecorder()
 
 	memStorage := memstorage.NewMemStorage()
 	hashServer := hashservicer.NewHashServer("secretKey")
@@ -171,8 +171,8 @@ func TestHandler_CreateMetricURLParamsCountValueIncorrectHandler(t *testing.T) {
 	var valueIncorrect = "bugaga"
 	var statusExpect = http.StatusBadRequest
 
-	router.ServeHTTP(responseRecorderPost, httptest.NewRequest("POST", "/update/counter/testMetric/"+valueIncorrect, nil))
-	statusGet := responseRecorderPost.Code
+	router.ServeHTTP(responseRecorder, httptest.NewRequest("POST", "/update/counter/testMetric/"+valueIncorrect, nil))
+	statusGet := responseRecorder.Code
 
 	assert.Equal(t, statusExpect, statusGet, fmt.Sprintf("Incorrect status code. Expect %d, got %d", statusExpect, statusGet))
 }

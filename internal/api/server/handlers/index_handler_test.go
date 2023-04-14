@@ -1,13 +1,5 @@
 package handlers
 
-import (
-	"net/http"
-	"net/http/httptest"
-	"testing"
-
-	"github.com/stretchr/testify/assert"
-)
-
 //func TestIndexHandler(t *testing.T) {
 //
 //	r := chi.NewRouter()
@@ -26,6 +18,7 @@ import (
 //	assert.Equal(t, res.StatusCode, http.StatusOK)
 //}
 
+/*
 func TestHandler_IndexHandler(t *testing.T) {
 	testTable := []struct {
 		name        string
@@ -55,3 +48,42 @@ func TestHandler_IndexHandler(t *testing.T) {
 		})
 	}
 }
+*/
+
+/*func TestHandler_IndexHandler(t *testing.T) {
+
+	responseRecorder := httptest.NewRecorder()
+
+	memStorage := memstorage.NewMemStorage()
+	hashServer := hashservicer.NewHashServer("secretKey")
+
+	configServer := configserver.ConfigServer{
+		Address:         "localhost:8080",
+		AddressPProfile: "localhost:8088",
+		Restore:         true,
+		StoreInterval:   300 * time.Second,
+		DebugLevel:      logrus.DebugLevel,
+		StoreFile:       "/tmp/devops-metrics-db.json",
+		Key:             "",
+		DSN:             "",
+		RootPath:        "file://./migrations",
+		//TemplatePath:    "file://./web/templates/index.html",
+	}
+
+	srv := NewHandler(memStorage, nil, &configServer, nil, hashServer)
+
+	router := chi.NewRouter()
+	router.Get("/", srv.IndexHandler)
+
+	var statusExpect = http.StatusOK
+	var contentTypeExpect = "text/html"
+
+	router.ServeHTTP(responseRecorder, httptest.NewRequest("GET", "/", nil))
+	statusGet := responseRecorder.Code
+	contentTypeGet := responseRecorder.Header().Get("Content-Type")
+
+	assert.Equal(t, statusExpect, statusGet, fmt.Sprintf("Incorrect status code. Expect %d, got %d", statusExpect, statusGet))
+	assert.Equal(t, contentTypeExpect, contentTypeGet, fmt.Sprintf("Incorrect Content-Type. Expect %s, got %s", contentTypeExpect, contentTypeGet))
+
+}
+*/

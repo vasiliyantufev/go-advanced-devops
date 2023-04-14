@@ -5,8 +5,8 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
-	"github.com/vasiliyantufev/go-advanced-devops/internal/api"
 	mock_hs "github.com/vasiliyantufev/go-advanced-devops/internal/api/hashservicer/mock"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/api/helpers"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/converter"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/models"
 )
@@ -24,7 +24,7 @@ func TestGenerateHashMock(t *testing.T) {
 	ctl := gomock.NewController(t)
 	ctl.Finish()
 
-	hash := api.RandStr(10)
+	hash := helpers.RandStr(10)
 
 	clientMetric := models.Metric{
 		ID:    "Alloc",

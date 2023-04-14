@@ -44,6 +44,7 @@ func (s Handler) CreateMetricJSONHandler(w http.ResponseWriter, r *http.Request)
 
 		hashServer := s.hashServer.GenerateHash(value)
 		s.memStorage.PutMetricsGauge(value.ID, *value.Value, hashServer)
+		rawValue.MType = value.MType
 		rawValue.Value = value.Value
 		rawValue.Hash = hashServer
 	}
@@ -71,6 +72,7 @@ func (s Handler) CreateMetricJSONHandler(w http.ResponseWriter, r *http.Request)
 		// store new metric
 		s.memStorage.PutMetricsCount(value.ID, sum, hashSumServer)
 
+		rawValue.MType = value.MType
 		rawValue.Delta = &sum
 		rawValue.Hash = hashSumServer
 
