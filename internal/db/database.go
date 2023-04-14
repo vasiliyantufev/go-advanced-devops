@@ -66,7 +66,7 @@ func (db DB) CreateTablesMigration(cfg *configserver.ConfigServer) {
 		log.Error(err)
 	}
 	m, err := migrate.NewWithDatabaseInstance(
-		cfg.RootPath,
+		cfg.MigrationsPath,
 		"postgres", driver)
 	if err != nil {
 		log.Error(err)

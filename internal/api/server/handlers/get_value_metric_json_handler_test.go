@@ -74,7 +74,7 @@ func TestHandler_GetValueMetricJSONHandler(t *testing.T) {
 		StoreFile:       "/tmp/devops-metrics-db.json",
 		Key:             "",
 		DSN:             "",
-		RootPath:        "file://./migrations",
+		MigrationsPath:  "file://./migrations",
 	}
 
 	srv := NewHandler(memStorage, nil, &configServer, nil, hashServer)

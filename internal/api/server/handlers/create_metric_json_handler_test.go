@@ -62,7 +62,7 @@ func TestHandler_CreateMetricJSONGaugeHandler(t *testing.T) {
 		StoreFile:       "/tmp/devops-metrics-db.json",
 		Key:             "",
 		DSN:             "",
-		RootPath:        "file://./migrations",
+		MigrationsPath:  "file://./migrations",
 	}
 
 	srv := NewHandler(memStorage, nil, &configServer, nil, hashServer)
@@ -111,7 +111,7 @@ func TestHandler_CreateMetricJSONCountHandler(t *testing.T) {
 		StoreFile:       "/tmp/devops-metrics-db.json",
 		Key:             "",
 		DSN:             "",
-		RootPath:        "file://./migrations",
+		MigrationsPath:  "file://./migrations",
 	}
 
 	srv := NewHandler(memStorage, nil, &configServer, nil, hashServer)
@@ -159,7 +159,7 @@ func TestHandler_CreateMetricJSONGaugeKeyIncorrectHandler(t *testing.T) {
 		StoreFile:       "/tmp/devops-metrics-db.json",
 		Key:             "",
 		DSN:             "",
-		RootPath:        "file://./migrations",
+		MigrationsPath:  "file://./migrations",
 	}
 
 	srv := NewHandler(memStorage, nil, &configServer, nil, hashServer)
@@ -203,7 +203,7 @@ func TestHandler_CreateMetricJSONCountKeyIncorrectHandler(t *testing.T) {
 		StoreFile:       "/tmp/devops-metrics-db.json",
 		Key:             "",
 		DSN:             "",
-		RootPath:        "file://./migrations",
+		MigrationsPath:  "file://./migrations",
 	}
 
 	srv := NewHandler(memStorage, nil, &configServer, nil, hashServer)
@@ -246,7 +246,7 @@ func TestHandler_CreateMetricJSONCountSumHandler(t *testing.T) {
 		StoreFile:       "/tmp/devops-metrics-db.json",
 		Key:             "",
 		DSN:             "",
-		RootPath:        "file://./migrations",
+		MigrationsPath:  "file://./migrations",
 	}
 
 	srv := NewHandler(memStorage, nil, &configServer, nil, hashServer)

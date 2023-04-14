@@ -95,7 +95,7 @@ func TestHandler_IndexHandler(t *testing.T) {
 		StoreFile:       "/tmp/devops-metrics-db.json",
 		Key:             "",
 		DSN:             "",
-		RootPath:        "file://./migrations",
+		MigrationsPath:  "file://./migrations",
 		TemplatePath:    tmplFile,
 	}
 
@@ -113,7 +113,7 @@ func TestHandler_IndexHandler(t *testing.T) {
 
 	assert.Equal(t, statusExpect, statusGet, fmt.Sprintf("Incorrect status code. Expect %d, got %d", statusExpect, statusGet))
 	assert.Equal(t, contentTypeExpect, contentTypeGet, fmt.Sprintf("Incorrect Content-Type. Expect %s, got %s", contentTypeExpect, contentTypeGet))
-	//assert.Contains(t)
+	//assert.True(t)
 
 }
 

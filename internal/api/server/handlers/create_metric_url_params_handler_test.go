@@ -62,7 +62,7 @@ func TestHandler_CreateMetricURLParamsGaugeHandler(t *testing.T) {
 		StoreFile:       "/tmp/devops-metrics-db.json",
 		Key:             "",
 		DSN:             "",
-		RootPath:        "file://./migrations",
+		MigrationsPath:  "file://./migrations",
 	}
 
 	srv := NewHandler(memStorage, nil, &configServer, nil, hashServer)
@@ -95,7 +95,7 @@ func TestHandler_CreateMetricURLParamsCountHandler(t *testing.T) {
 		StoreFile:       "/tmp/devops-metrics-db.json",
 		Key:             "",
 		DSN:             "",
-		RootPath:        "file://./migrations",
+		MigrationsPath:  "file://./migrations",
 	}
 
 	srv := NewHandler(memStorage, nil, &configServer, nil, hashServer)
@@ -128,7 +128,7 @@ func TestHandler_CreateMetricURLParamsGaugeValueIncorrectHandler(t *testing.T) {
 		StoreFile:       "/tmp/devops-metrics-db.json",
 		Key:             "",
 		DSN:             "",
-		RootPath:        "file://./migrations",
+		MigrationsPath:  "file://./migrations",
 	}
 
 	srv := NewHandler(memStorage, nil, &configServer, nil, hashServer)
@@ -160,7 +160,7 @@ func TestHandler_CreateMetricURLParamsCountValueIncorrectHandler(t *testing.T) {
 		StoreFile:       "/tmp/devops-metrics-db.json",
 		Key:             "",
 		DSN:             "",
-		RootPath:        "file://./migrations",
+		MigrationsPath:  "file://./migrations",
 	}
 
 	srv := NewHandler(memStorage, nil, &configServer, nil, hashServer)
@@ -193,7 +193,7 @@ func TestHandler_CreateMetricURLParamsCountSumHandler(t *testing.T) {
 		StoreFile:       "/tmp/devops-metrics-db.json",
 		Key:             "",
 		DSN:             "",
-		RootPath:        "file://./migrations",
+		MigrationsPath:  "file://./migrations",
 	}
 
 	srv := NewHandler(memStorage, nil, &configServer, nil, hashServer)

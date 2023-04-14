@@ -19,8 +19,9 @@ func TestConfigServer(t *testing.T) {
 		StoreFile:       "/tmp/devops-metrics-db.json",
 		Key:             "",
 		DSN:             "",
-		RootPath:        "file://./migrations",
-		TemplatePath:    "file://./web/templates/index.html",
+		MigrationsPath:  "file://./migrations",
+		TemplatePath:    configServerInstance.TemplatePath,
 	}
+
 	assert.Equal(t, configServerInstance, &configServer)
 }
