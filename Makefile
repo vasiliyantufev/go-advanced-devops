@@ -41,3 +41,8 @@ run_pprof_profile:
 
 run_pprof_heap:
 	go tool pprof -http=":9099" -seconds=30 http://localhost:8088/debug/pprof/heap
+
+#docs url - http://localhost:6060/pkg/?m=all
+run_godoc:
+	godoc -http=:6060
+
