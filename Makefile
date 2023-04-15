@@ -29,3 +29,15 @@ test100:
 
 race:
 	go test -v -race -count=1 ./..
+
+run_server:
+	go run ./cmd/server/main.go
+
+run_agent:
+	go run ./cmd/agent/main.go
+
+run_pprof_profile:
+	go tool pprof -http=":9090" -seconds=30 http://localhost:8088/debug/pprof/profile
+
+run_pprof_heap:
+	go tool pprof -http=":9099" -seconds=30 http://localhost:8088/debug/pprof/heap

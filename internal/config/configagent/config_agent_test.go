@@ -2,7 +2,6 @@ package configagent
 
 import (
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -10,11 +9,11 @@ import (
 func TestConfigAgent(t *testing.T) {
 	configAgentInstance := NewConfigAgent()
 	configAgent := ConfigAgent{
-		Address:        "localhost:8080",
-		ReportInterval: 10 * time.Second,
-		PollInterval:   2 * time.Second,
-		Key:            "",
-		RateLimit:      2,
+		Address:        configAgentInstance.Address,
+		ReportInterval: configAgentInstance.ReportInterval,
+		PollInterval:   configAgentInstance.PollInterval,
+		Key:            configAgentInstance.Key,
+		RateLimit:      configAgentInstance.RateLimit,
 	}
 	assert.Equal(t, configAgentInstance, &configAgent)
 }

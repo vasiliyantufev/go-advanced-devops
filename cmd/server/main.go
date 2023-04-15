@@ -31,6 +31,9 @@ func main() {
 		db.CreateTablesMigration(configServer)
 	}
 
+	//game_version := 3
+	//fmt.Printf("Super Mario %s\n", game_version)
+
 	memStorage := memstorage.NewMemStorage()
 	hashServer := hashservicer.NewHashServer(configServer.Key)
 
