@@ -8,6 +8,7 @@ import (
 	"golang.org/x/tools/go/analysis/passes/structtag"
 )
 
+// make run_multichecker
 var ErrNoExitAnalyzer = &analysis.Analyzer{
 	Name: "noexit",
 	Doc:  "os.Exit",
@@ -26,6 +27,5 @@ func main() {
 		shadow.Analyzer,
 		structtag.Analyzer,
 		ErrNoExitAnalyzer,
-		//mychecks...,
 	)
 }

@@ -46,3 +46,5 @@ run_pprof_heap:
 run_godoc:
 	godoc -http=:6060
 
+run_multichecker:
+	go run cmd/staticlint/multichecker.go ./...
