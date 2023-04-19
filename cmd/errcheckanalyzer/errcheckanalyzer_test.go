@@ -1,5 +1,0 @@
-package errcheckanalyzer
-
-func main() {
-
-}

@@ -20,7 +20,7 @@ func (s Handler) GetValueMetricJSONHandler(w http.ResponseWriter, r *http.Reques
 	}
 
 	value := models.Metric{}
-	if err := json.Unmarshal([]byte(string(resp)), &value); err != nil {
+	if err = json.Unmarshal([]byte(string(resp)), &value); err != nil {
 		log.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
