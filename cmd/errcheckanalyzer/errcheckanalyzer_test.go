@@ -1,0 +1,5 @@
+package errcheckanalyzer
+
+func main() {
+
+}
