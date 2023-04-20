@@ -14,7 +14,17 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+var (
+	buildVersion = "N/A"
+	buildDate    = "N/A"
+	buildCommit  = "N/A"
+)
+
 func main() {
+	log.Infof("Build version: %s", buildVersion)
+	log.Infof("Build date: %s", buildDate)
+	log.Infof("Build commit: %s", buildCommit)
+	
 	configAgent := configagent.NewConfigAgent()
 	memAgent := memstorage.NewMemStorage()
 	memAgentPsutil := memstorage.NewMemStorage()

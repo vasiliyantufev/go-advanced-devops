@@ -19,7 +19,17 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+var (
+	buildVersion = "N/A"
+	buildDate    = "N/A"
+	buildCommit  = "N/A"
+)
+
 func main() {
+	log.Infof("Build version: %s", buildVersion)
+	log.Infof("Build date: %s", buildDate)
+	log.Infof("Build commit: %s", buildCommit)
+
 	configServer := configserver.NewConfigServer()
 	log.SetLevel(configServer.DebugLevel)
 
