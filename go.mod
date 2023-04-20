@@ -12,8 +12,6 @@ require (
 	github.com/shirou/gopsutil/v3 v3.23.1
 	github.com/sirupsen/logrus v1.9.0
 	github.com/stretchr/testify v1.8.1
-	golang.org/x/tools v0.1.5
-	honnef.co/go/tools v0.0.1-2020.1.4
 )
 
 require (
