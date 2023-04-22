@@ -28,19 +28,15 @@ func (s Handler) CreateMetricsJSONHandler(w http.ResponseWriter, r *http.Request
 	}
 
 	for _, metric := range metrics {
-
 		if metric.Value != nil {
-
 			if !s.hashServer.ValidHashServer(*metric) {
 				log.Error("Хеш-сумма не соответствует расчетной")
 				http.Error(w, "Хеш-сумма не соответствует расчетной", http.StatusBadRequest)
 				return
 			}
 			s.memStorage.PutMetricsGauge(metric.ID, *metric.Value, s.hashServer.GenerateHash(*metric))
-
 		}
 		if metric.Delta != nil {
-
 			// compare hashes
 			if !s.hashServer.ValidHashServer(*metric) {
 				log.Error("Хеш-сумма не соответствует расчетной")
@@ -69,6 +65,6 @@ func (s Handler) CreateMetricsJSONHandler(w http.ResponseWriter, r *http.Request
 	}
 
 	log.Debug("Request completed successfully metric")
-	w.Header().Set("Content-Type", "application/json")
+	//w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 }
