@@ -3,6 +3,7 @@ package handlers
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/go-chi/chi/v5"
 	log "github.com/sirupsen/logrus"
@@ -22,7 +23,7 @@ func (s Handler) GetMetricURLParamsHandler(w http.ResponseWriter, r *http.Reques
 			http.Error(w, "The name "+nameMetrics+" incorrect", http.StatusNotFound)
 			return
 		}
-		param = fmt.Sprintf("%.3f", val)
+		param = strconv.FormatFloat(val, 'f', 3, 64)
 	}
 	if typeMetrics == "counter" {
 		val, _, exists := s.memStorage.GetMetricsCount(nameMetrics)
@@ -31,7 +32,7 @@ func (s Handler) GetMetricURLParamsHandler(w http.ResponseWriter, r *http.Reques
 			http.Error(w, "The name "+nameMetrics+" incorrect", http.StatusNotFound)
 			return
 		}
-		param = fmt.Sprint(val)
+		param = strconv.FormatInt(val, 10)
 	}
 
 	log.Debug("Request completed successfully " + nameMetrics + "=" + fmt.Sprint(param))
