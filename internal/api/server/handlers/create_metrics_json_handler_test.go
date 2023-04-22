@@ -20,7 +20,7 @@ import (
 	"github.com/vasiliyantufev/go-advanced-devops/internal/storage/memstorage"
 )
 
-func TestHandler_CreateMetricsJSONGaugeHandler(t *testing.T) {
+func TestHandler_CreateMetricsJSONHandler(t *testing.T) {
 	responseRecorder := httptest.NewRecorder()
 
 	memStorage := memstorage.NewMemStorage()
@@ -56,7 +56,7 @@ func TestHandler_CreateMetricsJSONGaugeHandler(t *testing.T) {
 	}
 	var metricCount = models.Metric{
 		ID:    "alloc2",
-		MType: "count",
+		MType: "counter",
 		Delta: &delta,
 	}
 
