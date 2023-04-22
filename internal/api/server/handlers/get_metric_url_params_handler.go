@@ -23,7 +23,7 @@ func (s Handler) GetMetricURLParamsHandler(w http.ResponseWriter, r *http.Reques
 			http.Error(w, "The name "+nameMetrics+" incorrect", http.StatusNotFound)
 			return
 		}
-		param = strconv.FormatFloat(val, 'f', 3, 64)
+		param = strconv.FormatFloat(val, 'f', -1, 64)
 	}
 	if typeMetrics == "counter" {
 		val, _, exists := s.memStorage.GetMetricsCount(nameMetrics)
