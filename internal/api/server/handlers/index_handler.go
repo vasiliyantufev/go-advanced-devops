@@ -15,7 +15,6 @@ type ViewData struct {
 
 // IndexHandler - the page that displays all the metrics with parameters
 func (s Handler) IndexHandler(w http.ResponseWriter, r *http.Request) {
-
 	tmpl, err := template.ParseFiles("./web/templates/index.html")
 	if err != nil {
 		log.Errorf("Parse failed: %s", err)
