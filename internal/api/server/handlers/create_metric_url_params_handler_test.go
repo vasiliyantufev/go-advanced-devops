@@ -17,36 +17,6 @@ import (
 	"github.com/vasiliyantufev/go-advanced-devops/internal/storage/memstorage"
 )
 
-//func TestHandler_CreateMetricURLParamsHandler(t *testing.T) {
-//
-//	testTable := []struct {
-//		name        string
-//		server      *httptest.Server
-//		expectedErr error
-//	}{
-//		{
-//			name: "test create metric url params handler",
-//			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-//				w.WriteHeader(http.StatusOK)
-//			})),
-//			//server:      httptest.NewServer(Handler.CreateMetricURLParamsHandler),
-//			expectedErr: nil,
-//		},
-//	}
-//	for _, tc := range testTable {
-//		t.Run(tc.name, func(t *testing.T) {
-//			defer tc.server.Close()
-//			resp, err := MakeHTTPCall(tc.server.URL)
-//			if err != tc.expectedErr {
-//				t.Error(err)
-//			}
-//			defer resp.Body.Close()
-//
-//			//assert.Equal(t, resp.StatusCode, http.StatusOK)
-//		})
-//	}
-//}
-
 func TestHandler_CreateMetricURLParamsGaugeHandler(t *testing.T) {
 	responseRecorder := httptest.NewRecorder()
 
