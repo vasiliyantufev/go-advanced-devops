@@ -12,7 +12,6 @@ import (
 
 // CreateMetricsJSONHandler - create metrics using json
 func (s Handler) CreateMetricsJSONHandler(w http.ResponseWriter, r *http.Request) {
-
 	resp, err := io.ReadAll(r.Body)
 	if err != nil {
 		log.Error(err.Error())
@@ -26,7 +25,6 @@ func (s Handler) CreateMetricsJSONHandler(w http.ResponseWriter, r *http.Request
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-
 	for _, metric := range metrics {
 		if metric.Value != nil {
 			if !s.hashServer.ValidHashServer(*metric) {
@@ -64,7 +62,14 @@ func (s Handler) CreateMetricsJSONHandler(w http.ResponseWriter, r *http.Request
 		s.fileStorage.FileStore(s.memStorage)
 	}
 
-	log.Debug("Request completed successfully metric")
-	//w.Header().Set("Content-Type", "application/json")
+	resp, err = json.Marshal(s.memStorage.GetAllMetrics())
+	if err != nil {
+		log.Error(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	log.Debug("Request completed successfully metrics")
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
+	w.Write(resp)
 }
