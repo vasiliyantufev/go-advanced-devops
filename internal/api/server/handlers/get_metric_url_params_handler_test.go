@@ -5,6 +5,7 @@ import (
 	"math/rand"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"testing"
 	"time"
 
@@ -43,7 +44,7 @@ func TestHandler_GetMetricURLParamsCounterHandler(t *testing.T) {
 	router.Get("/value/{type}/{name}", srv.GetMetricURLParamsHandler)
 
 	rand.Seed(time.Now().UnixNano())
-	var valueExpect = fmt.Sprint(rand.Int())
+	var valueExpect = strconv.FormatInt(rand.Int63(), 10)
 	var statusExpect = http.StatusOK
 
 	router.ServeHTTP(responseRecorderPost, httptest.NewRequest("POST", "/update/counter/testMetric/"+fmt.Sprint(valueExpect), nil))
@@ -82,7 +83,7 @@ func TestHandler_GetMetricURLParamsGaugeHandler(t *testing.T) {
 	router.Get("/value/{type}/{name}", srv.GetMetricURLParamsHandler)
 
 	rand.Seed(time.Now().UnixNano())
-	var valueExpect = fmt.Sprintf("%.3f", rand.Float64())
+	var valueExpect = strconv.FormatFloat(rand.Float64(), 'f', -1, 64)
 	var statusExpect = http.StatusOK
 
 	router.ServeHTTP(responseRecorderPost, httptest.NewRequest("POST", "/update/gauge/testMetric/"+fmt.Sprint(valueExpect), nil))
