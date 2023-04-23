@@ -6,10 +6,6 @@ import (
 	"strconv"
 )
 
-//type Batch struct {
-//	Metrics []Metric
-//}
-
 type Metric struct {
 	ID    string   `json:"id"`              // metric name
 	MType string   `json:"type"`            // a parameter that takes the value gauge or counter
@@ -40,8 +36,3 @@ func (J Metric) String() string {
 		return fmt.Sprintf("Metric {ID: %s Type: unknown}", J.ID)
 	}
 }
-
-//func (batches *Batch) AddItem(metric Metric) []Metric {
-//	batches.Metrics = append(batches.Metrics, metric)
-//	return batches.Metrics
-//}
