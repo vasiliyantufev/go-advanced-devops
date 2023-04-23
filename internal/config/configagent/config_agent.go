@@ -15,6 +15,7 @@ type ConfigAgent struct {
 	PollInterval   time.Duration `env:"POLL_INTERVAL"`
 	Key            string        `env:"KEY"`
 	RateLimit      int           `env:"RATE_LIMIT"`
+	CryptoKey      string        `env:"CRYPTO_KEY"`
 }
 
 // NewConfigAgent - creates a new instance with the configuration for the agent
@@ -26,6 +27,7 @@ func NewConfigAgent() *ConfigAgent {
 	flag.DurationVar(&cfgAgt.PollInterval, "p", 2*time.Second, "Time interval in seconds after which the current metric readings are updated on the client")
 	flag.StringVar(&cfgAgt.Key, "k", "", "Key to generate hash")
 	flag.IntVar(&cfgAgt.RateLimit, "l", 2, "Number of concurrent outgoing requests to the server")
+	flag.StringVar(&cfgAgt.Key, "crypto-key", "", "Crypto key")
 	flag.Parse()
 
 	err := env.Parse(&cfgAgt)
