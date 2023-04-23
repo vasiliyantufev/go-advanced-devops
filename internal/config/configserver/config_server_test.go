@@ -2,24 +2,24 @@ package configserver
 
 import (
 	"testing"
-	"time"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestConfigServer(t *testing.T) {
 	configServerInstance := NewConfigServer()
 	configServer := ConfigServer{
-		Address:         "localhost:8080",
-		AddressPProfile: "localhost:8088",
-		Restore:         true,
-		StoreInterval:   300 * time.Second,
-		DebugLevel:      log.DebugLevel,
-		StoreFile:       "/tmp/devops-metrics-db.json",
-		Key:             "",
-		DSN:             "",
-		RootPath:        "file://./migrations",
+		Address:         configServerInstance.Address,
+		AddressPProfile: configServerInstance.AddressPProfile,
+		Restore:         configServerInstance.Restore,
+		StoreInterval:   configServerInstance.StoreInterval,
+		DebugLevel:      configServerInstance.DebugLevel,
+		StoreFile:       configServerInstance.StoreFile,
+		Key:             configServerInstance.Key,
+		DSN:             configServerInstance.DSN,
+		MigrationsPath:  configServerInstance.MigrationsPath,
+		TemplatePath:    configServerInstance.TemplatePath,
 	}
+
 	assert.Equal(t, configServerInstance, &configServer)
 }

@@ -1,12 +1,16 @@
-// storage - jsonmetrics
-package storage
+// model - jsonmetric
+package models
 
 import (
 	"fmt"
 	"strconv"
 )
 
-type JSONMetrics struct {
+//type Batch struct {
+//	Metrics []Metric
+//}
+
+type Metric struct {
 	ID    string   `json:"id"`              // metric name
 	MType string   `json:"type"`            // a parameter that takes the value gauge or counter
 	Delta *int64   `json:"delta,omitempty"` // metric value in case of passing counter
@@ -14,7 +18,7 @@ type JSONMetrics struct {
 	Hash  string   `json:"hash"`            // hash value
 }
 
-func (J JSONMetrics) String() string {
+func (J Metric) String() string {
 	switch J.MType {
 	case "gauge":
 		var value string
@@ -36,3 +40,8 @@ func (J JSONMetrics) String() string {
 		return fmt.Sprintf("Metric {ID: %s Type: unknown}", J.ID)
 	}
 }
+
+//func (batches *Batch) AddItem(metric Metric) []Metric {
+//	batches.Metrics = append(batches.Metrics, metric)
+//	return batches.Metrics
+//}

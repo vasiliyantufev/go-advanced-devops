@@ -6,9 +6,8 @@ import (
 	"net/http"
 
 	log "github.com/sirupsen/logrus"
-	"github.com/vasiliyantufev/go-advanced-devops/internal/api/file"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/converter"
-	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/models"
 )
 
 // CreateMetricJSONHandler - create metric using json
@@ -21,13 +20,13 @@ func (s Handler) CreateMetricJSONHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	value := storage.JSONMetrics{}
-	if err := json.Unmarshal([]byte(string(resp)), &value); err != nil {
+	value := models.Metric{}
+	if err = json.Unmarshal([]byte(string(resp)), &value); err != nil {
 		log.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	rawValue := storage.JSONMetrics{
+	rawValue := models.Metric{
 		ID: value.ID,
 	}
 
@@ -44,7 +43,8 @@ func (s Handler) CreateMetricJSONHandler(w http.ResponseWriter, r *http.Request)
 		}
 
 		hashServer := s.hashServer.GenerateHash(value)
-		s.mem.PutMetricsGauge(value.ID, *value.Value, hashServer)
+		s.memStorage.PutMetricsGauge(value.ID, *value.Value, hashServer)
+		rawValue.MType = value.MType
 		rawValue.Value = value.Value
 		rawValue.Hash = hashServer
 	}
@@ -62,16 +62,17 @@ func (s Handler) CreateMetricJSONHandler(w http.ResponseWriter, r *http.Request)
 
 		// counter summing logic
 		var sum int64
-		if oldVal, _, exists := s.mem.GetMetricsCount(value.ID); exists {
+		if oldVal, _, exists := s.memStorage.GetMetricsCount(value.ID); exists {
 			sum = oldVal + *value.Delta
 		} else {
 			sum = *value.Delta
 		}
 		// calculate new hash
-		hashSumServer := s.hashServer.GenerateHash(storage.JSONMetrics{ID: value.ID, MType: value.MType, Delta: converter.Int64ToInt64Pointer(sum), Value: value.Value})
+		hashSumServer := s.hashServer.GenerateHash(models.Metric{ID: value.ID, MType: value.MType, Delta: converter.Int64ToInt64Pointer(sum), Value: value.Value})
 		// store new metric
-		s.mem.PutMetricsCount(value.ID, sum, hashSumServer)
+		s.memStorage.PutMetricsCount(value.ID, sum, hashSumServer)
 
+		rawValue.MType = value.MType
 		rawValue.Delta = &sum
 		rawValue.Hash = hashSumServer
 
@@ -84,10 +85,10 @@ func (s Handler) CreateMetricJSONHandler(w http.ResponseWriter, r *http.Request)
 	}
 
 	if s.database != nil {
-		s.database.InsertOrUpdateMetrics(s.mem)
+		s.database.InsertOrUpdateMetrics(s.memStorage)
 	}
 	if s.config.StoreInterval == 0 {
-		file.FileStore(s.mem, nil)
+		s.fileStorage.FileStore(s.memStorage)
 	}
 
 	log.Debug("Request completed successfully metric:" + value.ID)

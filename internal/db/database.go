@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/vasiliyantufev/go-advanced-devops/internal/config/configserver"
-	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/storage/memstorage"
 
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
@@ -16,6 +16,13 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	_ "github.com/lib/pq"
 )
+
+type DBS interface {
+	Ping() error
+	Close() error
+	CreateTablesMigration(cfg *configserver.ConfigServer)
+	InsertOrUpdateMetrics(metrics *memstorage.MemStorage) error
+}
 
 type DB struct {
 	pool *sql.DB
@@ -59,7 +66,7 @@ func (db DB) CreateTablesMigration(cfg *configserver.ConfigServer) {
 		log.Error(err)
 	}
 	m, err := migrate.NewWithDatabaseInstance(
-		cfg.RootPath,
+		cfg.MigrationsPath,
 		"postgres", driver)
 	if err != nil {
 		log.Error(err)
@@ -70,7 +77,7 @@ func (db DB) CreateTablesMigration(cfg *configserver.ConfigServer) {
 }
 
 // InsertOrUpdateMetrics - adds new metrics to the database or updates if the entry is already present
-func (db DB) InsertOrUpdateMetrics(metrics *storage.MemStorage) error {
+func (db DB) InsertOrUpdateMetrics(metrics *memstorage.MemStorage) error {
 	stmt, err := db.pool.Prepare(`
 			INSERT INTO metrics 
 			VALUES($1, $2, $3, $4, $5)

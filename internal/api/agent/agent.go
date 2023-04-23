@@ -11,7 +11,8 @@ import (
 	"github.com/vasiliyantufev/go-advanced-devops/internal/api/hashservicer"
 	runtime2 "github.com/vasiliyantufev/go-advanced-devops/internal/api/runtime"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/config/configagent"
-	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/models"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/storage/memstorage"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -22,19 +23,19 @@ type Agent interface {
 	putMetricsUsePsutilWorker(ctx context.Context)
 	writeMetricsToChanWorker(ctx context.Context)
 	sentMetricsWorker(ctx context.Context, url string)
-	makePostRequest(client *resty.Client, j []storage.JSONMetrics, url string)
+	makePostRequest(client *resty.Client, j []models.Metric, url string)
 }
 
 type agent struct {
-	jobs       chan []storage.JSONMetrics
-	mem        *storage.MemStorage
-	psutil     *storage.MemStorage
+	jobs       chan []models.Metric
+	mem        *memstorage.MemStorage
+	psutil     *memstorage.MemStorage
 	cfg        *configagent.ConfigAgent
 	hashServer *hashservicer.HashServer
 }
 
 // Creates a new agent instance
-func NewAgent(jobs chan []storage.JSONMetrics, mem *storage.MemStorage, memPsutil *storage.MemStorage, cfg *configagent.ConfigAgent, hashServer *hashservicer.HashServer) *agent {
+func NewAgent(jobs chan []models.Metric, mem *memstorage.MemStorage, memPsutil *memstorage.MemStorage, cfg *configagent.ConfigAgent, hashServer *hashservicer.HashServer) *agent {
 	return &agent{jobs: jobs, mem: mem, psutil: memPsutil, cfg: cfg, hashServer: hashServer}
 }
 
@@ -124,7 +125,7 @@ func (a agent) sentMetricsWorker(ctx context.Context, url string) {
 	}
 }
 
-func (a agent) makePostRequest(client *resty.Client, j []storage.JSONMetrics, url string) {
+func (a agent) makePostRequest(client *resty.Client, j []models.Metric, url string) {
 
 	_, err := client.R().
 		SetHeader("Content-Type", "application/json").

@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	log "github.com/sirupsen/logrus"
-	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/models"
 )
 
 // GetValueMetricJSONHandler - getting metric value using json
@@ -19,20 +19,20 @@ func (s Handler) GetValueMetricJSONHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	value := storage.JSONMetrics{}
-	if err := json.Unmarshal([]byte(string(resp)), &value); err != nil {
+	value := models.Metric{}
+	if err = json.Unmarshal([]byte(string(resp)), &value); err != nil {
 		log.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	rawValue := storage.JSONMetrics{
+	rawValue := models.Metric{
 		ID:    value.ID,
 		MType: value.MType,
 	}
 	log.Infoln("VALUE METRIC RECV", rawValue)
 	if value.MType == "gauge" {
-		val, hash, exists := s.mem.GetMetricsGauge(value.ID)
+		val, hash, exists := s.memStorage.GetMetricsGauge(value.ID)
 		if !exists {
 			log.Error("Element " + value.ID + " not exists")
 			http.Error(w, "Element "+value.ID+" not exists", http.StatusNotFound)
@@ -42,7 +42,7 @@ func (s Handler) GetValueMetricJSONHandler(w http.ResponseWriter, r *http.Reques
 		rawValue.Hash = hash
 	}
 	if value.MType == "counter" {
-		val, hash, exists := s.mem.GetMetricsCount(value.ID)
+		val, hash, exists := s.memStorage.GetMetricsCount(value.ID)
 		if !exists {
 			log.Error("Element " + value.ID + " not exists")
 			http.Error(w, "Element "+value.ID+" not exists", http.StatusNotFound)

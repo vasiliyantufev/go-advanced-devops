@@ -7,13 +7,13 @@ import (
 	"encoding/hex"
 	"fmt"
 
-	"github.com/vasiliyantufev/go-advanced-devops/internal/storage"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/models"
 )
 
 type HashServices interface {
-	ValidHashServer(metric storage.JSONMetrics, clientHash string) bool
-	GenerateHash(metric storage.JSONMetrics) string
-	isEnabled()
+	ValidHashServer(clientMetric models.Metric) bool
+	GenerateHash(metric models.Metric) string
+	IsEnabled() bool
 }
 
 type HashServer struct {
@@ -30,14 +30,14 @@ func (hs HashServer) IsEnabled() bool {
 }
 
 // Compares the hash received from the client with the hash stored on the server
-func (hs HashServer) ValidHashServer(clientMetric storage.JSONMetrics) bool {
+func (hs HashServer) ValidHashServer(clientMetric models.Metric) bool {
 	if hs.IsEnabled() {
 		return clientMetric.Hash == hs.GenerateHash(clientMetric)
 	}
 	return true
 }
 
-func (hs HashServer) GenerateHash(metric storage.JSONMetrics) string {
+func (hs HashServer) GenerateHash(metric models.Metric) string {
 	var data string
 	switch metric.MType {
 	case "counter":
