@@ -1,7 +1,8 @@
 package main
 
 import (
-	"github.com/vasiliyantufev/go-advanced-devops/internal/analyzers"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/analyzers/exit_analyzer"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/analyzers/ignore_errors_analyzer"
 	"golang.org/x/tools/go/analysis/multichecker"
 	"golang.org/x/tools/go/analysis/passes/printf"
 	"golang.org/x/tools/go/analysis/passes/shadow"
@@ -15,6 +16,7 @@ func main() {
 		printf.Analyzer,
 		shadow.Analyzer,
 		structtag.Analyzer,
-		analyzers.ExitAnalyzer,
+		exit_analyzer.ExitAnalyzer,
+		ignore_errors_analyzer.IgnoreErrorsAnalizer,
 	)
 }

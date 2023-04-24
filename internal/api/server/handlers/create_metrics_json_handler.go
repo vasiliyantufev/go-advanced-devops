@@ -20,7 +20,7 @@ func (s Handler) CreateMetricsJSONHandler(w http.ResponseWriter, r *http.Request
 	}
 
 	var metrics []*models.Metric
-	if err := json.Unmarshal([]byte(string(resp)), &metrics); err != nil {
+	if err = json.Unmarshal([]byte(string(resp)), &metrics); err != nil {
 		log.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
