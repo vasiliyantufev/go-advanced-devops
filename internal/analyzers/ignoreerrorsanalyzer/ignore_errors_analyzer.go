@@ -1,4 +1,4 @@
-package ignore_errors_analyzer
+package ignoreerrorsanalyzer
 
 import (
 	"go/ast"

@@ -6,6 +6,8 @@ import (
 	"io"
 	"net/http"
 	"strings"
+
+	log "github.com/sirupsen/logrus"
 )
 
 type gzipWriter struct {
@@ -30,7 +32,10 @@ func GzipMiddleware(next http.Handler) http.Handler {
 		// Create a gzip.Writer on top of the current w
 		gz, err := gzip.NewWriterLevel(w, gzip.BestSpeed)
 		if err != nil {
-			io.WriteString(w, err.Error())
+			_, err = io.WriteString(w, err.Error())
+			if err != nil {
+				log.Error(err)
+			}
 			return
 		}
 		defer gz.Close()

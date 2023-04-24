@@ -49,5 +49,8 @@ func (s Handler) CreateMetricURLParamsHandler(w http.ResponseWriter, r *http.Req
 	}
 	log.Debug(resp)
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(resp))
+	_, err := w.Write([]byte(resp))
+	if err != nil {
+		log.Error(err)
+	}
 }

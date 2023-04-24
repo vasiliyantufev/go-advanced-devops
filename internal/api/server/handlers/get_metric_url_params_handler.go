@@ -37,5 +37,8 @@ func (s Handler) GetMetricURLParamsHandler(w http.ResponseWriter, r *http.Reques
 
 	log.Debug("Request completed successfully " + nameMetrics + "=" + fmt.Sprint(param))
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(param))
+	_, err := w.Write([]byte(param))
+	if err != nil {
+		log.Error(err)
+	}
 }
