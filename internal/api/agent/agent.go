@@ -2,21 +2,23 @@
 package agent
 
 import (
+	"bytes"
 	"context"
 	"crypto/tls"
 	"crypto/x509"
-	"io/ioutil"
+	"encoding/json"
 	"net/http"
+	"os"
 	"runtime"
 	"time"
 
-	"github.com/go-resty/resty/v2"
 	"github.com/shirou/gopsutil/v3/mem"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/api/hashservicer"
 	runtime2 "github.com/vasiliyantufev/go-advanced-devops/internal/api/runtime"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/config/configagent"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/models"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/storage/memstorage"
+	"golang.org/x/net/http2"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -26,8 +28,8 @@ type Agent interface {
 	putMetricsWorker(ctx context.Context)
 	putMetricsUsePsutilWorker(ctx context.Context)
 	writeMetricsToChanWorker(ctx context.Context)
-	sentMetricsWorker(ctx context.Context, url string, client *resty.Client)
-	makePostRequest(client *resty.Client, j []models.Metric, url string)
+	sentMetricsWorker(ctx context.Context, url string, client *http.Client)
+	makePostRequest(client *http.Client, j []models.Metric, url string)
 }
 
 type agent struct {
@@ -44,26 +46,29 @@ func NewAgent(jobs chan []models.Metric, mem *memstorage.MemStorage, memPsutil *
 }
 
 func (a agent) StartWorkers(ctx context.Context, ai Agent) {
+
 	// Create a Resty Client
-	client := resty.New()
+	//client := resty.New()
 	var urlPath string
+	client := &http.Client{}
 
 	if a.cfg.CryptoKey != "" {
-		// Create a Go's http.Transport so we can set it in resty.
-		caCert, err := ioutil.ReadFile(a.cfg.CryptoKey)
+		// Create a pool with the server certificate since it is not signed
+		// by a known CA
+		caCert, err := os.ReadFile("server.crt")
 		if err != nil {
-			log.Fatal(err)
+			log.Fatalf("Reading server certificate: %s", err)
 		}
 		caCertPool := x509.NewCertPool()
 		caCertPool.AppendCertsFromPEM(caCert)
-
-		transport := http.Transport{
-			TLSClientConfig: &tls.Config{
-				RootCAs: caCertPool,
-			},
+		// Create TLS configuration with the certificate of the server
+		tlsConfig := &tls.Config{
+			RootCAs: caCertPool,
 		}
-		// Set the previous transport that we created, set the scheme
-		client.SetTransport(&transport).SetScheme("https")
+		// Use the proper transport in the client
+		client.Transport = &http2.Transport{
+			TLSClientConfig: tlsConfig,
+		}
 		urlPath = "https://" + a.cfg.Address + "/updates/"
 	} else {
 		// Set the scheme
@@ -136,7 +141,7 @@ func (a agent) writeMetricsToChanWorker(ctx context.Context) {
 }
 
 // Listens to the channel, if the metrics have arrived, forms a request and sends it to the server
-func (a agent) sentMetricsWorker(ctx context.Context, url string, client *resty.Client) {
+func (a agent) sentMetricsWorker(ctx context.Context, url string, client *http.Client) {
 	for {
 		select {
 		case <-ctx.Done():
@@ -148,14 +153,20 @@ func (a agent) sentMetricsWorker(ctx context.Context, url string, client *resty.
 	}
 }
 
-func (a agent) makePostRequest(client *resty.Client, j []models.Metric, url string) {
-	_, err := client.R().
-		SetHeader("Content-Type", "application/json").
-		SetBody(j).
-		Post(url)
+func (a agent) makePostRequest(client *http.Client, jsonData []models.Metric, url string) {
+	resp, err := json.Marshal(jsonData)
 	if err != nil {
 		log.Error(err)
-		return
 	}
+	request, err := http.NewRequest("POST", url, bytes.NewBuffer(resp))
+	if err != nil {
+		log.Error(err)
+	}
+	request.Header.Set("Content-Type", "application/json")
+	_, err = client.Do(request)
+	if err != nil {
+		log.Error(err)
+	}
+	//response.Body.Close()
 	log.Println("Sent metrics success ", url)
 }
