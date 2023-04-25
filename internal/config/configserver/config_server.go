@@ -17,10 +17,11 @@ type ConfigServer struct {
 	StoreInterval   time.Duration `env:"STORE_INTERVAL"`
 	DebugLevel      log.Level     `env:"DEBUG_LEVEL" envDefault:"debug"`
 	StoreFile       string        `env:"STORE_FILE"`
-	Restore         bool          `env:"RESTORE" envDefault:"true"`
+	Restore         bool          `env:"RESTORE"`
 	Key             string        `env:"KEY"`
 	DSN             string        `env:"DATABASE_DSN"`
 	CryptoKey       string        `env:"CRYPTO_KEY"`
+	Certificate     string        `env:"CERTIFICATE"`
 	//DSN string `env:"DATABASE_DSN" envDefault:"host=localhost port=5432 user=postgres password=postgres dbname=praktikum sslmode=disable"`
 	//DSN      string `env:"DATABASE_DSN" envDefault:"host=localhost port=5432 user=postgres password=myPassword dbname=praktikum sslmode=disable"`
 	MigrationsPath string `env:"ROOT_PATH" envDefault:"file://./migrations"`
@@ -37,7 +38,8 @@ func NewConfigServer() *ConfigServer {
 	flag.DurationVar(&cfgSrv.StoreInterval, "i", 300*time.Second, "Time interval in seconds after which the current server readings are flushed to disk")
 	flag.StringVar(&cfgSrv.StoreFile, "f", "/tmp/devops-metrics-db.json", "The file where the values are stored")
 	flag.StringVar(&cfgSrv.Key, "k", "", "Key to generate hash")
-	flag.StringVar(&cfgSrv.Key, "crypto-key", "", "Crypto key")
+	flag.StringVar(&cfgSrv.CryptoKey, "crypto-key", "", "Path to crypto key")
+	flag.StringVar(&cfgSrv.Certificate, "certificate", "", "Path to certificate")
 	flag.StringVar(&cfgSrv.DSN, "d", "", "Database configuration")
 	flag.Parse()
 

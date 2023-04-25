@@ -41,7 +41,7 @@ func NewAgent(jobs chan []models.Metric, mem *memstorage.MemStorage, memPsutil *
 
 func (a agent) StartWorkers(ctx context.Context, ai Agent) {
 
-	urlPath := "http://" + a.cfg.Address + "/updates/"
+	urlPath := "https://" + a.cfg.Address + "/updates/"
 
 	go ai.putMetricsWorker(ctx)
 	go ai.putMetricsUsePsutilWorker(ctx)
@@ -132,7 +132,7 @@ func (a agent) makePostRequest(client *resty.Client, j []models.Metric, url stri
 		SetBody(j).
 		Post(url)
 	if err != nil {
-		log.Println(err)
+		log.Error(err)
 		return
 	}
 	log.Println("Sent metrics success ", url)

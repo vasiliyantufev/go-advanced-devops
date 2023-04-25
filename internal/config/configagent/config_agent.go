@@ -27,7 +27,7 @@ func NewConfigAgent() *ConfigAgent {
 	flag.DurationVar(&cfgAgt.PollInterval, "p", 2*time.Second, "Time interval in seconds after which the current metric readings are updated on the client")
 	flag.StringVar(&cfgAgt.Key, "k", "", "Key to generate hash")
 	flag.IntVar(&cfgAgt.RateLimit, "l", 2, "Number of concurrent outgoing requests to the server")
-	flag.StringVar(&cfgAgt.Key, "crypto-key", "", "Crypto key")
+	flag.StringVar(&cfgAgt.CryptoKey, "crypto-key", "", "Path to crypto key")
 	flag.Parse()
 
 	err := env.Parse(&cfgAgt)

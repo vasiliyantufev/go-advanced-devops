@@ -1,12 +1,21 @@
 package main
 
+// @Title Metrics API
+// @Description Metrics and alerting service
+// @Version 1.0
+
+// @Contact.email vasiliyantufev@gmail.com
+
+// @Host http://127.0.0.1:8080/
+
 import (
 	"context"
-	_ "net/http/pprof" // подключаем пакет pprof
+	_ "net/http/pprof"
 	"os/signal"
 	"syscall"
 
 	"github.com/vasiliyantufev/go-advanced-devops/internal/api/hashservicer"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/api/helpers"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/api/server"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/api/server/handlers"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/api/server/routers"
@@ -26,9 +35,7 @@ var (
 )
 
 func main() {
-	log.Infof("Build version: %s", buildVersion)
-	log.Infof("Build date: %s", buildDate)
-	log.Infof("Build commit: %s", buildCommit)
+	helpers.PrintInfo(buildVersion, buildDate, buildCommit)
 
 	configServer := configserver.NewConfigServer()
 	log.SetLevel(configServer.DebugLevel)
