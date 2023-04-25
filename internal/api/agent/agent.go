@@ -3,6 +3,10 @@ package agent
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
+	"io/ioutil"
+	"net/http"
 	"runtime"
 	"time"
 
@@ -22,7 +26,7 @@ type Agent interface {
 	putMetricsWorker(ctx context.Context)
 	putMetricsUsePsutilWorker(ctx context.Context)
 	writeMetricsToChanWorker(ctx context.Context)
-	sentMetricsWorker(ctx context.Context, url string)
+	sentMetricsWorker(ctx context.Context, url string, client *resty.Client)
 	makePostRequest(client *resty.Client, j []models.Metric, url string)
 }
 
@@ -40,21 +44,43 @@ func NewAgent(jobs chan []models.Metric, mem *memstorage.MemStorage, memPsutil *
 }
 
 func (a agent) StartWorkers(ctx context.Context, ai Agent) {
+	// Create a Resty Client
+	client := resty.New()
+	var urlPath string
 
-	urlPath := "https://" + a.cfg.Address + "/updates/"
+	if a.cfg.CryptoKey != "" {
+		// Create a Go's http.Transport so we can set it in resty.
+		caCert, err := ioutil.ReadFile(a.cfg.CryptoKey)
+		if err != nil {
+			log.Fatal(err)
+		}
+		caCertPool := x509.NewCertPool()
+		caCertPool.AppendCertsFromPEM(caCert)
+
+		transport := http.Transport{
+			TLSClientConfig: &tls.Config{
+				RootCAs: caCertPool,
+			},
+		}
+		// Set the previous transport that we created, set the scheme
+		client.SetTransport(&transport).SetScheme("https")
+		urlPath = "https://" + a.cfg.Address + "/updates/"
+	} else {
+		// Set the scheme
+		urlPath = "http://" + a.cfg.Address + "/updates/"
+	}
 
 	go ai.putMetricsWorker(ctx)
 	go ai.putMetricsUsePsutilWorker(ctx)
 	go ai.writeMetricsToChanWorker(ctx)
 
 	for i := 0; i < a.cfg.RateLimit; i++ {
-		go ai.sentMetricsWorker(ctx, urlPath)
+		go ai.sentMetricsWorker(ctx, urlPath, client)
 	}
 }
 
 // Get metrics using runtime and write them to memory
 func (a agent) putMetricsWorker(ctx context.Context) {
-
 	ticker := time.NewTicker(a.cfg.PollInterval)
 	defer ticker.Stop()
 	for {
@@ -94,7 +120,6 @@ func (a agent) putMetricsUsePsutilWorker(ctx context.Context) {
 
 // Writes metrics to a channel
 func (a agent) writeMetricsToChanWorker(ctx context.Context) {
-
 	ticker := time.NewTicker(a.cfg.ReportInterval)
 	defer ticker.Stop()
 	for {
@@ -111,9 +136,7 @@ func (a agent) writeMetricsToChanWorker(ctx context.Context) {
 }
 
 // Listens to the channel, if the metrics have arrived, forms a request and sends it to the server
-func (a agent) sentMetricsWorker(ctx context.Context, url string) {
-
-	client := resty.New()
+func (a agent) sentMetricsWorker(ctx context.Context, url string, client *resty.Client) {
 	for {
 		select {
 		case <-ctx.Done():
@@ -126,7 +149,6 @@ func (a agent) sentMetricsWorker(ctx context.Context, url string) {
 }
 
 func (a agent) makePostRequest(client *resty.Client, j []models.Metric, url string) {
-
 	_, err := client.R().
 		SetHeader("Content-Type", "application/json").
 		SetBody(j).
