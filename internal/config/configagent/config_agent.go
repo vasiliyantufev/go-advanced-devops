@@ -28,6 +28,7 @@ func NewConfigAgent() *ConfigAgent {
 	flag.StringVar(&cfgAgt.Key, "k", "", "Key to generate hash")
 	flag.IntVar(&cfgAgt.RateLimit, "l", 2, "Number of concurrent outgoing requests to the server")
 	flag.StringVar(&cfgAgt.CryptoKey, "crypto-key", "", "Path to crypto key")
+	//flag.StringVar(&cfgAgt.CryptoKey, "crypto-key", "./certificates/server.crt", "Path to crypto key")
 	flag.Parse()
 
 	err := env.Parse(&cfgAgt)

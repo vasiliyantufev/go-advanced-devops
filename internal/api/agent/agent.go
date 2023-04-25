@@ -46,16 +46,13 @@ func NewAgent(jobs chan []models.Metric, mem *memstorage.MemStorage, memPsutil *
 }
 
 func (a agent) StartWorkers(ctx context.Context, ai Agent) {
-
-	// Create a Resty Client
-	//client := resty.New()
 	var urlPath string
 	client := &http.Client{}
 
 	if a.cfg.CryptoKey != "" {
 		// Create a pool with the server certificate since it is not signed
 		// by a known CA
-		caCert, err := os.ReadFile("server.crt")
+		caCert, err := os.ReadFile(a.cfg.CryptoKey)
 		if err != nil {
 			log.Fatalf("Reading server certificate: %s", err)
 		}
@@ -71,7 +68,6 @@ func (a agent) StartWorkers(ctx context.Context, ai Agent) {
 		}
 		urlPath = "https://" + a.cfg.Address + "/updates/"
 	} else {
-		// Set the scheme
 		urlPath = "http://" + a.cfg.Address + "/updates/"
 	}
 
@@ -163,10 +159,12 @@ func (a agent) makePostRequest(client *http.Client, jsonData []models.Metric, ur
 		log.Error(err)
 	}
 	request.Header.Set("Content-Type", "application/json")
-	_, err = client.Do(request)
+	response, err := client.Do(request)
 	if err != nil {
 		log.Error(err)
 	}
-	//response.Body.Close()
+	if response != nil {
+		response.Body.Close()
+	}
 	log.Println("Sent metrics success ", url)
 }

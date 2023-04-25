@@ -40,6 +40,8 @@ func NewConfigServer() *ConfigServer {
 	flag.StringVar(&cfgSrv.Key, "k", "", "Key to generate hash")
 	flag.StringVar(&cfgSrv.CryptoKey, "crypto-key", "", "Path to crypto key")
 	flag.StringVar(&cfgSrv.Certificate, "certificate", "", "Path to certificate")
+	//flag.StringVar(&cfgSrv.CryptoKey, "crypto-key", "./certificates/server.key", "Path to crypto key")
+	//flag.StringVar(&cfgSrv.Certificate, "certificate", "./certificates/server.crt", "Path to certificate")
 	flag.StringVar(&cfgSrv.DSN, "d", "", "Database configuration")
 	flag.Parse()
 
