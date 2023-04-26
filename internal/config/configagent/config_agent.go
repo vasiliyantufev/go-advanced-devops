@@ -10,12 +10,13 @@ import (
 )
 
 type ConfigAgent struct {
-	Address        string        `env:"ADDRESS"`
-	ReportInterval time.Duration `env:"REPORT_INTERVAL"`
-	PollInterval   time.Duration `env:"POLL_INTERVAL"`
-	Key            string        `env:"KEY"`
-	RateLimit      int           `env:"RATE_LIMIT"`
-	CryptoKey      string        `env:"CRYPTO_KEY"`
+	Address        string        `env:"ADDRESS" json:"address"`
+	ReportInterval time.Duration `env:"REPORT_INTERVAL" json:"report_interval"`
+	PollInterval   time.Duration `env:"POLL_INTERVAL" json:"poll_interval"`
+	Key            string        `env:"KEY" json:"key"`
+	RateLimit      int           `env:"RATE_LIMIT" json:"rate_limit"`
+	CryptoKey      string        `env:"CRYPTO_KEY" json:"crypto_key"`
+	ConfigFile     string        `env:"CONFIG"`
 }
 
 // NewConfigAgent - creates a new instance with the configuration for the agent
