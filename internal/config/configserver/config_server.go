@@ -3,7 +3,6 @@ package configserver
 
 import (
 	"flag"
-	"os"
 	"time"
 
 	"github.com/caarlos0/env/v6"
@@ -25,7 +24,7 @@ type ConfigServer struct {
 	//DSN string `env:"DATABASE_DSN" envDefault:"host=localhost port=5432 user=postgres password=postgres dbname=praktikum sslmode=disable"`
 	//DSN      string `env:"DATABASE_DSN" envDefault:"host=localhost port=5432 user=postgres password=myPassword dbname=praktikum sslmode=disable"`
 	MigrationsPath string `env:"ROOT_PATH" envDefault:"file://./migrations"`
-	TemplatePath   string `env:"TEMPLATE_PATH"`
+	TemplatePath   string `env:"TEMPLATE_PATH" envDefault:"file://./web/templates"`
 }
 
 // NewConfigServer - creates a new instance with the configuration for the server
@@ -45,13 +44,7 @@ func NewConfigServer() *ConfigServer {
 	flag.StringVar(&cfgSrv.DSN, "d", "", "Database configuration")
 	flag.Parse()
 
-	dirname, err := os.Getwd()
-	if err != nil {
-		log.Fatal(err)
-	}
-	cfgSrv.TemplatePath = dirname + "/web/templates/index.html"
-
-	err = env.Parse(&cfgSrv)
+	err := env.Parse(&cfgSrv)
 	if err != nil {
 		log.Fatal(err)
 	}
