@@ -24,7 +24,7 @@ type ConfigServer struct {
 	//DSN string `env:"DATABASE_DSN" envDefault:"host=localhost port=5432 user=postgres password=postgres dbname=praktikum sslmode=disable"`
 	//DSN      string `env:"DATABASE_DSN" envDefault:"host=localhost port=5432 user=postgres password=myPassword dbname=praktikum sslmode=disable"`
 	MigrationsPath string `env:"ROOT_PATH" envDefault:"file://./migrations"`
-	TemplatePath   string `env:"TEMPLATE_PATH" envDefault:"file://./web/templates"`
+	TemplatePath   string `env:"TEMPLATE_PATH" envDefault:"./web/templates/index.html"`
 }
 
 // NewConfigServer - creates a new instance with the configuration for the server
