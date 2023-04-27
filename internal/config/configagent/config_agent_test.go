@@ -14,6 +14,7 @@ func TestConfigAgent(t *testing.T) {
 		PollInterval:   configAgentInstance.PollInterval,
 		Key:            configAgentInstance.Key,
 		RateLimit:      configAgentInstance.RateLimit,
+		configFile:     configAgentInstance.configFile,
 	}
 	assert.Equal(t, configAgentInstance, &configAgent)
 }
