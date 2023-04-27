@@ -18,10 +18,6 @@ type Handler struct {
 }
 
 // NewHandler - creates a new server instance
-func NewHandler(mem *memstorage.MemStorage,
-	file *filestorage.FileStorage,
-	cfg *configserver.ConfigServer,
-	db *database.DB,
-	hash *hashservicer.HashServer) *Handler {
+func NewHandler(mem *memstorage.MemStorage, file *filestorage.FileStorage, cfg *configserver.ConfigServer, db *database.DB, hash *hashservicer.HashServer) *Handler {
 	return &Handler{memStorage: mem, fileStorage: file, config: cfg, database: db, hashServer: hash}
 }

@@ -29,8 +29,8 @@ type DB struct {
 }
 
 // NewDB - creates a new database instance
-func NewDB(c *configserver.ConfigServer) (*DB, error) {
-	pool, err := sql.Open("postgres", c.DSN)
+func NewDB(config *configserver.ConfigServer) (*DB, error) {
+	pool, err := sql.Open("postgres", config.DSN)
 	if err != nil {
 		log.Error(err)
 		return nil, err

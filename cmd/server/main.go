@@ -38,7 +38,6 @@ func main() {
 	helpers.PrintInfo(buildVersion, buildDate, buildCommit)
 
 	configServer := configserver.NewConfigServer()
-	log.SetLevel(configServer.DebugLevel)
 
 	db, err := database.NewDB(configServer)
 	if err != nil {

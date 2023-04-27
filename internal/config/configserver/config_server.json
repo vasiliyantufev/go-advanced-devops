@@ -1,7 +1,6 @@
 {
-  "address": "localhost:8080",
-  "restore": true,
-  "store_interval": "1s",
+  "address": "localhost:8086",
+  "store_interval": 2000000000,
   "store_file": "/tmp/devops-metrics-db.json",
   "database_dsn": "",
   "crypto_key": "./certificates/server.key",

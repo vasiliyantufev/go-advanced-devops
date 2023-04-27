@@ -2,7 +2,10 @@
 package configagent
 
 import (
+	"encoding/json"
 	"flag"
+	"io"
+	"os"
 	"time"
 
 	"github.com/caarlos0/env/v6"
@@ -22,6 +25,17 @@ type ConfigAgent struct {
 // NewConfigAgent - creates a new instance with the configuration for the agent
 func NewConfigAgent() *ConfigAgent {
 	var cfgAgt ConfigAgent
+
+	//flag.StringVar(&cfgAgt.ConfigFile, "c", "", "Path to config file")
+	//flag.Parse()
+	//
+	//if cfgAgt.ConfigFile != "" {
+	//	err := parseFileJSON(cfgAgt.ConfigFile, &cfgAgt)
+	//	if err != nil {
+	//		log.Fatal(err)
+	//	}
+	//}
+
 	// setting flags for the agent
 	flag.StringVar(&cfgAgt.Address, "a", "localhost:8080", "Server address")
 	flag.DurationVar(&cfgAgt.ReportInterval, "r", 10*time.Second, "Time interval in seconds after which the current readings are sent to the server")
@@ -38,4 +52,23 @@ func NewConfigAgent() *ConfigAgent {
 	}
 	log.Debug(cfgAgt)
 	return &cfgAgt
+}
+
+func parseFileJSON(path string, config *ConfigAgent) error {
+	filename := path
+	jsonFile, err := os.Open(filename)
+	if err != nil {
+		return err
+	}
+	defer jsonFile.Close()
+
+	jsonData, err := io.ReadAll(jsonFile)
+	if err != nil {
+		return err
+	}
+
+	if err := json.Unmarshal(jsonData, &config); err != nil {
+		return err
+	}
+	return nil
 }
