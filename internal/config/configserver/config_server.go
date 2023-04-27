@@ -37,7 +37,7 @@ func NewConfigServer() *ConfigServer {
 	configServer := ConfigServer{
 		Address:         "localhost:8080",
 		AddressPProfile: "localhost:8088",
-		Restore:         false,
+		Restore:         true,
 		StoreInterval:   300 * time.Second,
 		StoreFile:       "/tmp/devops-metrics-db.json",
 	}
@@ -78,8 +78,7 @@ func NewConfigServer() *ConfigServer {
 
 func parseFileJSON(path string) (ConfigServer, error) {
 	fileConfig := ConfigServer{}
-	filename := path
-	jsonFile, err := os.Open(filename)
+	jsonFile, err := os.Open(path)
 	if err != nil {
 		return fileConfig, err
 	}
