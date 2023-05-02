@@ -7,6 +7,7 @@ import (
 
 	"github.com/vasiliyantufev/go-advanced-devops/internal/api/agent"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/api/hashservicer"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/api/helpers"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/config/configagent"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/models"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/storage/memstorage"
@@ -21,10 +22,8 @@ var (
 )
 
 func main() {
-	log.Infof("Build version: %s", buildVersion)
-	log.Infof("Build date: %s", buildDate)
-	log.Infof("Build commit: %s", buildCommit)
-	
+	helpers.PrintInfo(buildVersion, buildDate, buildCommit)
+
 	configAgent := configagent.NewConfigAgent()
 	memAgent := memstorage.NewMemStorage()
 	memAgentPsutil := memstorage.NewMemStorage()

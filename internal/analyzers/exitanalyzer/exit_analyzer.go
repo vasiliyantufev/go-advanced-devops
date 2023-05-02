@@ -1,4 +1,4 @@
-package analyzers
+package exitanalyzer
 
 import (
 	"fmt"

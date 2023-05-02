@@ -48,3 +48,6 @@ run_godoc:
 
 run_multichecker:
 	go run cmd/staticlint/multichecker.go ./...
+
+gen_cripto_key:
+	openssl req -newkey rsa:2048 -nodes -keyout "./certificates/server.key" -x509 -out "./certificates/server.crt" -subj "/CN=localhost" -addext "subjectAltName = DNS:localhost"

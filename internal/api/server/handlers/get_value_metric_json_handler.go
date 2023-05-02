@@ -61,5 +61,8 @@ func (s Handler) GetValueMetricJSONHandler(w http.ResponseWriter, r *http.Reques
 	log.Debug("Request completed successfully metric:" + value.ID)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	w.Write(resp)
+	_, err = w.Write(resp)
+	if err != nil {
+		log.Error(err)
+	}
 }

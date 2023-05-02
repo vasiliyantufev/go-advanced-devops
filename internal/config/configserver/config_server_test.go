@@ -19,6 +19,7 @@ func TestConfigServer(t *testing.T) {
 		DSN:             configServerInstance.DSN,
 		MigrationsPath:  configServerInstance.MigrationsPath,
 		TemplatePath:    configServerInstance.TemplatePath,
+		configFile:      configServerInstance.configFile,
 	}
 
 	assert.Equal(t, configServerInstance, &configServer)

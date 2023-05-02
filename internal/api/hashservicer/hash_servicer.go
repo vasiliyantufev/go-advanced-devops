@@ -7,6 +7,7 @@ import (
 	"encoding/hex"
 	"fmt"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/models"
 )
 
@@ -46,6 +47,9 @@ func (hs HashServer) GenerateHash(metric models.Metric) string {
 		data = fmt.Sprintf("%s:%s:%f", metric.ID, metric.MType, *metric.Value)
 	}
 	h := hmac.New(sha256.New, []byte(hs.key))
-	h.Write([]byte(data))
+	_, err := h.Write([]byte(data))
+	if err != nil {
+		log.Error(err)
+	}
 	return hex.EncodeToString(h.Sum(nil))
 }

@@ -85,7 +85,10 @@ func (s Handler) CreateMetricJSONHandler(w http.ResponseWriter, r *http.Request)
 	}
 
 	if s.database != nil {
-		s.database.InsertOrUpdateMetrics(s.memStorage)
+		err = s.database.InsertOrUpdateMetrics(s.memStorage)
+		if err != nil {
+			log.Error(err)
+		}
 	}
 	if s.config.StoreInterval == 0 {
 		s.fileStorage.FileStore(s.memStorage)
@@ -94,5 +97,8 @@ func (s Handler) CreateMetricJSONHandler(w http.ResponseWriter, r *http.Request)
 	log.Debug("Request completed successfully metric:" + value.ID)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	w.Write(resp)
+	_, err = w.Write(resp)
+	if err != nil {
+		log.Error(err)
+	}
 }

@@ -2,17 +2,23 @@
 package agent
 
 import (
+	"bytes"
 	"context"
+	"crypto/tls"
+	"crypto/x509"
+	"encoding/json"
+	"net/http"
+	"os"
 	"runtime"
 	"time"
 
-	"github.com/go-resty/resty/v2"
 	"github.com/shirou/gopsutil/v3/mem"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/api/hashservicer"
 	runtime2 "github.com/vasiliyantufev/go-advanced-devops/internal/api/runtime"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/config/configagent"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/models"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/storage/memstorage"
+	"golang.org/x/net/http2"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -22,8 +28,8 @@ type Agent interface {
 	putMetricsWorker(ctx context.Context)
 	putMetricsUsePsutilWorker(ctx context.Context)
 	writeMetricsToChanWorker(ctx context.Context)
-	sentMetricsWorker(ctx context.Context, url string)
-	makePostRequest(client *resty.Client, j []models.Metric, url string)
+	sentMetricsWorker(ctx context.Context, url string, client *http.Client)
+	makePostRequest(client *http.Client, j []models.Metric, url string)
 }
 
 type agent struct {
@@ -40,21 +46,42 @@ func NewAgent(jobs chan []models.Metric, mem *memstorage.MemStorage, memPsutil *
 }
 
 func (a agent) StartWorkers(ctx context.Context, ai Agent) {
+	var urlPath string
+	client := &http.Client{}
 
-	urlPath := "http://" + a.cfg.Address + "/updates/"
+	if a.cfg.CryptoKey != "" {
+		// Create a pool with the server certificate since it is not signed
+		// by a known CA
+		caCert, err := os.ReadFile(a.cfg.CryptoKey)
+		if err != nil {
+			log.Fatalf("Reading server certificate: %s", err)
+		}
+		caCertPool := x509.NewCertPool()
+		caCertPool.AppendCertsFromPEM(caCert)
+		// Create TLS configuration with the certificate of the server
+		tlsConfig := &tls.Config{
+			RootCAs: caCertPool,
+		}
+		// Use the proper transport in the client
+		client.Transport = &http2.Transport{
+			TLSClientConfig: tlsConfig,
+		}
+		urlPath = "https://" + a.cfg.Address + "/updates/"
+	} else {
+		urlPath = "http://" + a.cfg.Address + "/updates/"
+	}
 
 	go ai.putMetricsWorker(ctx)
 	go ai.putMetricsUsePsutilWorker(ctx)
 	go ai.writeMetricsToChanWorker(ctx)
 
 	for i := 0; i < a.cfg.RateLimit; i++ {
-		go ai.sentMetricsWorker(ctx, urlPath)
+		go ai.sentMetricsWorker(ctx, urlPath, client)
 	}
 }
 
 // Get metrics using runtime and write them to memory
 func (a agent) putMetricsWorker(ctx context.Context) {
-
 	ticker := time.NewTicker(a.cfg.PollInterval)
 	defer ticker.Stop()
 	for {
@@ -94,7 +121,6 @@ func (a agent) putMetricsUsePsutilWorker(ctx context.Context) {
 
 // Writes metrics to a channel
 func (a agent) writeMetricsToChanWorker(ctx context.Context) {
-
 	ticker := time.NewTicker(a.cfg.ReportInterval)
 	defer ticker.Stop()
 	for {
@@ -111,9 +137,7 @@ func (a agent) writeMetricsToChanWorker(ctx context.Context) {
 }
 
 // Listens to the channel, if the metrics have arrived, forms a request and sends it to the server
-func (a agent) sentMetricsWorker(ctx context.Context, url string) {
-
-	client := resty.New()
+func (a agent) sentMetricsWorker(ctx context.Context, url string, client *http.Client) {
 	for {
 		select {
 		case <-ctx.Done():
@@ -125,15 +149,22 @@ func (a agent) sentMetricsWorker(ctx context.Context, url string) {
 	}
 }
 
-func (a agent) makePostRequest(client *resty.Client, j []models.Metric, url string) {
-
-	_, err := client.R().
-		SetHeader("Content-Type", "application/json").
-		SetBody(j).
-		Post(url)
+func (a agent) makePostRequest(client *http.Client, jsonData []models.Metric, url string) {
+	resp, err := json.Marshal(jsonData)
 	if err != nil {
-		log.Println(err)
-		return
+		log.Error(err)
+	}
+	request, err := http.NewRequest("POST", url, bytes.NewBuffer(resp))
+	if err != nil {
+		log.Error(err)
+	}
+	request.Header.Set("Content-Type", "application/json")
+	response, err := client.Do(request)
+	if err != nil {
+		log.Error(err)
+	}
+	if response != nil {
+		response.Body.Close()
 	}
 	log.Println("Sent metrics success ", url)
 }

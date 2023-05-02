@@ -53,13 +53,16 @@ func TestHandler_CreateMetricJSONGaugeHandler(t *testing.T) {
 	}
 	reqBody, err := json.Marshal(metricExt)
 	if err != nil {
-		logrus.Fatal(err)
+		logrus.Error(err)
 	}
 
 	router.ServeHTTP(responseRecorder, httptest.NewRequest(http.MethodPost, "/update", bytes.NewBuffer(reqBody)))
 	statusGet := responseRecorder.Code
 	metricGet := models.Metric{}
-	json.Unmarshal([]byte(responseRecorder.Body.Bytes()), &metricGet)
+	err = json.Unmarshal([]byte(responseRecorder.Body.Bytes()), &metricGet)
+	if err != nil {
+		logrus.Error(err)
+	}
 
 	assert.Equal(t, statusExpect, statusGet, fmt.Sprintf("Incorrect status code. Expect %d, got %d", statusExpect, statusGet))
 	assert.Equal(t, metricExt.ID, metricGet.ID, fmt.Sprintf("Incorrect ID metric. Expect %s, got %s", metricExt.ID, metricGet.ID))
@@ -101,13 +104,16 @@ func TestHandler_CreateMetricJSONCountHandler(t *testing.T) {
 	}
 	reqBody, err := json.Marshal(metricExt)
 	if err != nil {
-		logrus.Fatal(err)
+		logrus.Error(err)
 	}
 
 	router.ServeHTTP(responseRecorder, httptest.NewRequest(http.MethodPost, "/update", bytes.NewBuffer(reqBody)))
 	statusGet := responseRecorder.Code
 	metricGet := models.Metric{}
-	json.Unmarshal([]byte(responseRecorder.Body.Bytes()), &metricGet)
+	err = json.Unmarshal([]byte(responseRecorder.Body.Bytes()), &metricGet)
+	if err != nil {
+		logrus.Error(err)
+	}
 
 	assert.Equal(t, statusExpect, statusGet, fmt.Sprintf("Incorrect status code. Expect %d, got %d", statusExpect, statusGet))
 	assert.Equal(t, metricExt.ID, metricGet.ID, fmt.Sprintf("Incorrect ID metric. Expect %s, got %s", metricExt.ID, metricGet.ID))
@@ -236,14 +242,17 @@ func TestHandler_CreateMetricJSONCountSumHandler(t *testing.T) {
 	}
 	reqBody, err := json.Marshal(metricExt)
 	if err != nil {
-		logrus.Fatal(err)
+		logrus.Error(err)
 	}
 
 	router.ServeHTTP(responseRecorderPostFirst, httptest.NewRequest(http.MethodPost, "/update", bytes.NewBuffer(reqBody)))
 	router.ServeHTTP(responseRecorderPostSecond, httptest.NewRequest(http.MethodPost, "/update", bytes.NewBuffer(reqBody)))
 	statusGet := responseRecorderPostSecond.Code
 	metricGet := models.Metric{}
-	json.Unmarshal([]byte(responseRecorderPostSecond.Body.Bytes()), &metricGet)
+	err = json.Unmarshal([]byte(responseRecorderPostSecond.Body.Bytes()), &metricGet)
+	if err != nil {
+		logrus.Error(err)
+	}
 
 	var valueExpect = value + value
 
