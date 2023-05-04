@@ -11,12 +11,13 @@ import (
 
 // StartService - starts the devops server
 func StartService(r *chi.Mux, config *configserver.ConfigServer) {
-	log.Infof("Starting application %v\n", config.Address)
 	if config.CryptoKey != "" && config.Certificate != "" {
+		log.Infof("Starting tls application %v\n", config.Address)
 		if con := http.ListenAndServeTLS(config.Address, config.Certificate, config.CryptoKey, r); con != nil {
 			log.Fatal(con)
 		}
 	} else {
+		log.Infof("Starting  application %v\n", config.Address)
 		if con := http.ListenAndServe(config.Address, r); con != nil {
 			log.Fatal(con)
 		}

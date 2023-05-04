@@ -8,6 +8,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/converter"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/models"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/storage/errors"
 )
 
 // CreateMetricJSONHandler - create metric using json
@@ -37,8 +38,8 @@ func (s Handler) CreateMetricJSONHandler(w http.ResponseWriter, r *http.Request)
 		}
 
 		if !s.hashServer.ValidHashServer(value) {
-			log.Error("Хеш-сумма не соответствует расчетной")
-			http.Error(w, "Хеш-сумма не соответствует расчетной", http.StatusBadRequest)
+			log.Error(errors.ErrHashSum)
+			http.Error(w, errors.ErrHashSum.Error(), http.StatusBadRequest)
 			return
 		}
 
@@ -55,8 +56,8 @@ func (s Handler) CreateMetricJSONHandler(w http.ResponseWriter, r *http.Request)
 		}
 		// compare hashes
 		if !s.hashServer.ValidHashServer(value) {
-			log.Error("Хеш-сумма не соответствует расчетной")
-			http.Error(w, "Хеш-сумма не соответствует расчетной", http.StatusBadRequest)
+			log.Error(errors.ErrHashSum)
+			http.Error(w, errors.ErrHashSum.Error(), http.StatusBadRequest)
 			return
 		}
 

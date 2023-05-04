@@ -37,6 +37,13 @@ func TestHandler_CreateMetricJSONGaugeHandler(t *testing.T) {
 		MigrationsPath:  "file://./migrations",
 	}
 
+	//ctrl := gomock.NewController(t)
+	//defer ctrl.Finish()
+
+	//DBMOCK := mock_database.NewMockDBS(ctrl)
+	//DBMOCK.EXPECT().InsertOrUpdateMetrics(memStorage).Return(nil)
+
+	//srv := NewHandler(memStorage, nil, &configServer, DBMOCK, hashServer)
 	srv := NewHandler(memStorage, nil, &configServer, nil, hashServer)
 
 	router := chi.NewRouter()

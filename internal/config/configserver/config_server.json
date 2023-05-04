@@ -4,5 +4,6 @@
   "store_file": "/tmp/devops-metrics-db.json",
   "database_dsn": "",
   "crypto_key": "./certificates/server.key",
-  "certificate": "./certificates/server.crt"
+  "certificate": "./certificates/server.crt",
+  "trusted_subnet": "192.168.0.1"
 }
