@@ -3,14 +3,13 @@ package handlers
 import (
 	"encoding/json"
 	"io"
+	"net"
 	"net/http"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/converter"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/models"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/storage/errors"
-	"github.com/vasiliyantufev/go-advanced-devops/internal/storage/subnet"
-	"golang.org/x/exp/slices"
 )
 
 // CreateMetricsJSONHandler - create metrics using json
@@ -18,9 +17,10 @@ func (s Handler) CreateMetricsJSONHandler(w http.ResponseWriter, r *http.Request
 
 	if s.config.TrustedSubnet != "" {
 		// look at the X-Real-IP request header
-		ipStr := r.Header.Get("X-Real-IP")
+		IPAddressAgent := net.ParseIP(r.Header.Get("X-Real-IP"))
+		_, subnet, _ := net.ParseCIDR(s.config.TrustedSubnet)
 
-		if !slices.Contains(subnet.GetTrustedSubnet(), ipStr) {
+		if !subnet.Contains(IPAddressAgent) {
 			log.Error(errors.ErrAddressNotTrustedSubnet)
 			http.Error(w, errors.ErrAddressNotTrustedSubnet.Error(), http.StatusForbidden)
 			w.WriteHeader(http.StatusForbidden)
