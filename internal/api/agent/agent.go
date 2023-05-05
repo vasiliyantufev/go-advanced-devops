@@ -14,6 +14,7 @@ import (
 
 	"github.com/shirou/gopsutil/v3/mem"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/api/hashservicer"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/api/helpers"
 	runtime2 "github.com/vasiliyantufev/go-advanced-devops/internal/api/runtime"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/config/configagent"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/models"
@@ -159,6 +160,7 @@ func (a agent) makePostRequest(client *http.Client, jsonData []models.Metric, ur
 		log.Error(err)
 	}
 	request.Header.Set("Content-Type", "application/json")
+	request.Header.Set("X-Real-IP", helpers.GetOutboundIP().String())
 	response, err := client.Do(request)
 	if err != nil {
 		log.Error(err)

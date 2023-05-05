@@ -22,6 +22,9 @@ var (
 )
 
 func main() {
+
+	//log.Fatal(helpers.GetOutboundIP().String())
+
 	helpers.PrintInfo(buildVersion, buildDate, buildCommit)
 
 	configAgent := configagent.NewConfigAgent()

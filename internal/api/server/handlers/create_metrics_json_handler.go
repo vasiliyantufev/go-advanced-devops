@@ -9,10 +9,24 @@ import (
 	"github.com/vasiliyantufev/go-advanced-devops/internal/converter"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/models"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/storage/errors"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/storage/subnet"
+	"golang.org/x/exp/slices"
 )
 
 // CreateMetricsJSONHandler - create metrics using json
 func (s Handler) CreateMetricsJSONHandler(w http.ResponseWriter, r *http.Request) {
+
+	if s.config.TrustedSubnet != "" {
+		// look at the X-Real-IP request header
+		ipStr := r.Header.Get("X-Real-IP")
+
+		if !slices.Contains(subnet.GetTrustedSubnet(), ipStr) {
+			log.Error(errors.ErrAddressNotTrustedSubnet)
+			http.Error(w, errors.ErrAddressNotTrustedSubnet.Error(), http.StatusForbidden)
+			w.WriteHeader(http.StatusForbidden)
+		}
+	}
+
 	resp, err := io.ReadAll(r.Body)
 	if err != nil {
 		log.Error(err.Error())
@@ -74,7 +88,7 @@ func (s Handler) CreateMetricsJSONHandler(w http.ResponseWriter, r *http.Request
 	}
 	log.Debug("Request completed successfully metrics")
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
+	w.WriteHeader(http.StatusCreated)
 	_, err = w.Write(resp)
 	if err != nil {
 		log.Error(err)
