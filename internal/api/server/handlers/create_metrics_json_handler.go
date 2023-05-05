@@ -18,25 +18,30 @@ func (s Handler) CreateMetricsJSONHandler(w http.ResponseWriter, r *http.Request
 	if s.config.TrustedSubnet != "" {
 		// look at the X-Real-IP request header
 		IPAddressAgent := net.ParseIP(r.Header.Get("X-Real-IP"))
-		_, subnet, _ := net.ParseCIDR(s.config.TrustedSubnet)
+		_, subnet, err := net.ParseCIDR(s.config.TrustedSubnet)
+		if err != nil {
+			log.Error(err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 
 		if !subnet.Contains(IPAddressAgent) {
 			log.Error(errors.ErrAddressNotTrustedSubnet)
 			http.Error(w, errors.ErrAddressNotTrustedSubnet.Error(), http.StatusForbidden)
-			w.WriteHeader(http.StatusForbidden)
+			return
 		}
 	}
 
 	resp, err := io.ReadAll(r.Body)
 	if err != nil {
-		log.Error(err.Error())
+		log.Error(err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	var metrics []*models.Metric
 	if err = json.Unmarshal([]byte(string(resp)), &metrics); err != nil {
-		log.Error(err.Error())
+		log.Error(err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -82,7 +87,7 @@ func (s Handler) CreateMetricsJSONHandler(w http.ResponseWriter, r *http.Request
 
 	resp, err = json.Marshal(s.memStorage.GetAllMetrics())
 	if err != nil {
-		log.Error(err.Error())
+		log.Error(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
