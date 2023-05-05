@@ -22,22 +22,6 @@ var (
 )
 
 func main() {
-
-	//A := "192.168.0.0/16"
-	//B := helpers.GetOutboundIP().String()
-	//IPAddressAgent := net.ParseIP(B)
-	//ipA, ipnetA, _ := net.ParseCIDR(A)
-	//fmt.Println("Network address A: ", A)
-	//fmt.Println("ipA              : ", ipA)
-	//fmt.Println("ipnetA           : ", ipnetA)
-	//fmt.Printf("\nDoes A (%s) contain: B (%s)?\n", ipnetA, IPAddressAgent)
-	//if ipnetA.Contains(IPAddressAgent) {
-	//	fmt.Println("yes")
-	//} else {
-	//	fmt.Println("no")
-	//}
-	//log.Fatal(IPAddressAgent)
-
 	helpers.PrintInfo(buildVersion, buildDate, buildCommit)
 
 	configAgent := configagent.NewConfigAgent()
