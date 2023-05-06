@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package api;
+
+option go_package = "./devops";
+
+message TestRequest {
+  string msg = 1;
+}
+
+message TestResponse {
+  string msg = 1;
+}
+
+service Handlers {
+  rpc Test(TestRequest) returns (TestResponse);
+}
