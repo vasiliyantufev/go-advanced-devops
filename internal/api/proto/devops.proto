@@ -1,0 +1,49 @@
+syntax = "proto3";
+
+package api;
+
+option go_package = "./devops";
+
+service Devops {
+  rpc GetMetric(GetMetricRequest) returns (GetMetricResponse) {}
+  rpc CreateMetric(CreateMetricRequest) returns (CreateMetricResponse) {}
+  rpc CreateMetrics(CreateMetricsRequest) returns (CreateMetricsResponse) {}
+  rpc Ping(PingRequest) returns (PingResponse) {}
+}
+
+message PingRequest {}
+message PingResponse {}
+
+message GetMetricRequest {
+    string id = 1;
+    string type = 2;
+}
+message GetMetricResponse {}
+
+message CreateMetricRequest {
+  string id = 1;
+  string mtype = 2;
+}
+message CreateMetricResponse {
+  repeated Metric metric = 1;
+}
+
+message CreateMetricsRequest {
+  repeated MetricRequest metric = 1;
+}
+message CreateMetricsResponse {
+  repeated Metric metric = 1;
+}
+
+message Metric {
+  string id = 1;
+  string mtype = 2;
+  string delta = 3;
+  string value = 4;
+  string hash = 5;
+}
+
+message MetricRequest {
+  string id = 1;
+  string mtype = 2;
+}
