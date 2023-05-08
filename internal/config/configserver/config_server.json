@@ -5,5 +5,6 @@
   "database_dsn": "",
   "crypto_key": "./certificates/server.key",
   "certificate": "./certificates/server.crt",
-  "trusted_subnet": "192.168.0.1"
+  "trusted_subnet": "192.168.0.1",
+  "grpc": "192.168.1.1"
 }

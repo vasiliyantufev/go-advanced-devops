@@ -1,11 +1,11 @@
-package handlers
+package rest
 
 import (
 	"fmt"
 	"math/rand"
 	"net/http"
 	"net/http/httptest"
-	"strings"
+	"strconv"
 	"testing"
 	"time"
 
@@ -17,8 +17,10 @@ import (
 	"github.com/vasiliyantufev/go-advanced-devops/internal/storage/memstorage"
 )
 
-func TestHandler_CreateMetricURLParamsGaugeHandler(t *testing.T) {
-	responseRecorder := httptest.NewRecorder()
+func TestHandler_GetMetricURLParamsCounterHandler(t *testing.T) {
+
+	responseRecorderPost := httptest.NewRecorder()
+	responseRecorderGet := httptest.NewRecorder()
 
 	memStorage := memstorage.NewMemStorage()
 	hashServer := hashservicer.NewHashServer("secretKey")
@@ -39,19 +41,25 @@ func TestHandler_CreateMetricURLParamsGaugeHandler(t *testing.T) {
 
 	router := chi.NewRouter()
 	router.Post("/update/{type}/{name}/{value}", srv.CreateMetricURLParamsHandler)
+	router.Get("/value/{type}/{name}", srv.GetMetricURLParamsHandler)
 
 	rand.Seed(time.Now().UnixNano())
-	var valueExpect = fmt.Sprint(rand.Int())
+	var valueExpect = strconv.FormatInt(rand.Int63(), 10)
 	var statusExpect = http.StatusOK
 
-	router.ServeHTTP(responseRecorder, httptest.NewRequest("POST", "/update/gauge/testMetric/"+fmt.Sprint(valueExpect), nil))
-	statusGet := responseRecorder.Code
+	router.ServeHTTP(responseRecorderPost, httptest.NewRequest("POST", "/update/counter/testMetric/"+fmt.Sprint(valueExpect), nil))
+	router.ServeHTTP(responseRecorderGet, httptest.NewRequest("GET", "/value/counter/testMetric", nil))
+	valueGet := responseRecorderGet.Body.String()
+	statusGet := responseRecorderGet.Code
 
+	assert.Equal(t, valueExpect, valueGet, fmt.Sprintf("Incorrect body. Expect %s, got %s", valueExpect, valueGet))
 	assert.Equal(t, statusExpect, statusGet, fmt.Sprintf("Incorrect status code. Expect %d, got %d", statusExpect, statusGet))
 }
 
-func TestHandler_CreateMetricURLParamsCountHandler(t *testing.T) {
-	responseRecorder := httptest.NewRecorder()
+func TestHandler_GetMetricURLParamsGaugeHandler(t *testing.T) {
+
+	responseRecorderPost := httptest.NewRecorder()
+	responseRecorderGet := httptest.NewRecorder()
 
 	memStorage := memstorage.NewMemStorage()
 	hashServer := hashservicer.NewHashServer("secretKey")
@@ -72,19 +80,59 @@ func TestHandler_CreateMetricURLParamsCountHandler(t *testing.T) {
 
 	router := chi.NewRouter()
 	router.Post("/update/{type}/{name}/{value}", srv.CreateMetricURLParamsHandler)
+	router.Get("/value/{type}/{name}", srv.GetMetricURLParamsHandler)
 
 	rand.Seed(time.Now().UnixNano())
-	var valueExpect = fmt.Sprintf("%.3f", rand.Float64())
+	var valueExpect = strconv.FormatFloat(rand.Float64(), 'f', -1, 64)
 	var statusExpect = http.StatusOK
 
-	router.ServeHTTP(responseRecorder, httptest.NewRequest("POST", "/update/count/testMetric/"+fmt.Sprint(valueExpect), nil))
-	statusGet := responseRecorder.Code
+	router.ServeHTTP(responseRecorderPost, httptest.NewRequest("POST", "/update/gauge/testMetric/"+fmt.Sprint(valueExpect), nil))
+	router.ServeHTTP(responseRecorderGet, httptest.NewRequest("GET", "/value/gauge/testMetric", nil))
+	valueGet := responseRecorderGet.Body.String()
+	statusGet := responseRecorderGet.Code
 
+	assert.Equal(t, valueExpect, valueGet, fmt.Sprintf("Incorrect body. Expect %s, got %s", valueExpect, valueGet))
 	assert.Equal(t, statusExpect, statusGet, fmt.Sprintf("Incorrect status code. Expect %d, got %d", statusExpect, statusGet))
 }
 
-func TestHandler_CreateMetricURLParamsGaugeValueIncorrectHandler(t *testing.T) {
-	responseRecorder := httptest.NewRecorder()
+func TestHandler_GetMetricURLParamsNotExistCounterHandler(t *testing.T) {
+
+	responseRecorderGet := httptest.NewRecorder()
+
+	memStorage := memstorage.NewMemStorage()
+	hashServer := hashservicer.NewHashServer("secretKey")
+
+	configServer := configserver.ConfigServer{
+		Address:         "localhost:8080",
+		AddressPProfile: "localhost:8088",
+		Restore:         true,
+		StoreInterval:   300 * time.Second,
+		DebugLevel:      logrus.DebugLevel,
+		StoreFile:       "/tmp/devops-metrics-db.json",
+		Key:             "",
+		DSN:             "",
+		MigrationsPath:  "file://./migrations",
+	}
+
+	srv := NewHandler(memStorage, nil, &configServer, nil, hashServer)
+
+	router := chi.NewRouter()
+	router.Get("/value/{type}/{name}", srv.GetMetricURLParamsHandler)
+
+	var statusExpect = http.StatusNotFound
+	var contentTypeExpect = "text/plain; charset=utf-8"
+
+	router.ServeHTTP(responseRecorderGet, httptest.NewRequest("GET", "/value/counter/testMetric", nil))
+	statusGet := responseRecorderGet.Code
+	contentTypeGet := responseRecorderGet.Header().Get("Content-Type")
+
+	assert.Equal(t, statusExpect, statusGet, fmt.Sprintf("Incorrect status code. Expect %d, got %d", statusExpect, statusGet))
+	assert.Equal(t, contentTypeExpect, contentTypeGet, fmt.Sprintf("Incorrect Content-Type. Expect %s, got %s", contentTypeExpect, contentTypeGet))
+}
+
+func TestHandler_GetMetricURLParamsNotExistGaugeHandler(t *testing.T) {
+
+	responseRecorderGet := httptest.NewRecorder()
 
 	memStorage := memstorage.NewMemStorage()
 	hashServer := hashservicer.NewHashServer("secretKey")
@@ -105,83 +153,15 @@ func TestHandler_CreateMetricURLParamsGaugeValueIncorrectHandler(t *testing.T) {
 
 	router := chi.NewRouter()
 	router.Post("/update/{type}/{name}/{value}", srv.CreateMetricURLParamsHandler)
+	router.Get("/value/{type}/{name}", srv.GetMetricURLParamsHandler)
 
-	var valueIncorrect = "bugaga"
-	var statusExpect = http.StatusBadRequest
+	var statusExpect = http.StatusNotFound
+	var contentTypeExpect = "text/plain; charset=utf-8"
 
-	router.ServeHTTP(responseRecorder, httptest.NewRequest("POST", "/update/gauge/testMetric/"+valueIncorrect, nil))
-	statusGet := responseRecorder.Code
-
-	assert.Equal(t, statusExpect, statusGet, fmt.Sprintf("Incorrect status code. Expect %d, got %d", statusExpect, statusGet))
-}
-
-func TestHandler_CreateMetricURLParamsCountValueIncorrectHandler(t *testing.T) {
-	responseRecorder := httptest.NewRecorder()
-
-	memStorage := memstorage.NewMemStorage()
-	hashServer := hashservicer.NewHashServer("secretKey")
-
-	configServer := configserver.ConfigServer{
-		Address:         "localhost:8080",
-		AddressPProfile: "localhost:8088",
-		Restore:         true,
-		StoreInterval:   300 * time.Second,
-		DebugLevel:      logrus.DebugLevel,
-		StoreFile:       "/tmp/devops-metrics-db.json",
-		Key:             "",
-		DSN:             "",
-		MigrationsPath:  "file://./migrations",
-	}
-
-	srv := NewHandler(memStorage, nil, &configServer, nil, hashServer)
-
-	router := chi.NewRouter()
-	router.Post("/update/{type}/{name}/{value}", srv.CreateMetricURLParamsHandler)
-
-	var valueIncorrect = "bugaga"
-	var statusExpect = http.StatusBadRequest
-
-	router.ServeHTTP(responseRecorder, httptest.NewRequest("POST", "/update/counter/testMetric/"+valueIncorrect, nil))
-	statusGet := responseRecorder.Code
+	router.ServeHTTP(responseRecorderGet, httptest.NewRequest("GET", "/value/gauge/testMetric", nil))
+	statusGet := responseRecorderGet.Code
+	contentTypeGet := responseRecorderGet.Header().Get("Content-Type")
 
 	assert.Equal(t, statusExpect, statusGet, fmt.Sprintf("Incorrect status code. Expect %d, got %d", statusExpect, statusGet))
-}
-
-func TestHandler_CreateMetricURLParamsCountSumHandler(t *testing.T) {
-	responseRecorderPostFirst := httptest.NewRecorder()
-	responseRecorderPostSecond := httptest.NewRecorder()
-
-	memStorage := memstorage.NewMemStorage()
-	hashServer := hashservicer.NewHashServer("secretKey")
-
-	configServer := configserver.ConfigServer{
-		Address:         "localhost:8080",
-		AddressPProfile: "localhost:8088",
-		Restore:         true,
-		StoreInterval:   300 * time.Second,
-		DebugLevel:      logrus.DebugLevel,
-		StoreFile:       "/tmp/devops-metrics-db.json",
-		Key:             "",
-		DSN:             "",
-		MigrationsPath:  "file://./migrations",
-	}
-
-	srv := NewHandler(memStorage, nil, &configServer, nil, hashServer)
-
-	router := chi.NewRouter()
-	router.Post("/update/{type}/{name}/{value}", srv.CreateMetricURLParamsHandler)
-
-	rand.Seed(time.Now().UnixNano())
-	var value = 1234567890
-	var statusExpect = http.StatusOK
-
-	router.ServeHTTP(responseRecorderPostFirst, httptest.NewRequest("POST", "/update/counter/testMetric/"+fmt.Sprint(value), nil))
-	router.ServeHTTP(responseRecorderPostSecond, httptest.NewRequest("POST", "/update/counter/testMetric/"+fmt.Sprint(value), nil))
-	var valueGet = strings.Split(responseRecorderPostSecond.Body.String(), "=")
-	statusGet := responseRecorderPostSecond.Code
-
-	var valueExpect = fmt.Sprint(value + value)
-
-	assert.Equal(t, valueExpect, valueGet[1], fmt.Sprintf("Incorrect body. Expect %s, got %s", valueExpect, valueGet))
-	assert.Equal(t, statusExpect, statusGet, fmt.Sprintf("Incorrect status code. Expect %d, got %d", statusExpect, statusGet))
+	assert.Equal(t, contentTypeExpect, contentTypeGet, fmt.Sprintf("Incorrect Content-Type. Expect %s, got %s", contentTypeExpect, contentTypeGet))
 }

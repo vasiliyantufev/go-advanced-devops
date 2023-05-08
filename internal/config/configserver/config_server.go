@@ -30,6 +30,7 @@ type ConfigServer struct {
 	TemplatePath   string `env:"TEMPLATE_PATH" envDefault:"./web/templates/index.html"`
 	configFile     string `env:"CONFIG"`
 	TrustedSubnet  string `env:"TRUSTED_SUBNET"`
+	GRPC           string `env:"GRPC"`
 }
 
 // NewConfigServer - creates a new instance with the configuration for the server
@@ -56,6 +57,7 @@ func NewConfigServer() *ConfigServer {
 	flag.StringVar(&configServer.DSN, "d", configServer.DSN, "Database configuration")
 	flag.StringVar(&configServer.configFile, "c", configServer.configFile, "Path to config file")
 	flag.StringVar(&configServer.TrustedSubnet, "t", configServer.TrustedSubnet, "CIDR")
+	flag.StringVar(&configServer.GRPC, "g", configServer.GRPC, "GRPC")
 	flag.Parse()
 
 	err := env.Parse(&configServer)
@@ -124,5 +126,8 @@ func mergeConfig(configServer *ConfigServer, fileConfig *ConfigServer) {
 	}
 	if configServer.TrustedSubnet == "" && fileConfig.TrustedSubnet != "" {
 		configServer.TrustedSubnet = fileConfig.TrustedSubnet
+	}
+	if configServer.GRPC == "" && fileConfig.GRPC != "" {
+		configServer.GRPC = fileConfig.GRPC
 	}
 }

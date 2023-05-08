@@ -19,19 +19,16 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	Devops_GetMetric_FullMethodName     = "/api.Devops/GetMetric"
-	Devops_CreateMetric_FullMethodName  = "/api.Devops/CreateMetric"
-	Devops_CreateMetrics_FullMethodName = "/api.Devops/CreateMetrics"
-	Devops_Ping_FullMethodName          = "/api.Devops/Ping"
+	Devops_Ping_FullMethodName = "/api.Devops/Ping"
 )
 
 // DevopsClient is the client API for Devops service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type DevopsClient interface {
-	GetMetric(ctx context.Context, in *GetMetricRequest, opts ...grpc.CallOption) (*GetMetricResponse, error)
-	CreateMetric(ctx context.Context, in *CreateMetricRequest, opts ...grpc.CallOption) (*CreateMetricResponse, error)
-	CreateMetrics(ctx context.Context, in *CreateMetricsRequest, opts ...grpc.CallOption) (*CreateMetricsResponse, error)
+	//  rpc GetMetric(GetMetricRequest) returns (GetMetricResponse) {}
+	//  rpc CreateMetric(CreateMetricRequest) returns (CreateMetricResponse) {}
+	//  rpc CreateMetrics(CreateMetricsRequest) returns (CreateMetricsResponse) {}
 	Ping(ctx context.Context, in *PingRequest, opts ...grpc.CallOption) (*PingResponse, error)
 }
 
@@ -41,33 +38,6 @@ type devopsClient struct {
 
 func NewDevopsClient(cc grpc.ClientConnInterface) DevopsClient {
 	return &devopsClient{cc}
-}
-
-func (c *devopsClient) GetMetric(ctx context.Context, in *GetMetricRequest, opts ...grpc.CallOption) (*GetMetricResponse, error) {
-	out := new(GetMetricResponse)
-	err := c.cc.Invoke(ctx, Devops_GetMetric_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *devopsClient) CreateMetric(ctx context.Context, in *CreateMetricRequest, opts ...grpc.CallOption) (*CreateMetricResponse, error) {
-	out := new(CreateMetricResponse)
-	err := c.cc.Invoke(ctx, Devops_CreateMetric_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *devopsClient) CreateMetrics(ctx context.Context, in *CreateMetricsRequest, opts ...grpc.CallOption) (*CreateMetricsResponse, error) {
-	out := new(CreateMetricsResponse)
-	err := c.cc.Invoke(ctx, Devops_CreateMetrics_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
 }
 
 func (c *devopsClient) Ping(ctx context.Context, in *PingRequest, opts ...grpc.CallOption) (*PingResponse, error) {
@@ -83,9 +53,9 @@ func (c *devopsClient) Ping(ctx context.Context, in *PingRequest, opts ...grpc.C
 // All implementations must embed UnimplementedDevopsServer
 // for forward compatibility
 type DevopsServer interface {
-	GetMetric(context.Context, *GetMetricRequest) (*GetMetricResponse, error)
-	CreateMetric(context.Context, *CreateMetricRequest) (*CreateMetricResponse, error)
-	CreateMetrics(context.Context, *CreateMetricsRequest) (*CreateMetricsResponse, error)
+	//  rpc GetMetric(GetMetricRequest) returns (GetMetricResponse) {}
+	//  rpc CreateMetric(CreateMetricRequest) returns (CreateMetricResponse) {}
+	//  rpc CreateMetrics(CreateMetricsRequest) returns (CreateMetricsResponse) {}
 	Ping(context.Context, *PingRequest) (*PingResponse, error)
 	mustEmbedUnimplementedDevopsServer()
 }
@@ -94,15 +64,6 @@ type DevopsServer interface {
 type UnimplementedDevopsServer struct {
 }
 
-func (UnimplementedDevopsServer) GetMetric(context.Context, *GetMetricRequest) (*GetMetricResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetMetric not implemented")
-}
-func (UnimplementedDevopsServer) CreateMetric(context.Context, *CreateMetricRequest) (*CreateMetricResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateMetric not implemented")
-}
-func (UnimplementedDevopsServer) CreateMetrics(context.Context, *CreateMetricsRequest) (*CreateMetricsResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateMetrics not implemented")
-}
 func (UnimplementedDevopsServer) Ping(context.Context, *PingRequest) (*PingResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Ping not implemented")
 }
@@ -117,60 +78,6 @@ type UnsafeDevopsServer interface {
 
 func RegisterDevopsServer(s grpc.ServiceRegistrar, srv DevopsServer) {
 	s.RegisterService(&Devops_ServiceDesc, srv)
-}
-
-func _Devops_GetMetric_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetMetricRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(DevopsServer).GetMetric(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Devops_GetMetric_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DevopsServer).GetMetric(ctx, req.(*GetMetricRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Devops_CreateMetric_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreateMetricRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(DevopsServer).CreateMetric(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Devops_CreateMetric_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DevopsServer).CreateMetric(ctx, req.(*CreateMetricRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Devops_CreateMetrics_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreateMetricsRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(DevopsServer).CreateMetrics(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Devops_CreateMetrics_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DevopsServer).CreateMetrics(ctx, req.(*CreateMetricsRequest))
-	}
-	return interceptor(ctx, in, info, handler)
 }
 
 func _Devops_Ping_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -198,18 +105,6 @@ var Devops_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "api.Devops",
 	HandlerType: (*DevopsServer)(nil),
 	Methods: []grpc.MethodDesc{
-		{
-			MethodName: "GetMetric",
-			Handler:    _Devops_GetMetric_Handler,
-		},
-		{
-			MethodName: "CreateMetric",
-			Handler:    _Devops_CreateMetric_Handler,
-		},
-		{
-			MethodName: "CreateMetrics",
-			Handler:    _Devops_CreateMetrics_Handler,
-		},
 		{
 			MethodName: "Ping",
 			Handler:    _Devops_Ping_Handler,

@@ -4,12 +4,12 @@ import (
 	"net/http/pprof"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/vasiliyantufev/go-advanced-devops/internal/api/server/handlers"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/api/server/handlers/rest"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/api/server/middlewares"
 )
 
 // RoutePProf pprof - setting pprof routes
-func RoutePProf(s *handlers.Handler) *chi.Mux {
+func RoutePProf(s *rest.Handler) *chi.Mux {
 	r := chi.NewRouter()
 
 	r.Use(middlewares.GzipMiddleware)
