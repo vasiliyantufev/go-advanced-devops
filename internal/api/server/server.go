@@ -14,7 +14,7 @@ import (
 	//"google.golang.org/grpc"
 )
 
-// StartRestService - starts the rest devops server
+// StartRestService - starts the REST devops server
 func StartRestService(r *chi.Mux, config *configserver.ConfigServer) {
 	if config.CryptoKey != "" && config.Certificate != "" {
 		log.Infof("Starting tls application %v\n", config.Address)
@@ -39,7 +39,6 @@ func StartPProfile(r *chi.Mux, config *configserver.ConfigServer) {
 
 // StartGRPCService - starts the gRPC devops server
 func StartGRPCService(grpcHandler *grpcHandler.Handler, config *configserver.ConfigServer) {
-
 	log.Infof("Starting gRPC application %v\n", config.GRPC)
 
 	grpcServer := grpc.NewServer()

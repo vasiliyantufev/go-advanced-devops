@@ -2,6 +2,8 @@
 package grpchandler
 
 import (
+	"context"
+
 	"github.com/vasiliyantufev/go-advanced-devops/internal/api/hashservicer"
 	grpcDevops "github.com/vasiliyantufev/go-advanced-devops/internal/api/proto"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/config/configserver"
@@ -19,12 +21,17 @@ type Handler struct {
 	grpcDevops.UnimplementedDevopsServer
 }
 
-// NewHandler - creates a new server instance
+// NewHandler - creates a new grpc server instance
 func NewHandler(
-	/**/ mem *memstorage.MemStorage,
+	mem *memstorage.MemStorage,
 	file *filestorage.FileStorage,
 	cfg *configserver.ConfigServer,
 	db *database.DB,
 	hash *hashservicer.HashServer) *Handler {
 	return &Handler{memStorage: mem, fileStorage: file, config: cfg, database: db, hashServer: hash /**/}
+}
+
+// Ping checks is alive db or not.
+func (h *Handler) Ping(ctx context.Context, req *grpcDevops.PingRequest) (*grpcDevops.PingResponse, error) {
+	return &grpcDevops.PingResponse{}, nil
 }

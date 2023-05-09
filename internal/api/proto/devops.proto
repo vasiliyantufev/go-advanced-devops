@@ -12,7 +12,7 @@ service Devops {
 }
 
 message PingRequest {}
-message PingResponse {}
+message PingResponse { }
 
 //message GetMetricRequest {
 //    string id = 1;
