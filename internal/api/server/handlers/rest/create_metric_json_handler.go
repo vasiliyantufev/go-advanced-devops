@@ -76,7 +76,6 @@ func (s Handler) CreateMetricJSONHandler(w http.ResponseWriter, r *http.Request)
 		rawValue.MType = value.MType
 		rawValue.Delta = &sum
 		rawValue.Hash = hashSumServer
-
 	}
 
 	resp, err = json.Marshal(rawValue)

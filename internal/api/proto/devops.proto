@@ -6,13 +6,23 @@ option go_package = "./devops";
 
 service Devops {
 //  rpc GetMetric(GetMetricRequest) returns (GetMetricResponse) {}
-//  rpc CreateMetric(CreateMetricRequest) returns (CreateMetricResponse) {}
+  rpc CreateMetric(CreateMetricRequest) returns (CreateMetricResponse) {}
 //  rpc CreateMetrics(CreateMetricsRequest) returns (CreateMetricsResponse) {}
   rpc Ping(PingRequest) returns (PingResponse) {}
 }
 
 message PingRequest {}
-message PingResponse { }
+message PingResponse {}
+
+message CreateMetricRequest {
+  string type = 1;
+  string name = 2;
+  string value = 3;
+}
+
+message CreateMetricResponse {
+  string resp = 1;
+}
 
 //message GetMetricRequest {
 //    string id = 1;

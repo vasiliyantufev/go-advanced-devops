@@ -19,6 +19,7 @@ func (s Handler) CreateMetricURLParamsHandler(w http.ResponseWriter, r *http.Req
 	valueMetrics := chi.URLParam(r, "value")
 
 	var resp string
+
 	if typeMetrics == "gauge" {
 		val, err := strconv.ParseFloat(string(valueMetrics), 64)
 		if err != nil {
