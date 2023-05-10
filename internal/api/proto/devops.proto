@@ -5,13 +5,15 @@ package api;
 option go_package = "./devops";
 
 service Devops {
-  rpc GetMetric(GetMetricRequest) returns (GetMetricResponse) {}
-  rpc CreateMetric(CreateMetricRequest) returns (CreateMetricResponse) {}
-  rpc Ping(PingRequest) returns (PingResponse) {}
+  rpc GetMetricHandler(GetMetricRequest) returns (GetMetricResponse) {}
+  rpc CreateMetricHandler(CreateMetricRequest) returns (CreateMetricResponse) {}
+  rpc PingHandler(PingRequest) returns (PingResponse) {}
 }
 
 message PingRequest {}
-message PingResponse {}
+message PingResponse {
+  string resp = 1;
+}
 
 message CreateMetricRequest {
   string type = 1;
