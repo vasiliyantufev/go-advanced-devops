@@ -31,3 +31,8 @@ func NewHandler(mem *memstorage.MemStorage,
 	hash *hashservicer.HashServer) *Handler {
 	return &Handler{memStorage: mem, fileStorage: file, config: cfg, database: db, hashServer: hash}
 }
+
+func (s Handler) GetConfig() *configserver.ConfigServer {
+	return s.config
+
+}

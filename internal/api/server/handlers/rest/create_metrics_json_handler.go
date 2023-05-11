@@ -3,7 +3,6 @@ package rest
 import (
 	"encoding/json"
 	"io"
-	"net"
 	"net/http"
 
 	log "github.com/sirupsen/logrus"
@@ -14,23 +13,6 @@ import (
 
 // CreateMetricsJSONHandler - create metrics using json
 func (s Handler) CreateMetricsJSONHandler(w http.ResponseWriter, r *http.Request) {
-
-	if s.config.TrustedSubnet != "" {
-		// look at the X-Real-IP request header
-		IPAddressAgent := net.ParseIP(r.Header.Get("X-Real-IP"))
-		_, subnet, err := net.ParseCIDR(s.config.TrustedSubnet)
-		if err != nil {
-			log.Error(err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		if !subnet.Contains(IPAddressAgent) {
-			log.Error(errors.ErrAddressNotTrustedSubnet)
-			http.Error(w, errors.ErrAddressNotTrustedSubnet.Error(), http.StatusForbidden)
-			return
-		}
-	}
 
 	resp, err := io.ReadAll(r.Body)
 	if err != nil {

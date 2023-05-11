@@ -58,21 +58,19 @@ func main() {
 		log.Error(err)
 	}
 	defer fileStorage.Close()
-
-	srvRest := restHandler.NewHandler(memStorage, fileStorage, configServer, db, hashServer)
-
 	fileStorage.RestoreMetricsFromFile(memStorage)
 
-	routerService := routers.Route(srvRest)
+	ctx, cnl := signal.NotifyContext(context.Background(), syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
+	defer cnl()
+
+	srvRest := restHandler.NewHandler(memStorage, fileStorage, configServer, db, hashServer)
+	routerService := routers.Route(ctx, srvRest)
 	rs := chi.NewRouter()
 	rs.Mount("/", routerService)
 
 	routerPProfile := routers.RoutePProf(srvRest)
 	rp := chi.NewRouter()
 	rp.Mount("/", routerPProfile)
-
-	ctx, cnl := signal.NotifyContext(context.Background(), syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
-	defer cnl()
 
 	if configServer.GRPC != "" {
 		handlerGrpc := grpcHandler.NewHandler(memStorage, fileStorage, configServer, db, hashServer)
