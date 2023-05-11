@@ -2,7 +2,6 @@
 package routers
 
 import (
-	"context"
 	"net"
 
 	"github.com/go-chi/chi/v5"
@@ -12,7 +11,7 @@ import (
 )
 
 // Route - setting service routes
-func Route(ctx context.Context, s *rest.Handler) *chi.Mux {
+func Route(s *rest.Handler) *chi.Mux {
 	r := chi.NewRouter()
 
 	//r.Use(middleware.Compress(1, "application/json", "text/html"))
