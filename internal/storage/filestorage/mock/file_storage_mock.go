@@ -8,7 +8,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	models "github.com/vasiliyantufev/go-advanced-devops/internal/models"
+	models "github.com/vasiliyantufev/go-advanced-devops/internal/model"
 	memstorage "github.com/vasiliyantufev/go-advanced-devops/internal/storage/memstorage"
 )
 
