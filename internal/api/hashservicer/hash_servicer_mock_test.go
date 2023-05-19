@@ -6,7 +6,9 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	mock_hs "github.com/vasiliyantufev/go-advanced-devops/internal/api/hashservicer/mock"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/api/helper"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/converter"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/model"
 )
 
 func TestIsEnabledMock(t *testing.T) {

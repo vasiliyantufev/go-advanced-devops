@@ -5,6 +5,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/converter"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/model"
 )
 
 var key = "secretKey"
