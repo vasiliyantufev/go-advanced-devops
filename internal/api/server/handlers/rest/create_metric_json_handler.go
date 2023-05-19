@@ -15,14 +15,14 @@ import (
 func (s Handler) CreateMetricJSONHandler(w http.ResponseWriter, r *http.Request) {
 	resp, err := io.ReadAll(r.Body)
 	if err != nil {
-		log.Errorf("invalid request body: %w", err)
+		log.Errorf("invalid request body: %s", err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	value := model.Metric{}
 	if err = json.Unmarshal([]byte(string(resp)), &value); err != nil {
-		log.Errorf("invalid request body: %w", err)
+		log.Errorf("invalid request body: %s", err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -79,7 +79,7 @@ func (s Handler) CreateMetricJSONHandler(w http.ResponseWriter, r *http.Request)
 
 	resp, err = json.Marshal(rawValue)
 	if err != nil {
-		log.Errorf("invalid respounse body: %w", err)
+		log.Errorf("invalid respounse body: %s", err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
 
