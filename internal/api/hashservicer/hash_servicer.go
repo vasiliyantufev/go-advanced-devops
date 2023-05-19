@@ -8,12 +8,12 @@ import (
 	"fmt"
 
 	log "github.com/sirupsen/logrus"
-	"github.com/vasiliyantufev/go-advanced-devops/internal/models"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/model"
 )
 
 type HashServices interface {
-	ValidHashServer(clientMetric models.Metric) bool
-	GenerateHash(metric models.Metric) string
+	ValidHashServer(clientMetric model.Metric) bool
+	GenerateHash(metric model.Metric) string
 	IsEnabled() bool
 }
 
@@ -31,14 +31,14 @@ func (hs HashServer) IsEnabled() bool {
 }
 
 // Compares the hash received from the client with the hash stored on the server
-func (hs HashServer) ValidHashServer(clientMetric models.Metric) bool {
+func (hs HashServer) ValidHashServer(clientMetric model.Metric) bool {
 	if hs.IsEnabled() {
 		return clientMetric.Hash == hs.GenerateHash(clientMetric)
 	}
 	return true
 }
 
-func (hs HashServer) GenerateHash(metric models.Metric) string {
+func (hs HashServer) GenerateHash(metric model.Metric) string {
 	var data string
 	switch metric.MType {
 	case "counter":

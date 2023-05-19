@@ -9,11 +9,6 @@ import (
 	"github.com/vasiliyantufev/go-advanced-devops/internal/storage/memstorage"
 )
 
-type DBS interface {
-	Ping() error
-	InsertOrUpdateMetrics(metrics *memstorage.MemStorage) error
-}
-
 type Handler struct {
 	memStorage  *memstorage.MemStorage
 	fileStorage *filestorage.FileStorage

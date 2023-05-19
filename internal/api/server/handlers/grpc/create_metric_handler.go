@@ -6,10 +6,10 @@ import (
 	"strconv"
 
 	log "github.com/sirupsen/logrus"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/model"
 
 	grpcDevops "github.com/vasiliyantufev/go-advanced-devops/internal/api/proto"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/converter"
-	"github.com/vasiliyantufev/go-advanced-devops/internal/models"
 )
 
 // CreateMetricHandler - create metric
@@ -20,7 +20,7 @@ func (h *Handler) CreateMetricHandler(ctx context.Context, req *grpcDevops.Creat
 		if err != nil {
 			log.Fatal("The query parameter value " + req.Value + " is incorrect")
 		}
-		hashServer := h.hashServer.GenerateHash(models.Metric{ID: req.Name, MType: "gauge", Delta: nil, Value: converter.Float64ToFloat64Pointer(val)})
+		hashServer := h.hashServer.GenerateHash(model.Metric{ID: req.Name, MType: "gauge", Delta: nil, Value: converter.Float64ToFloat64Pointer(val)})
 		h.memStorage.PutMetricsGauge(req.Name, val, hashServer)
 		resp = "Request completed successfully " + req.Name + "=" + fmt.Sprint(val)
 	}
@@ -35,7 +35,7 @@ func (h *Handler) CreateMetricHandler(ctx context.Context, req *grpcDevops.Creat
 		} else {
 			sum = val
 		}
-		hashServer := h.hashServer.GenerateHash(models.Metric{ID: req.Name, MType: "counter", Delta: converter.Int64ToInt64Pointer(val), Value: nil})
+		hashServer := h.hashServer.GenerateHash(model.Metric{ID: req.Name, MType: "counter", Delta: converter.Int64ToInt64Pointer(val), Value: nil})
 		h.memStorage.PutMetricsCount(req.Name, sum, hashServer)
 		resp = "Request completed successfully " + req.Name + "=" + fmt.Sprint(sum)
 	}

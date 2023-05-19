@@ -7,9 +7,9 @@ import (
 
 	"github.com/vasiliyantufev/go-advanced-devops/internal/api/agent"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/api/hashservicer"
-	"github.com/vasiliyantufev/go-advanced-devops/internal/api/helpers"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/api/helper"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/config/configagent"
-	"github.com/vasiliyantufev/go-advanced-devops/internal/models"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/model"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/storage/memstorage"
 
 	log "github.com/sirupsen/logrus"
@@ -22,7 +22,7 @@ var (
 )
 
 func main() {
-	helpers.PrintInfo(buildVersion, buildDate, buildCommit)
+	helper.PrintInfo(buildVersion, buildDate, buildCommit)
 
 	configAgent := configagent.NewConfigAgent()
 	memAgent := memstorage.NewMemStorage()
@@ -32,7 +32,7 @@ func main() {
 	ctx, cnl := signal.NotifyContext(context.Background(), syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
 	defer cnl()
 
-	jobs := make(chan []models.Metric, configAgent.RateLimit)
+	jobs := make(chan []model.Metric, configAgent.RateLimit)
 	defer close(jobs)
 
 	agent := agent.NewAgent(jobs, memAgent, memAgentPsutil, configAgent, hashServer)

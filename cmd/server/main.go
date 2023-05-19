@@ -15,7 +15,7 @@ import (
 	"syscall"
 
 	"github.com/vasiliyantufev/go-advanced-devops/internal/api/hashservicer"
-	"github.com/vasiliyantufev/go-advanced-devops/internal/api/helpers"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/api/helper"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/api/server"
 
 	grpcHandler "github.com/vasiliyantufev/go-advanced-devops/internal/api/server/handlers/grpc"
@@ -38,7 +38,7 @@ var (
 )
 
 func main() {
-	helpers.PrintInfo(buildVersion, buildDate, buildCommit)
+	helper.PrintInfo(buildVersion, buildDate, buildCommit)
 
 	configServer := configserver.NewConfigServer()
 

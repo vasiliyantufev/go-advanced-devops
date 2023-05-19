@@ -6,27 +6,26 @@ import (
 	"net/http"
 
 	log "github.com/sirupsen/logrus"
-	"github.com/vasiliyantufev/go-advanced-devops/internal/models"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/model"
 )
 
 // GetValueMetricJSONHandler - getting metric value using json
 func (s Handler) GetValueMetricJSONHandler(w http.ResponseWriter, r *http.Request) {
-
 	resp, err := io.ReadAll(r.Body)
 	if err != nil {
-		log.Error(err.Error())
+		log.Errorf("invalid request body: %w", err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	value := models.Metric{}
+	value := model.Metric{}
 	if err = json.Unmarshal([]byte(string(resp)), &value); err != nil {
-		log.Error(err.Error())
+		log.Errorf("invalid request body: %w", err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	rawValue := models.Metric{
+	rawValue := model.Metric{
 		ID:    value.ID,
 		MType: value.MType,
 	}
@@ -54,7 +53,7 @@ func (s Handler) GetValueMetricJSONHandler(w http.ResponseWriter, r *http.Reques
 	log.Infoln("VALUE METRIC RESPONSE", rawValue)
 	resp, err = json.Marshal(rawValue)
 	if err != nil {
-		log.Error(err.Error())
+		log.Errorf("invalid respounse body: %w", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

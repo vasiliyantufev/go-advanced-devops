@@ -15,7 +15,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/api/hashservicer"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/config/configserver"
-	"github.com/vasiliyantufev/go-advanced-devops/internal/models"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/model"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/storage/memstorage"
 )
 
@@ -37,13 +37,6 @@ func TestHandler_CreateMetricJSONGaugeHandler(t *testing.T) {
 		MigrationsPath:  "file://./migrations",
 	}
 
-	//ctrl := gomock.NewController(t)
-	//defer ctrl.Finish()
-
-	//DBMOCK := mock_database.NewMockDBS(ctrl)
-	//DBMOCK.EXPECT().InsertOrUpdateMetrics(memStorage).Return(nil)
-
-	//srv := NewHandler(memStorage, nil, &configServer, DBMOCK, hashServer)
 	srv := NewHandler(memStorage, nil, &configServer, nil, hashServer)
 
 	router := chi.NewRouter()
@@ -53,7 +46,7 @@ func TestHandler_CreateMetricJSONGaugeHandler(t *testing.T) {
 	var value = rand.Float64()
 
 	var statusExpect = http.StatusOK
-	var metricExt = models.Metric{
+	var metricExt = model.Metric{
 		ID:    "alloc",
 		MType: "gauge",
 		Value: &value,
@@ -65,7 +58,7 @@ func TestHandler_CreateMetricJSONGaugeHandler(t *testing.T) {
 
 	router.ServeHTTP(responseRecorder, httptest.NewRequest(http.MethodPost, "/update", bytes.NewBuffer(reqBody)))
 	statusGet := responseRecorder.Code
-	metricGet := models.Metric{}
+	metricGet := model.Metric{}
 	err = json.Unmarshal([]byte(responseRecorder.Body.Bytes()), &metricGet)
 	if err != nil {
 		logrus.Error(err)
@@ -104,7 +97,7 @@ func TestHandler_CreateMetricJSONCountHandler(t *testing.T) {
 	rand.Seed(time.Now().UnixNano())
 	var value = rand.Int63()
 	var statusExpect = http.StatusOK
-	var metricExt = models.Metric{
+	var metricExt = model.Metric{
 		ID:    "alloc",
 		MType: "count",
 		Delta: &value,
@@ -116,7 +109,7 @@ func TestHandler_CreateMetricJSONCountHandler(t *testing.T) {
 
 	router.ServeHTTP(responseRecorder, httptest.NewRequest(http.MethodPost, "/update", bytes.NewBuffer(reqBody)))
 	statusGet := responseRecorder.Code
-	metricGet := models.Metric{}
+	metricGet := model.Metric{}
 	err = json.Unmarshal([]byte(responseRecorder.Body.Bytes()), &metricGet)
 	if err != nil {
 		logrus.Error(err)
@@ -156,7 +149,7 @@ func TestHandler_CreateMetricJSONGaugeKeyIncorrectHandler(t *testing.T) {
 	var value = rand.Float64()
 
 	var statusExpect = http.StatusBadRequest
-	var metricExt = models.Metric{
+	var metricExt = model.Metric{
 		ID:    "alloc",
 		MType: "gauge",
 		Value: &value,
@@ -199,7 +192,7 @@ func TestHandler_CreateMetricJSONCountKeyIncorrectHandler(t *testing.T) {
 	rand.Seed(time.Now().UnixNano())
 	var value = rand.Int63()
 	var statusExpect = http.StatusBadRequest
-	var metricExt = models.Metric{
+	var metricExt = model.Metric{
 		ID:    "alloc",
 		MType: "count",
 		Delta: &value,
@@ -242,7 +235,7 @@ func TestHandler_CreateMetricJSONCountSumHandler(t *testing.T) {
 	rand.Seed(time.Now().UnixNano())
 	var value int64 = 1234567890
 	var statusExpect = http.StatusOK
-	var metricExt = models.Metric{
+	var metricExt = model.Metric{
 		ID:    "alloc",
 		MType: "count",
 		Delta: &value,
@@ -255,7 +248,7 @@ func TestHandler_CreateMetricJSONCountSumHandler(t *testing.T) {
 	router.ServeHTTP(responseRecorderPostFirst, httptest.NewRequest(http.MethodPost, "/update", bytes.NewBuffer(reqBody)))
 	router.ServeHTTP(responseRecorderPostSecond, httptest.NewRequest(http.MethodPost, "/update", bytes.NewBuffer(reqBody)))
 	statusGet := responseRecorderPostSecond.Code
-	metricGet := models.Metric{}
+	metricGet := model.Metric{}
 	err = json.Unmarshal([]byte(responseRecorderPostSecond.Body.Bytes()), &metricGet)
 	if err != nil {
 		logrus.Error(err)

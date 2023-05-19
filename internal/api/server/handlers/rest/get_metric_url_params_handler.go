@@ -11,7 +11,6 @@ import (
 
 // GetMetricURLParamsHandler - getting metric using url parameters
 func (s Handler) GetMetricURLParamsHandler(w http.ResponseWriter, r *http.Request) {
-
 	typeMetrics := chi.URLParam(r, "type")
 	nameMetrics := chi.URLParam(r, "name")
 

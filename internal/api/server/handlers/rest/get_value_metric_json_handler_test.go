@@ -16,7 +16,7 @@ import (
 	"github.com/vasiliyantufev/go-advanced-devops/internal/api/hashservicer"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/config/configserver"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/converter"
-	"github.com/vasiliyantufev/go-advanced-devops/internal/models"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/model"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/storage/memstorage"
 )
 
@@ -47,12 +47,12 @@ func TestHandler_GetValueGaugeMetricJSONHandler(t *testing.T) {
 	var value = rand.Float64()
 	var statusExpect = http.StatusOK
 	var contentTypeExpect = "application/json"
-	var metricGauge = models.Metric{
+	var metricGauge = model.Metric{
 		ID:    "alloc1",
 		MType: "gauge",
 		Value: &value,
 	}
-	srv.memStorage.PutMetricsGauge(metricGauge.ID, *metricGauge.Value, hashServer.GenerateHash(models.Metric{ID: metricGauge.ID, MType: metricGauge.MType, Delta: nil, Value: converter.Float64ToFloat64Pointer(*metricGauge.Value)}))
+	srv.memStorage.PutMetricsGauge(metricGauge.ID, *metricGauge.Value, hashServer.GenerateHash(model.Metric{ID: metricGauge.ID, MType: metricGauge.MType, Delta: nil, Value: converter.Float64ToFloat64Pointer(*metricGauge.Value)}))
 
 	reqBody, err := json.Marshal(metricGauge)
 	if err != nil {
@@ -94,12 +94,12 @@ func TestHandler_GetValueCountMetricJSONHandler(t *testing.T) {
 	var delta = rand.Int63()
 	var statusExpect = http.StatusOK
 	var contentTypeExpect = "application/json"
-	var metricCount = models.Metric{
+	var metricCount = model.Metric{
 		ID:    "alloc2",
 		MType: "counter",
 		Delta: &delta,
 	}
-	srv.memStorage.PutMetricsCount(metricCount.ID, *metricCount.Delta, hashServer.GenerateHash(models.Metric{ID: metricCount.ID, MType: metricCount.MType, Delta: converter.Int64ToInt64Pointer(*metricCount.Delta), Value: nil}))
+	srv.memStorage.PutMetricsCount(metricCount.ID, *metricCount.Delta, hashServer.GenerateHash(model.Metric{ID: metricCount.ID, MType: metricCount.MType, Delta: converter.Int64ToInt64Pointer(*metricCount.Delta), Value: nil}))
 
 	reqBody, err := json.Marshal(metricCount)
 	if err != nil {
@@ -140,7 +140,7 @@ func TestHandler_GetValueGaugeNoExistsMetricJSONHandler(t *testing.T) {
 	rand.Seed(time.Now().UnixNano())
 	var value = rand.Float64()
 	var statusExpect = http.StatusNotFound
-	var metricGauge = models.Metric{
+	var metricGauge = model.Metric{
 		ID:    "alloc1",
 		MType: "gauge",
 		Value: &value,
@@ -183,7 +183,7 @@ func TestHandler_GetValueCountNoExistsMetricJSONHandler(t *testing.T) {
 	rand.Seed(time.Now().UnixNano())
 	var delta = rand.Int63()
 	var statusExpect = http.StatusNotFound
-	var metricCount = models.Metric{
+	var metricCount = model.Metric{
 		ID:    "alloc2",
 		MType: "counter",
 		Delta: &delta,

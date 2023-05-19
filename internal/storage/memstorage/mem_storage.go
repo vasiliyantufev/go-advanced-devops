@@ -4,7 +4,7 @@ package memstorage
 import (
 	"sync"
 
-	"github.com/vasiliyantufev/go-advanced-devops/internal/models"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/model"
 )
 
 type MemStorages interface {
@@ -12,19 +12,19 @@ type MemStorages interface {
 	GetMetricsGauge(id string) (o float64, h string, b bool)
 	PutMetricsCount(id string, o int64, h string)
 	GetMetricsCount(id string) (o int64, h string, b bool)
-	GetAllMetrics() []models.Metric
+	GetAllMetrics() []model.Metric
 }
 
 type MemStorage struct {
 	mx   *sync.RWMutex
-	data map[string]models.Metric
+	data map[string]model.Metric
 }
 
 // NewMemStorage - creates a new store instance
 func NewMemStorage() *MemStorage {
 	return &MemStorage{
 		mx:   new(sync.RWMutex),
-		data: make(map[string]models.Metric),
+		data: make(map[string]model.Metric),
 	}
 }
 
@@ -32,7 +32,7 @@ func NewMemStorage() *MemStorage {
 func (data *MemStorage) PutMetricsGauge(id string, o float64, h string) {
 	data.mx.Lock()
 	defer data.mx.Unlock()
-	data.data[id] = models.Metric{
+	data.data[id] = model.Metric{
 		ID:    id,
 		MType: "gauge",
 		Delta: nil,
@@ -56,7 +56,7 @@ func (data *MemStorage) GetMetricsGauge(id string) (o float64, h string, b bool)
 func (data *MemStorage) PutMetricsCount(id string, o int64, h string) {
 	data.mx.Lock()
 	defer data.mx.Unlock()
-	data.data[id] = models.Metric{
+	data.data[id] = model.Metric{
 		ID:    id,
 		MType: "counter",
 		Delta: &o,
@@ -77,10 +77,10 @@ func (data *MemStorage) GetMetricsCount(id string) (o int64, h string, b bool) {
 }
 
 // GetAllMetrics - gets all metrics from storage
-func (data *MemStorage) GetAllMetrics() []models.Metric {
+func (data *MemStorage) GetAllMetrics() []model.Metric {
 	data.mx.RLock()
 	defer data.mx.RUnlock()
-	result := make([]models.Metric, 0)
+	result := make([]model.Metric, 0)
 	for _, metric := range data.data {
 		result = append(result, metric)
 	}

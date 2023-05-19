@@ -1,5 +1,5 @@
 // model - jsonmetric
-package models
+package model
 
 import (
 	"fmt"
