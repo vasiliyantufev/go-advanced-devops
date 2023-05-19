@@ -1,4 +1,4 @@
-package handlers
+package rest
 
 import (
 	"fmt"
@@ -18,7 +18,6 @@ import (
 )
 
 func TestHandler_GetMetricURLParamsCounterHandler(t *testing.T) {
-
 	responseRecorderPost := httptest.NewRecorder()
 	responseRecorderGet := httptest.NewRecorder()
 
@@ -57,7 +56,6 @@ func TestHandler_GetMetricURLParamsCounterHandler(t *testing.T) {
 }
 
 func TestHandler_GetMetricURLParamsGaugeHandler(t *testing.T) {
-
 	responseRecorderPost := httptest.NewRecorder()
 	responseRecorderGet := httptest.NewRecorder()
 
@@ -96,7 +94,6 @@ func TestHandler_GetMetricURLParamsGaugeHandler(t *testing.T) {
 }
 
 func TestHandler_GetMetricURLParamsNotExistCounterHandler(t *testing.T) {
-
 	responseRecorderGet := httptest.NewRecorder()
 
 	memStorage := memstorage.NewMemStorage()
@@ -131,7 +128,6 @@ func TestHandler_GetMetricURLParamsNotExistCounterHandler(t *testing.T) {
 }
 
 func TestHandler_GetMetricURLParamsNotExistGaugeHandler(t *testing.T) {
-
 	responseRecorderGet := httptest.NewRecorder()
 
 	memStorage := memstorage.NewMemStorage()

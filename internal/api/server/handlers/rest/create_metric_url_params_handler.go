@@ -1,4 +1,4 @@
-package handlers
+package rest
 
 import (
 	"fmt"
@@ -8,17 +8,17 @@ import (
 	"github.com/go-chi/chi/v5"
 	log "github.com/sirupsen/logrus"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/converter"
-	"github.com/vasiliyantufev/go-advanced-devops/internal/models"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/model"
 )
 
 // CreateMetricURLParamsHandler - create metric using url parameters
 func (s Handler) CreateMetricURLParamsHandler(w http.ResponseWriter, r *http.Request) {
-
 	typeMetrics := chi.URLParam(r, "type")
 	nameMetrics := chi.URLParam(r, "name")
 	valueMetrics := chi.URLParam(r, "value")
 
 	var resp string
+
 	if typeMetrics == "gauge" {
 		val, err := strconv.ParseFloat(string(valueMetrics), 64)
 		if err != nil {
@@ -26,7 +26,7 @@ func (s Handler) CreateMetricURLParamsHandler(w http.ResponseWriter, r *http.Req
 			http.Error(w, "The query parameter value "+valueMetrics+" is incorrect", http.StatusBadRequest)
 			return
 		}
-		hashServer := s.hashServer.GenerateHash(models.Metric{ID: nameMetrics, MType: "gauge", Delta: nil, Value: converter.Float64ToFloat64Pointer(val)})
+		hashServer := s.hashServer.GenerateHash(model.Metric{ID: nameMetrics, MType: "gauge", Delta: nil, Value: converter.Float64ToFloat64Pointer(val)})
 		s.memStorage.PutMetricsGauge(nameMetrics, val, hashServer)
 		resp = "Request completed successfully " + nameMetrics + "=" + fmt.Sprint(val)
 	}
@@ -43,7 +43,7 @@ func (s Handler) CreateMetricURLParamsHandler(w http.ResponseWriter, r *http.Req
 		} else {
 			sum = val
 		}
-		hashServer := s.hashServer.GenerateHash(models.Metric{ID: nameMetrics, MType: "counter", Delta: converter.Int64ToInt64Pointer(val), Value: nil})
+		hashServer := s.hashServer.GenerateHash(model.Metric{ID: nameMetrics, MType: "counter", Delta: converter.Int64ToInt64Pointer(val), Value: nil})
 		s.memStorage.PutMetricsCount(nameMetrics, sum, hashServer)
 		resp = "Request completed successfully " + nameMetrics + "=" + fmt.Sprint(sum)
 	}

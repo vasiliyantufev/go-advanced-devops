@@ -17,13 +17,6 @@ import (
 	_ "github.com/lib/pq"
 )
 
-type DBS interface {
-	Ping() error
-	Close() error
-	CreateTablesMigration(cfg *configserver.ConfigServer)
-	InsertOrUpdateMetrics(metrics *memstorage.MemStorage) error
-}
-
 type DB struct {
 	pool *sql.DB
 }

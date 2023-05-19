@@ -1,12 +1,11 @@
-package handlers
+package rest
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
 	"math/rand"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 	"time"
 
@@ -15,15 +14,14 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/api/hashservicer"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/config/configserver"
-	"github.com/vasiliyantufev/go-advanced-devops/internal/models"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/storage/memstorage"
 )
 
-func TestHandler_CreateMetricJSONGaugeHandler(t *testing.T) {
+func TestHandler_CreateMetricURLParamsGaugeHandler(t *testing.T) {
 	responseRecorder := httptest.NewRecorder()
 
 	memStorage := memstorage.NewMemStorage()
-	hashServer := hashservicer.NewHashServer("")
+	hashServer := hashservicer.NewHashServer("secretKey")
 
 	configServer := configserver.ConfigServer{
 		Address:         "localhost:8080",
@@ -40,42 +38,23 @@ func TestHandler_CreateMetricJSONGaugeHandler(t *testing.T) {
 	srv := NewHandler(memStorage, nil, &configServer, nil, hashServer)
 
 	router := chi.NewRouter()
-	router.Post("/update", srv.CreateMetricJSONHandler)
+	router.Post("/update/{type}/{name}/{value}", srv.CreateMetricURLParamsHandler)
 
 	rand.Seed(time.Now().UnixNano())
-	var value = rand.Float64()
-
+	var valueExpect = fmt.Sprint(rand.Int())
 	var statusExpect = http.StatusOK
-	var metricExt = models.Metric{
-		ID:    "alloc",
-		MType: "gauge",
-		Value: &value,
-	}
-	reqBody, err := json.Marshal(metricExt)
-	if err != nil {
-		logrus.Error(err)
-	}
 
-	router.ServeHTTP(responseRecorder, httptest.NewRequest(http.MethodPost, "/update", bytes.NewBuffer(reqBody)))
+	router.ServeHTTP(responseRecorder, httptest.NewRequest("POST", "/update/gauge/testMetric/"+fmt.Sprint(valueExpect), nil))
 	statusGet := responseRecorder.Code
-	metricGet := models.Metric{}
-	err = json.Unmarshal([]byte(responseRecorder.Body.Bytes()), &metricGet)
-	if err != nil {
-		logrus.Error(err)
-	}
 
 	assert.Equal(t, statusExpect, statusGet, fmt.Sprintf("Incorrect status code. Expect %d, got %d", statusExpect, statusGet))
-	assert.Equal(t, metricExt.ID, metricGet.ID, fmt.Sprintf("Incorrect ID metric. Expect %s, got %s", metricExt.ID, metricGet.ID))
-	assert.Equal(t, metricExt.MType, metricGet.MType, fmt.Sprintf("Incorrect type metric. Expect %s, got %s", metricExt.MType, metricGet.MType))
-	assert.Equal(t, metricExt.Value, metricGet.Value, fmt.Sprintf("Incorrect value metric. Expect %d, got %d", metricExt.Value, metricGet.Value))
-	assert.True(t, len(metricGet.Hash) > 0, "Empty hash metric")
 }
 
-func TestHandler_CreateMetricJSONCountHandler(t *testing.T) {
+func TestHandler_CreateMetricURLParamsCountHandler(t *testing.T) {
 	responseRecorder := httptest.NewRecorder()
 
 	memStorage := memstorage.NewMemStorage()
-	hashServer := hashservicer.NewHashServer("")
+	hashServer := hashservicer.NewHashServer("secretKey")
 
 	configServer := configserver.ConfigServer{
 		Address:         "localhost:8080",
@@ -92,41 +71,23 @@ func TestHandler_CreateMetricJSONCountHandler(t *testing.T) {
 	srv := NewHandler(memStorage, nil, &configServer, nil, hashServer)
 
 	router := chi.NewRouter()
-	router.Post("/update", srv.CreateMetricJSONHandler)
+	router.Post("/update/{type}/{name}/{value}", srv.CreateMetricURLParamsHandler)
 
 	rand.Seed(time.Now().UnixNano())
-	var value = rand.Int63()
+	var valueExpect = fmt.Sprintf("%.3f", rand.Float64())
 	var statusExpect = http.StatusOK
-	var metricExt = models.Metric{
-		ID:    "alloc",
-		MType: "count",
-		Delta: &value,
-	}
-	reqBody, err := json.Marshal(metricExt)
-	if err != nil {
-		logrus.Error(err)
-	}
 
-	router.ServeHTTP(responseRecorder, httptest.NewRequest(http.MethodPost, "/update", bytes.NewBuffer(reqBody)))
+	router.ServeHTTP(responseRecorder, httptest.NewRequest("POST", "/update/count/testMetric/"+fmt.Sprint(valueExpect), nil))
 	statusGet := responseRecorder.Code
-	metricGet := models.Metric{}
-	err = json.Unmarshal([]byte(responseRecorder.Body.Bytes()), &metricGet)
-	if err != nil {
-		logrus.Error(err)
-	}
 
 	assert.Equal(t, statusExpect, statusGet, fmt.Sprintf("Incorrect status code. Expect %d, got %d", statusExpect, statusGet))
-	assert.Equal(t, metricExt.ID, metricGet.ID, fmt.Sprintf("Incorrect ID metric. Expect %s, got %s", metricExt.ID, metricGet.ID))
-	assert.Equal(t, metricExt.MType, metricGet.MType, fmt.Sprintf("Incorrect type metric. Expect %s, got %s", metricExt.MType, metricGet.MType))
-	assert.Equal(t, metricExt.Value, metricGet.Value, fmt.Sprintf("Incorrect value metric. Expect %d, got %d", metricExt.Value, metricGet.Value))
-	assert.True(t, len(metricGet.Hash) > 0, "Empty hash metric")
 }
 
-func TestHandler_CreateMetricJSONGaugeKeyIncorrectHandler(t *testing.T) {
+func TestHandler_CreateMetricURLParamsGaugeValueIncorrectHandler(t *testing.T) {
 	responseRecorder := httptest.NewRecorder()
 
 	memStorage := memstorage.NewMemStorage()
-	hashServer := hashservicer.NewHashServer("bugagaKey")
+	hashServer := hashservicer.NewHashServer("secretKey")
 
 	configServer := configserver.ConfigServer{
 		Address:         "localhost:8080",
@@ -143,34 +104,22 @@ func TestHandler_CreateMetricJSONGaugeKeyIncorrectHandler(t *testing.T) {
 	srv := NewHandler(memStorage, nil, &configServer, nil, hashServer)
 
 	router := chi.NewRouter()
-	router.Post("/update", srv.CreateMetricJSONHandler)
+	router.Post("/update/{type}/{name}/{value}", srv.CreateMetricURLParamsHandler)
 
-	rand.Seed(time.Now().UnixNano())
-	var value = rand.Float64()
-
+	var valueIncorrect = "bugaga"
 	var statusExpect = http.StatusBadRequest
-	var metricExt = models.Metric{
-		ID:    "alloc",
-		MType: "gauge",
-		Value: &value,
-	}
-	reqBody, err := json.Marshal(metricExt)
-	if err != nil {
-		logrus.Fatal(err)
-	}
 
-	router.ServeHTTP(responseRecorder, httptest.NewRequest(http.MethodPost, "/update", bytes.NewBuffer(reqBody)))
+	router.ServeHTTP(responseRecorder, httptest.NewRequest("POST", "/update/gauge/testMetric/"+valueIncorrect, nil))
 	statusGet := responseRecorder.Code
 
 	assert.Equal(t, statusExpect, statusGet, fmt.Sprintf("Incorrect status code. Expect %d, got %d", statusExpect, statusGet))
-
 }
 
-func TestHandler_CreateMetricJSONCountKeyIncorrectHandler(t *testing.T) {
+func TestHandler_CreateMetricURLParamsCountValueIncorrectHandler(t *testing.T) {
 	responseRecorder := httptest.NewRecorder()
 
 	memStorage := memstorage.NewMemStorage()
-	hashServer := hashservicer.NewHashServer("bugagaKey")
+	hashServer := hashservicer.NewHashServer("secretKey")
 
 	configServer := configserver.ConfigServer{
 		Address:         "localhost:8080",
@@ -187,33 +136,23 @@ func TestHandler_CreateMetricJSONCountKeyIncorrectHandler(t *testing.T) {
 	srv := NewHandler(memStorage, nil, &configServer, nil, hashServer)
 
 	router := chi.NewRouter()
-	router.Post("/update", srv.CreateMetricJSONHandler)
+	router.Post("/update/{type}/{name}/{value}", srv.CreateMetricURLParamsHandler)
 
-	rand.Seed(time.Now().UnixNano())
-	var value = rand.Int63()
+	var valueIncorrect = "bugaga"
 	var statusExpect = http.StatusBadRequest
-	var metricExt = models.Metric{
-		ID:    "alloc",
-		MType: "count",
-		Delta: &value,
-	}
-	reqBody, err := json.Marshal(metricExt)
-	if err != nil {
-		logrus.Fatal(err)
-	}
 
-	router.ServeHTTP(responseRecorder, httptest.NewRequest(http.MethodPost, "/update", bytes.NewBuffer(reqBody)))
+	router.ServeHTTP(responseRecorder, httptest.NewRequest("POST", "/update/counter/testMetric/"+valueIncorrect, nil))
 	statusGet := responseRecorder.Code
 
 	assert.Equal(t, statusExpect, statusGet, fmt.Sprintf("Incorrect status code. Expect %d, got %d", statusExpect, statusGet))
 }
 
-func TestHandler_CreateMetricJSONCountSumHandler(t *testing.T) {
+func TestHandler_CreateMetricURLParamsCountSumHandler(t *testing.T) {
 	responseRecorderPostFirst := httptest.NewRecorder()
 	responseRecorderPostSecond := httptest.NewRecorder()
 
 	memStorage := memstorage.NewMemStorage()
-	hashServer := hashservicer.NewHashServer("")
+	hashServer := hashservicer.NewHashServer("secretKey")
 
 	configServer := configserver.ConfigServer{
 		Address:         "localhost:8080",
@@ -230,32 +169,19 @@ func TestHandler_CreateMetricJSONCountSumHandler(t *testing.T) {
 	srv := NewHandler(memStorage, nil, &configServer, nil, hashServer)
 
 	router := chi.NewRouter()
-	router.Post("/update", srv.CreateMetricJSONHandler)
+	router.Post("/update/{type}/{name}/{value}", srv.CreateMetricURLParamsHandler)
 
 	rand.Seed(time.Now().UnixNano())
-	var value int64 = 1234567890
+	var value = 1234567890
 	var statusExpect = http.StatusOK
-	var metricExt = models.Metric{
-		ID:    "alloc",
-		MType: "count",
-		Delta: &value,
-	}
-	reqBody, err := json.Marshal(metricExt)
-	if err != nil {
-		logrus.Error(err)
-	}
 
-	router.ServeHTTP(responseRecorderPostFirst, httptest.NewRequest(http.MethodPost, "/update", bytes.NewBuffer(reqBody)))
-	router.ServeHTTP(responseRecorderPostSecond, httptest.NewRequest(http.MethodPost, "/update", bytes.NewBuffer(reqBody)))
+	router.ServeHTTP(responseRecorderPostFirst, httptest.NewRequest("POST", "/update/counter/testMetric/"+fmt.Sprint(value), nil))
+	router.ServeHTTP(responseRecorderPostSecond, httptest.NewRequest("POST", "/update/counter/testMetric/"+fmt.Sprint(value), nil))
+	var valueGet = strings.Split(responseRecorderPostSecond.Body.String(), "=")
 	statusGet := responseRecorderPostSecond.Code
-	metricGet := models.Metric{}
-	err = json.Unmarshal([]byte(responseRecorderPostSecond.Body.Bytes()), &metricGet)
-	if err != nil {
-		logrus.Error(err)
-	}
 
-	var valueExpect = value + value
+	var valueExpect = fmt.Sprint(value + value)
 
-	assert.Equal(t, valueExpect, *metricGet.Delta, fmt.Sprintf("Incorrect Delta. Expect %d, got %d", valueExpect, *metricGet.Delta))
+	assert.Equal(t, valueExpect, valueGet[1], fmt.Sprintf("Incorrect body. Expect %s, got %s", valueExpect, valueGet))
 	assert.Equal(t, statusExpect, statusGet, fmt.Sprintf("Incorrect status code. Expect %d, got %d", statusExpect, statusGet))
 }

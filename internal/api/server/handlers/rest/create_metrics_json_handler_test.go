@@ -1,4 +1,4 @@
-package handlers
+package rest
 
 import (
 	"bytes"
@@ -16,7 +16,7 @@ import (
 	"github.com/vasiliyantufev/go-advanced-devops/internal/api/hashservicer"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/config/configserver"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/converter"
-	"github.com/vasiliyantufev/go-advanced-devops/internal/models"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/model"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/storage/memstorage"
 )
 
@@ -49,19 +49,19 @@ func TestHandler_CreateMetricsJSONHandler(t *testing.T) {
 
 	var statusExpect = http.StatusOK
 	var contentTypeExpect = "application/json"
-	var metricGauge = models.Metric{
+	var metricGauge = model.Metric{
 		ID:    "alloc1",
 		MType: "gauge",
 		Value: &value,
 	}
-	var metricCount = models.Metric{
+	var metricCount = model.Metric{
 		ID:    "alloc2",
 		MType: "counter",
 		Delta: &delta,
 	}
 
-	srv.memStorage.PutMetricsGauge(metricGauge.ID, *metricGauge.Value, hashServer.GenerateHash(models.Metric{ID: metricGauge.ID, MType: metricGauge.MType, Delta: nil, Value: converter.Float64ToFloat64Pointer(*metricGauge.Value)}))
-	srv.memStorage.PutMetricsCount(metricCount.ID, *metricCount.Delta, hashServer.GenerateHash(models.Metric{ID: metricCount.ID, MType: metricCount.MType, Delta: converter.Int64ToInt64Pointer(*metricCount.Delta), Value: nil}))
+	srv.memStorage.PutMetricsGauge(metricGauge.ID, *metricGauge.Value, hashServer.GenerateHash(model.Metric{ID: metricGauge.ID, MType: metricGauge.MType, Delta: nil, Value: converter.Float64ToFloat64Pointer(*metricGauge.Value)}))
+	srv.memStorage.PutMetricsCount(metricCount.ID, *metricCount.Delta, hashServer.GenerateHash(model.Metric{ID: metricCount.ID, MType: metricCount.MType, Delta: converter.Int64ToInt64Pointer(*metricCount.Delta), Value: nil}))
 
 	reqBody, err := json.Marshal(srv.memStorage.GetAllMetrics())
 	if err != nil {

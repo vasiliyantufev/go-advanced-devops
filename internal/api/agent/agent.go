@@ -14,9 +14,10 @@ import (
 
 	"github.com/shirou/gopsutil/v3/mem"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/api/hashservicer"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/api/helper"
 	runtime2 "github.com/vasiliyantufev/go-advanced-devops/internal/api/runtime"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/config/configagent"
-	"github.com/vasiliyantufev/go-advanced-devops/internal/models"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/model"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/storage/memstorage"
 	"golang.org/x/net/http2"
 
@@ -29,11 +30,11 @@ type Agent interface {
 	putMetricsUsePsutilWorker(ctx context.Context)
 	writeMetricsToChanWorker(ctx context.Context)
 	sentMetricsWorker(ctx context.Context, url string, client *http.Client)
-	makePostRequest(client *http.Client, j []models.Metric, url string)
+	makePostRequest(client *http.Client, j []model.Metric, url string)
 }
 
 type agent struct {
-	jobs       chan []models.Metric
+	jobs       chan []model.Metric
 	mem        *memstorage.MemStorage
 	psutil     *memstorage.MemStorage
 	cfg        *configagent.ConfigAgent
@@ -41,7 +42,7 @@ type agent struct {
 }
 
 // Creates a new agent instance
-func NewAgent(jobs chan []models.Metric, mem *memstorage.MemStorage, memPsutil *memstorage.MemStorage, cfg *configagent.ConfigAgent, hashServer *hashservicer.HashServer) *agent {
+func NewAgent(jobs chan []model.Metric, mem *memstorage.MemStorage, memPsutil *memstorage.MemStorage, cfg *configagent.ConfigAgent, hashServer *hashservicer.HashServer) *agent {
 	return &agent{jobs: jobs, mem: mem, psutil: memPsutil, cfg: cfg, hashServer: hashServer}
 }
 
@@ -100,7 +101,6 @@ func (a agent) putMetricsWorker(ctx context.Context) {
 
 // Gets metrics using psutil and write to memory
 func (a agent) putMetricsUsePsutilWorker(ctx context.Context) {
-
 	ticker := time.NewTicker(a.cfg.PollInterval)
 	defer ticker.Stop()
 	for {
@@ -149,7 +149,7 @@ func (a agent) sentMetricsWorker(ctx context.Context, url string, client *http.C
 	}
 }
 
-func (a agent) makePostRequest(client *http.Client, jsonData []models.Metric, url string) {
+func (a agent) makePostRequest(client *http.Client, jsonData []model.Metric, url string) {
 	resp, err := json.Marshal(jsonData)
 	if err != nil {
 		log.Error(err)
@@ -159,6 +159,7 @@ func (a agent) makePostRequest(client *http.Client, jsonData []models.Metric, ur
 		log.Error(err)
 	}
 	request.Header.Set("Content-Type", "application/json")
+	request.Header.Set("X-Real-IP", helper.GetOutboundIP().String())
 	response, err := client.Do(request)
 	if err != nil {
 		log.Error(err)

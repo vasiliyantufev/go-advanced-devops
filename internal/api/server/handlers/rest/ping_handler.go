@@ -1,4 +1,4 @@
-package handlers
+package rest
 
 import (
 	"net/http"
@@ -8,7 +8,6 @@ import (
 
 // PingHandler - checking if the database is available
 func (s Handler) PingHandler(w http.ResponseWriter, r *http.Request) {
-
 	if s.database != nil {
 		if err := s.database.Ping(); err != nil {
 			log.Error(err)

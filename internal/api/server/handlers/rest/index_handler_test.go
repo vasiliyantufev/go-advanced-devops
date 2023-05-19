@@ -1,4 +1,4 @@
-package handlers
+package rest
 
 import (
 	"fmt"
@@ -31,7 +31,7 @@ func TestHandler_IndexHandler(t *testing.T) {
 	if err != nil {
 		log.Error(err)
 	}
-	dir, err := os.Open(path.Join(dirname, "../../../../"))
+	dir, err := os.Open(path.Join(dirname, "../../../../../"))
 	if err != nil {
 		log.Error(err)
 	}

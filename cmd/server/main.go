@@ -15,9 +15,12 @@ import (
 	"syscall"
 
 	"github.com/vasiliyantufev/go-advanced-devops/internal/api/hashservicer"
-	"github.com/vasiliyantufev/go-advanced-devops/internal/api/helpers"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/api/helper"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/api/server"
-	"github.com/vasiliyantufev/go-advanced-devops/internal/api/server/handlers"
+
+	grpcHandler "github.com/vasiliyantufev/go-advanced-devops/internal/api/server/handlers/grpc"
+	restHandler "github.com/vasiliyantufev/go-advanced-devops/internal/api/server/handlers/rest"
+
 	"github.com/vasiliyantufev/go-advanced-devops/internal/api/server/routers"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/config/configserver"
 	database "github.com/vasiliyantufev/go-advanced-devops/internal/db"
@@ -35,7 +38,7 @@ var (
 )
 
 func main() {
-	helpers.PrintInfo(buildVersion, buildDate, buildCommit)
+	helper.PrintInfo(buildVersion, buildDate, buildCommit)
 
 	configServer := configserver.NewConfigServer()
 
@@ -55,23 +58,26 @@ func main() {
 		log.Error(err)
 	}
 	defer fileStorage.Close()
-
-	srv := handlers.NewHandler(memStorage, fileStorage, configServer, db, hashServer)
-
 	fileStorage.RestoreMetricsFromFile(memStorage)
 
-	routerService := routers.Route(srv)
+	srvRest := restHandler.NewHandler(memStorage, fileStorage, configServer, db, hashServer)
+	routerService := routers.Route(srvRest)
 	rs := chi.NewRouter()
 	rs.Mount("/", routerService)
 
-	routerPProfile := routers.RoutePProf(srv)
+	routerPProfile := routers.RoutePProf(srvRest)
 	rp := chi.NewRouter()
 	rp.Mount("/", routerPProfile)
 
 	ctx, cnl := signal.NotifyContext(context.Background(), syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
 	defer cnl()
 
-	go server.StartService(rs, configServer)
+	if configServer.GRPC != "" {
+		handlerGrpc := grpcHandler.NewHandler(memStorage, fileStorage, configServer, db, hashServer)
+		go server.StartGRPCService(handlerGrpc, configServer)
+	} else {
+		go server.StartRestService(rs, configServer)
+	}
 	go server.StartPProfile(rp, configServer)
 
 	if configServer.StoreInterval > 0 {

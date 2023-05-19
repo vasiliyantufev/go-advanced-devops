@@ -1,4 +1,4 @@
-package handlers
+package rest
 
 import (
 	"encoding/json"
@@ -7,29 +7,30 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/converter"
-	"github.com/vasiliyantufev/go-advanced-devops/internal/models"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/model"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/storage/errors"
 )
 
 // CreateMetricsJSONHandler - create metrics using json
 func (s Handler) CreateMetricsJSONHandler(w http.ResponseWriter, r *http.Request) {
 	resp, err := io.ReadAll(r.Body)
 	if err != nil {
-		log.Error(err.Error())
+		log.Errorf("invalid request body: %s", err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	var metrics []*models.Metric
+	var metrics []*model.Metric
 	if err = json.Unmarshal([]byte(string(resp)), &metrics); err != nil {
-		log.Error(err.Error())
+		log.Errorf("invalid request body: %s", err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 	for _, metric := range metrics {
 		if metric.Value != nil {
 			if !s.hashServer.ValidHashServer(*metric) {
-				log.Error("Хеш-сумма не соответствует расчетной")
-				http.Error(w, "Хеш-сумма не соответствует расчетной", http.StatusBadRequest)
+				log.Error(errors.ErrHashSum)
+				http.Error(w, errors.ErrHashSum.Error(), http.StatusBadRequest)
 				return
 			}
 			s.memStorage.PutMetricsGauge(metric.ID, *metric.Value, s.hashServer.GenerateHash(*metric))
@@ -37,8 +38,8 @@ func (s Handler) CreateMetricsJSONHandler(w http.ResponseWriter, r *http.Request
 		if metric.Delta != nil {
 			// compare hashes
 			if !s.hashServer.ValidHashServer(*metric) {
-				log.Error("Хеш-сумма не соответствует расчетной")
-				http.Error(w, "Хеш-сумма не соответствует расчетной", http.StatusBadRequest)
+				log.Error(errors.ErrHashSum)
+				http.Error(w, errors.ErrHashSum.Error(), http.StatusBadRequest)
 				return
 			}
 			// counter summing logic
@@ -49,7 +50,7 @@ func (s Handler) CreateMetricsJSONHandler(w http.ResponseWriter, r *http.Request
 				sum = *metric.Delta
 			}
 			// calculate new hash
-			hashSumServer := s.hashServer.GenerateHash(models.Metric{ID: metric.ID, MType: metric.MType, Delta: converter.Int64ToInt64Pointer(sum), Value: metric.Value})
+			hashSumServer := s.hashServer.GenerateHash(model.Metric{ID: metric.ID, MType: metric.MType, Delta: converter.Int64ToInt64Pointer(sum), Value: metric.Value})
 			// store new metric
 			s.memStorage.PutMetricsCount(metric.ID, sum, hashSumServer)
 		}
@@ -67,7 +68,7 @@ func (s Handler) CreateMetricsJSONHandler(w http.ResponseWriter, r *http.Request
 
 	resp, err = json.Marshal(s.memStorage.GetAllMetrics())
 	if err != nil {
-		log.Error(err.Error())
+		log.Errorf("invalid respounse body: %s", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

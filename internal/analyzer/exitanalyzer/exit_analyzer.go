@@ -14,7 +14,6 @@ var ExitAnalyzer = &analysis.Analyzer{
 }
 
 func run(pass *analysis.Pass) (interface{}, error) {
-
 	for _, file := range pass.Files {
 
 		ast.Inspect(file, func(node ast.Node) bool {

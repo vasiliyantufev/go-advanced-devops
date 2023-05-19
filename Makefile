@@ -51,3 +51,14 @@ run_multichecker:
 
 gen_cripto_key:
 	openssl req -newkey rsa:2048 -nodes -keyout "./certificates/server.key" -x509 -out "./certificates/server.crt" -subj "/CN=localhost" -addext "subjectAltName = DNS:localhost"
+
+gen_protoc:
+	protoc --go_out=. --go_opt=paths=source_relative \
+  	--go-grpc_out=. --go-grpc_opt=paths=source_relative \
+	internal/api/proto/devops.proto
+
+run_grpc:
+	go run ./cmd/server/main.go -g=127.0.0.1:8084
+
+run_evans:
+	evans internal/api/proto/devops.proto -p 8084

@@ -8,15 +8,15 @@ import (
 	"time"
 
 	"github.com/vasiliyantufev/go-advanced-devops/internal/config/configserver"
-	"github.com/vasiliyantufev/go-advanced-devops/internal/models"
+	"github.com/vasiliyantufev/go-advanced-devops/internal/model"
 	"github.com/vasiliyantufev/go-advanced-devops/internal/storage/memstorage"
 
 	log "github.com/sirupsen/logrus"
 )
 
 type FileStorages interface {
-	WriteMetric(event *models.Metric) error
-	ReadMetric() (*models.Metric, error)
+	WriteMetric(event *model.Metric) error
+	ReadMetric() (*model.Metric, error)
 	Close() error
 	FileStore(mem *memstorage.MemStorage)
 	FileRestore(mem *memstorage.MemStorage)
@@ -45,12 +45,12 @@ func NewMetricReadWriter(config *configserver.ConfigServer) (*FileStorage, error
 	}, nil
 }
 
-func (file *FileStorage) WriteMetric(event *models.Metric) error {
+func (file *FileStorage) WriteMetric(event *model.Metric) error {
 	return file.encoder.Encode(event)
 }
 
-func (file *FileStorage) ReadMetric() (*models.Metric, error) {
-	mr := new(models.Metric)
+func (file *FileStorage) ReadMetric() (*model.Metric, error) {
+	mr := new(model.Metric)
 	if err := file.decoder.Decode(mr); err == io.EOF {
 		return nil, err
 	} else if err != nil {
@@ -84,10 +84,8 @@ func (file *FileStorage) FileStore(mem *memstorage.MemStorage) {
 
 // Restores metrics from file to storage
 func (file *FileStorage) FileRestore(mem *memstorage.MemStorage) {
-
 	for {
 		mr, err := file.ReadMetric()
-
 		if err == io.EOF {
 			log.Info("File end")
 			return
